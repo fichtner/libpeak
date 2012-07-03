@@ -1,0 +1,5 @@
+  PEAK utilities
+
+These few source files offer basic debugging and development
+tools for C projects in general. A unit test is provided. Use
+it at your own risk.
