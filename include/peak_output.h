@@ -51,42 +51,42 @@ static inline void peak_log(int priority, const char *message, ...)
 	do {														\
 		peak_bug(LOG_EMERG, WHERE_HACK __message__, ##args);	\
 		abort();												\
-	} while (0);
+	} while (0)
 
 #define peak_alert(__message__, args...)						\
 	do {														\
 		peak_bug(LOG_ALERT, WHERE_HACK __message__, ##args);	\
-	} while (0);
+	} while (0)
 
 #define peak_crit(__message__, args...)							\
 	do {														\
 		peak_bug(LOG_CRIT, WHERE_HACK __message__, ##args);		\
-	} while (0);
+	} while (0)
 
 #define peak_error(__message__, args...)						\
 	do {														\
 		peak_bug(LOG_ERR, WHERE_HACK __message__, ##args);		\
-	} while (0);
+	} while (0)
 
 #define peak_warn(__message__, args...)							\
 	do {														\
 		peak_bug(LOG_WARNING, WHERE_HACK __message__, ##args);	\
-	} while (0);
+	} while (0)
 
 #define peak_notice(__message__, args...)						\
 	do {														\
 		peak_bug(LOG_NOTICE, WHERE_HACK __message__, ##args);	\
-	} while (0);
+	} while (0)
 
 #define peak_info(__message__, args...)							\
 	do {														\
 		peak_bug(LOG_INFO, WHERE_HACK __message__, ##args);		\
-	} while (0);
+	} while (0)
 
 #define peak_debug(__message__, args...)						\
 	do {														\
 		peak_bug(LOG_DEBUG, WHERE_HACK __message__, ##args);	\
-	} while (0);
+	} while (0)
 
 #define peak_priority_bump(__priority__)							\
 	do {															\
@@ -104,7 +104,7 @@ static inline void peak_log(int priority, const char *message, ...)
 		default:													\
 			peak_panic("impossible priority: %d\n", __priority__);	\
 		}															\
-	} while (0);
+	} while (0)
 
 #define peak_priority_init()	LOG_EMERG
 

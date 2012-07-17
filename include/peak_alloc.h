@@ -26,7 +26,7 @@ static inline size_t peak_cacheline_aligned(const size_t size)
 		case PEAK_ALLOC_OVERFLOW:						\
 			peak_panic("buffer overflow detected\n");	\
 		}												\
-	} while (0);
+	} while (0)
 
 #define PEAK_MEMALIGN_VALUE	0x8897A6B5C4D3E2F1ULL
 #define PEAK_MALLOC_VALUE	0x1F2E3D4C5B6A7988ULL

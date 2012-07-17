@@ -89,14 +89,14 @@ static inline u32 __peak_preput(struct peak_prealloc_struct *ptr, void *chunk)
 		case PEAK_PREALLOC_DOUBLE_FREE:						\
 			peak_panic("double free detected\n");			\
 		}													\
-	} while (0);
+	} while (0)
 
 #define peak_preput(__ptr__, __chunk__)		\
 	do {									\
 		OSSpinLockLock(&(__ptr__)->lock);	\
 		_peak_preput(__ptr__, __chunk__);	\
 		OSSpinLockUnlock(&(__ptr__)->lock);	\
-	} while (0);
+	} while (0)
 
 static inline struct peak_prealloc_struct *peak_prealloc(size_t count, size_t size)
 {
@@ -175,7 +175,7 @@ static inline u32 _peak_prefree(struct peak_prealloc_struct *ptr)
 		case PEAK_PREALLOC_MISSING_CHUNKS:				\
 			peak_panic("missing chunks detected\n");	\
 		}												\
-	} while (0);
+	} while (0)
 
 #undef PEAK_PREALLOC_FROM_USER
 #undef PEAK_PREALLOC_TO_USER
