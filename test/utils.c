@@ -258,10 +258,10 @@ static s32 test_tree_cmp(void *u1, void *u2)
 
 static void test_tree(void)
 {
-	struct peak_tree *root = &sentinel;
+	struct peak_tree *root = NIL;
 	struct test t1, t2, t3;
 
-	__cmp__ = test_tree_cmp;
+	peak_tree_compare = test_tree_cmp;
 
 	t1.value = 1;
 	t2.value = 2;

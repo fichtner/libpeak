@@ -1,9 +1,9 @@
 #ifndef PEAK_TREE_H
 #define PEAK_TREE_H
 
-typedef s32 (*peak_tree_compare) (void *u1, void *u2);
+typedef s32 (*peak_tree_compare_func) (void *u1, void *u2);
 
-static peak_tree_compare __cmp__ = NULL;
+static peak_tree_compare_func peak_tree_compare = NULL;
 
 struct peak_tree {
 	struct peak_tree *right;
@@ -11,11 +11,13 @@ struct peak_tree {
 	u32 level, reserved;
 };
 
-static struct peak_tree sentinel = { NULL, NULL, 1, 0 };
+static struct peak_tree peak_tree_sentinel = { NULL, NULL, 1, 0 };
+
+#define NIL (&peak_tree_sentinel)
 
 static inline struct peak_tree *peak_tree_skew(struct peak_tree *t)
 {
-	if (t->level > 1 && t->left->level == t->level) {
+	if (t != NIL && t->left->level == t->level) {
 		struct peak_tree *l = t->left;
 
 		t->left = l->right;
@@ -29,7 +31,7 @@ static inline struct peak_tree *peak_tree_skew(struct peak_tree *t)
 
 static inline struct peak_tree *peak_tree_split(struct peak_tree *t)
 {
-	if (t->right->level > 1 && t->right->right->level == t->level) {
+	if (t->right != NIL && t->right->right->level == t->level) {
 		struct peak_tree *r = t->right;
 
 		t->right = r->left;
@@ -44,12 +46,12 @@ static inline struct peak_tree *peak_tree_split(struct peak_tree *t)
 
 static struct peak_tree *_peak_tree_insert(struct peak_tree *t, struct peak_tree *n)
 {
-	if (t == &sentinel) {
-		n->left = n->right = &sentinel;
+	if (t == NIL) {
+		n->left = n->right = NIL;
 		n->level = 2;
 		t = n;
 	} else {
-		s32 ret = __cmp__(n, t);
+		s32 ret = peak_tree_compare(n, t);
 		if (ret < 0) {
 			t->left = _peak_tree_insert(t->left, n);
 		} else if (ret > 0) {
@@ -68,8 +70,8 @@ static inline void *peak_tree_insert(void *t, void *n)
 
 static struct peak_tree *_peak_tree_lookup(struct peak_tree *t, struct peak_tree *o)
 {
-	while (t != &sentinel) {
-		s32 ret = __cmp__(o, t);
+	while (t != NIL) {
+		s32 ret = peak_tree_compare(o, t);
 		if (!ret) {
 			return t;
 		}
