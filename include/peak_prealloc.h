@@ -1,6 +1,8 @@
 #ifndef PEAK_PREALLOC_H
 #define PEAK_PREALLOC_H
 
+#include <libkern/OSAtomic.h>
+
 #define PEAK_PREALLOC_VALUE 0x1234ABBA5678AC97ULL
 
 struct peak_prealloc_element {
@@ -13,6 +15,8 @@ struct peak_prealloc_struct {
 	struct peak_prealloc_element *free;
 	size_t count, used, size, mem_size;
 	void *mem;
+
+	OSSpinLock lock;
 };
 
 #define PEAK_PREALLOC_TO_USER(__e__)		((void *)((__e__)->user))
@@ -24,7 +28,7 @@ struct peak_prealloc_struct {
 #define PEAK_PREALLOC_DOUBLE_FREE		2
 #define PEAK_PREALLOC_MISSING_CHUNKS	3
 
-static inline void *peak_preget(struct peak_prealloc_struct *ptr)
+static inline void *_peak_preget(struct peak_prealloc_struct *ptr)
 {
 	struct peak_prealloc_element *e = ptr->free;
 	if (unlikely(!e)) {
@@ -39,7 +43,18 @@ static inline void *peak_preget(struct peak_prealloc_struct *ptr)
 	return PEAK_PREALLOC_TO_USER(e);
 }
 
-static inline u32 _peak_preput(struct peak_prealloc_struct *ptr, void *chunk)
+static inline void *peak_preget(struct peak_prealloc_struct *ptr)
+{
+	void *ret;
+
+	OSSpinLockLock(&ptr->lock);
+	ret = _peak_preget(ptr);
+	OSSpinLockUnlock(&ptr->lock);
+
+	return ret;
+}
+
+static inline u32 __peak_preput(struct peak_prealloc_struct *ptr, void *chunk)
 {
 	u32 ret = PEAK_PREALLOC_HEALTHY;
 
@@ -64,16 +79,23 @@ static inline u32 _peak_preput(struct peak_prealloc_struct *ptr, void *chunk)
 	return ret;
 }
 
-#define peak_preput(__ptr__, __chunk__)					\
-	do {												\
-		switch (_peak_preput(__ptr__, __chunk__)) {		\
-		case PEAK_PREALLOC_HEALTHY:						\
-			break;										\
-		case PEAK_PREALLOC_UNDERFLOW:					\
-			peak_panic("buffer underflow detected\n");	\
-		case PEAK_PREALLOC_DOUBLE_FREE:					\
-			peak_panic("double free detected\n");		\
-		}												\
+#define _peak_preput(__ptr__, __chunk__)					\
+	do {													\
+		switch(__peak_preput(__ptr__, __chunk__)) {			\
+		case PEAK_PREALLOC_HEALTHY:							\
+			break;											\
+		case PEAK_PREALLOC_UNDERFLOW:						\
+			peak_panic("buffer underflow detected\n");		\
+		case PEAK_PREALLOC_DOUBLE_FREE:						\
+			peak_panic("double free detected\n");			\
+		}													\
+	} while (0);
+
+#define peak_preput(__ptr__, __chunk__)		\
+	do {									\
+		OSSpinLockLock(&(__ptr__)->lock);	\
+		_peak_preput(__ptr__, __chunk__);	\
+		OSSpinLockUnlock(&(__ptr__)->lock);	\
 	} while (0);
 
 static inline struct peak_prealloc_struct *peak_prealloc(size_t count, size_t size)

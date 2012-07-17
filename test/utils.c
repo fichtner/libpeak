@@ -192,8 +192,8 @@ static void test_prealloc(void)
 
 		*test_chunks[i] = i;
 
-		assert(PEAK_PREALLOC_HEALTHY == _peak_preput(test_mem, test_chunks[i]));
-		assert(PEAK_PREALLOC_DOUBLE_FREE == _peak_preput(test_mem, test_chunks[i]));
+		assert(PEAK_PREALLOC_HEALTHY == __peak_preput(test_mem, test_chunks[i]));
+		assert(PEAK_PREALLOC_DOUBLE_FREE == __peak_preput(test_mem, test_chunks[i]));
 		assert(peak_preget(test_mem) == test_chunks[i]);
 	}
 
@@ -205,7 +205,7 @@ static void test_prealloc(void)
 		u64 magic = *(test_chunks[i] - 1);
 		*(test_chunks[i] - 1) = 0;
 
-		assert(PEAK_PREALLOC_UNDERFLOW == _peak_preput(test_mem, test_chunks[i]));
+		assert(PEAK_PREALLOC_UNDERFLOW == __peak_preput(test_mem, test_chunks[i]));
 
 		*(test_chunks[i] - 1) = magic;
 
