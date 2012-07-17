@@ -291,6 +291,19 @@ static void test_tree(void)
 	assert(&t1.t == peak_tree_lookup(root, &t1));
 	assert(&t2.t == peak_tree_lookup(root, &t2));
 	assert(&t3.t == peak_tree_lookup(root, &t3));
+
+	root = peak_tree_remove(root, &t2);
+
+	assert(root != &t2.t);
+	assert(root == &t1.t);
+	assert(root->left == NIL);
+	assert(root->right == &t3.t);
+
+	root = peak_tree_remove(root, &t3);
+	root = peak_tree_remove(root, &t1);
+	root = peak_tree_remove(root, &t1);
+
+	assert(root == NIL);
 }
 
 int main(void)
