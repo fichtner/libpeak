@@ -42,7 +42,7 @@ static inline struct peak_tree *peak_tree_split(struct peak_tree *t)
 	return t;
 }
 
-static struct peak_tree *peak_tree_insert(struct peak_tree *t, struct peak_tree *n)
+static struct peak_tree *_peak_tree_insert(struct peak_tree *t, struct peak_tree *n)
 {
 	if (t == &sentinel) {
 		n->left = n->right = &sentinel;
@@ -51,16 +51,22 @@ static struct peak_tree *peak_tree_insert(struct peak_tree *t, struct peak_tree 
 	} else {
 		s32 ret = __cmp__(n, t);
 		if (ret < 0) {
-			t->left = peak_tree_insert(t->left, n);
+			t->left = _peak_tree_insert(t->left, n);
 		} else if (ret > 0) {
-			t->right = peak_tree_insert(t->right, n);
+			t->right = _peak_tree_insert(t->right, n);
 		}
 	}
 
 	return peak_tree_split(peak_tree_skew(t));
 }
 
-static struct peak_tree *peak_tree_lookup(struct peak_tree *t, struct peak_tree *o)
+static inline void *peak_tree_insert(void *t, void *n)
+{
+	/* because casting sucks */
+	return _peak_tree_insert(t, n);
+}
+
+static struct peak_tree *_peak_tree_lookup(struct peak_tree *t, struct peak_tree *o)
 {
 	while (t != &sentinel) {
 		s32 ret = __cmp__(o, t);
@@ -72,6 +78,12 @@ static struct peak_tree *peak_tree_lookup(struct peak_tree *t, struct peak_tree 
 	}
 
 	return NULL;
+}
+
+static inline void *peak_tree_lookup(void *t, void *o)
+{
+	/* (most of the time) */
+	return _peak_tree_lookup(t, o);
 }
 
 #endif /* PEAK_TREE_H */
