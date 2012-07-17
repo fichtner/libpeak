@@ -3,6 +3,7 @@
 #include "peak_output.h"
 #include "peak_alloc.h"
 #include "peak_prealloc.h"
+#include "peak_tree.h"
 
 #include <assert.h>
 
@@ -236,6 +237,62 @@ static void test_output(void)
 	}
 }
 
+struct test {
+	struct peak_tree t;
+	u32 value;
+};
+
+static s32 test_tree_cmp(void *u1, void *u2)
+{
+	struct test *t1 = u1;
+	struct test *t2 = u2;
+
+	if (t1->value < t2->value) {
+		return -1;
+	} else if (t1->value > t2->value) {
+		return 1;
+	}
+
+	return 0;
+}
+
+static void test_tree(void)
+{
+	struct peak_tree *root = &sentinel;
+	struct test t1, t2, t3;
+
+	__cmp__ = test_tree_cmp;
+
+	t1.value = 1;
+	t2.value = 2;
+	t3.value = 3;
+
+	assert(!peak_tree_lookup(root, &t1.t));
+	assert(!peak_tree_lookup(root, &t2.t));
+	assert(!peak_tree_lookup(root, &t3.t));
+
+	root = peak_tree_insert(root, &t1.t);
+
+	assert(root == &t1.t);
+	assert(&t1.t == peak_tree_lookup(root, &t1.t));
+
+	root = peak_tree_insert(root, &t2.t);
+
+	assert(root == &t1.t);
+	assert(root->right == &t2.t);
+	assert(&t1.t == peak_tree_lookup(root, &t1.t));
+	assert(&t2.t == peak_tree_lookup(root, &t2.t));
+
+	root = peak_tree_insert(root, &t3.t);
+
+	assert(root == &t2.t);
+	assert(root->right == &t3.t);
+	assert(root->left == &t1.t);
+	assert(&t1.t == peak_tree_lookup(root, &t1.t));
+	assert(&t2.t == peak_tree_lookup(root, &t2.t));
+	assert(&t3.t == peak_tree_lookup(root, &t3.t));
+}
+
 int main(void)
 {
 	peak_log(LOG_EMERG, "peak utilities test suite... ");
@@ -244,6 +301,7 @@ int main(void)
 	test_alloc();
 	test_prealloc();
 	test_output();
+	test_tree();
 
 	peak_log(LOG_EMERG, "ok\n");
 
