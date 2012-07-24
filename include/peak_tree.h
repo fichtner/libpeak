@@ -21,7 +21,7 @@ static inline struct peak_tree *peak_tree_skew(struct peak_tree *t)
 		struct peak_tree *l = t->left;
 
 		t->left = l->right;
-		t->right = t;
+		l->right = t;
 
 		return l;
 	}
