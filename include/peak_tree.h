@@ -167,4 +167,35 @@ static inline void *peak_tree_remove(void *t, void *r)
 	return _peak_tree_remove(t, r);
 }
 
+static u32 _peak_tree_height(struct peak_tree *t)
+{
+	u32 l = 0, r = 0;
+
+	if (t != NIL) {
+		l = _peak_tree_height(t->left) + 1;
+		r = _peak_tree_height(t->right) + 1;
+	}
+
+	return r > l ? r : l;
+}
+
+static inline u32 peak_tree_height(void *t)
+{
+	return _peak_tree_height(t);
+}
+
+static u32 _peak_tree_count(struct peak_tree *t)
+{
+	if (t == NIL) {
+		return 0;
+	}
+
+	return 1 + _peak_tree_count(t->left) + _peak_tree_count(t->right);
+}
+
+static inline u32 peak_tree_count(void *t)
+{
+	return _peak_tree_count(t);
+}
+
 #endif /* PEAK_TREE_H */
