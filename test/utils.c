@@ -256,7 +256,7 @@ static s32 test_tree_cmp(void *u1, void *u2)
 	return 0;
 }
 
-static void test_tree(void)
+static void test_tree_simple(void)
 {
 	struct peak_tree *root = NIL;
 	struct test t1, t2, t3;
@@ -306,6 +306,46 @@ static void test_tree(void)
 	assert(root == NIL);
 }
 
+#define TREE_COUNT 10000
+
+static void test_tree_complex(void)
+{
+	struct peak_prealloc_struct *mem;
+	struct peak_tree *root = NIL;
+	struct test helper;
+	struct test *e;
+	u32 i = 1;
+
+	mem = peak_prealloc(TREE_COUNT, sizeof(struct test));
+
+	assert(mem);
+
+	peak_tree_compare = test_tree_cmp;
+
+	while ((e = _peak_preget(mem))) {
+		assert(i - 1 == peak_tree_count(root));
+		e->value = i++;
+		root = peak_tree_insert(root, e);
+	}
+
+	assert(TREE_COUNT == peak_tree_count(root));
+	assert(18 == peak_tree_height(root));
+	memset(&helper, 0, sizeof(struct test));
+
+	for (i = TREE_COUNT; i; --i) {
+		helper.value = i;
+		e = peak_tree_lookup(root, &helper);
+		assert(e);
+		root = peak_tree_remove(root, e);
+		assert(e->t.left == NIL);
+		assert(e->t.right == NIL);
+		assert(i - 1 == peak_tree_count(root));
+		_peak_preput(mem, e);
+	}
+
+	peak_prefree(mem);
+}
+
 int main(void)
 {
 	peak_log(LOG_EMERG, "peak utilities test suite... ");
@@ -314,7 +354,8 @@ int main(void)
 	test_alloc();
 	test_prealloc();
 	test_output();
-	test_tree();
+	test_tree_simple();
+	test_tree_complex();
 
 	peak_log(LOG_EMERG, "ok\n");
 

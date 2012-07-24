@@ -31,7 +31,7 @@ static inline struct peak_tree *peak_tree_skew(struct peak_tree *t)
 
 static inline struct peak_tree *peak_tree_split(struct peak_tree *t)
 {
-	if (t->right != NIL && t->right->right->level == t->level) {
+	if (t != NIL && t->right != NIL && t->right->right->level == t->level) {
 		struct peak_tree *r = t->right;
 
 		t->right = r->left;
@@ -157,7 +157,13 @@ static struct peak_tree *_peak_tree_remove(struct peak_tree *t, struct peak_tree
 		}
 	}
 
-	/* somebody should do the dancing */
+	if (t->left->level < t->level - 1 || t->right->level < t->level - 1) {
+		if (t->right->level > --t->level) {
+			t->right->level = t->level;
+		}
+
+		t = peak_tree_split(peak_tree_skew(t));
+	}
 
 	return t;
 }
