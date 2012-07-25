@@ -242,20 +242,6 @@ struct test {
 	u32 value;
 };
 
-static s32 test_tree_cmp(void *u1, void *u2)
-{
-	struct test *t1 = u1;
-	struct test *t2 = u2;
-
-	if (t1->value < t2->value) {
-		return -1;
-	} else if (t1->value > t2->value) {
-		return 1;
-	}
-
-	return 0;
-}
-
 static u32 test_tree_lt(const void *u1, const void *u2)
 {
 	const struct test *t1 = u1;
@@ -278,7 +264,6 @@ static void test_tree_simple(void)
 	struct test t1, t2, t3;
 
 	peak_tree_init(test_tree_lt, test_tree_eq);
-	peak_tree_compare = test_tree_cmp;
 
 	t1.value = 1;
 	t2.value = 2;
@@ -338,7 +323,6 @@ static void test_tree_complex(void)
 	assert(mem);
 
 	peak_tree_init(test_tree_lt, test_tree_eq);
-	peak_tree_compare = test_tree_cmp;
 
 	while ((e = _peak_preget(mem))) {
 		assert(i - 1 == peak_tree_count(root));

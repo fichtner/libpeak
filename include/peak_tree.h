@@ -1,10 +1,8 @@
 #ifndef PEAK_TREE_H
 #define PEAK_TREE_H
 
-typedef s32 (*peak_tree_compare_func) (void *u1, void *u2);
 typedef u32 (*peak_tree_compare_funk) (const void *u1, const void *u2);
 
-static peak_tree_compare_func peak_tree_compare = NULL;
 static peak_tree_compare_funk __peak_tree_lt = NULL;
 static peak_tree_compare_funk __peak_tree_eq = NULL;
 
