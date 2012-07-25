@@ -5,14 +5,16 @@ LDLIBS=-lc -pthread
 all: bin/utils
 
 bin/%.d: test/%.c
-	$(CC) $(CFLAGS) -MM -MT '$<' $< -MF $@
+	$(CC) $(CFLAGS) -MM -MT '$(@:.d=)' $< -MF $@
+
+-include bin/utils.d
 
 bin/%: test/%.c
 	$(CC) $(CFLAGS) $(LDLIBS) $< -o $@
 	@bin/utils
 
 clean:
-	@rm -rf bin/* test/*.d
+	@rm -rf bin/*
 
 # Ubunu 12.04 needs this...
 GCCDIR=/usr/lib/gcc/x86_64-linux-gnu/4.6
