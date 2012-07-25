@@ -256,20 +256,37 @@ static s32 test_tree_cmp(void *u1, void *u2)
 	return 0;
 }
 
+static u32 test_tree_lt(const void *u1, const void *u2)
+{
+	const struct test *t1 = u1;
+	const struct test *t2 = u2;
+
+	return (t1->value < t2->value);
+}
+
+static u32 test_tree_eq(const void *u1, const void *u2)
+{
+	const struct test *t1 = u1;
+	const struct test *t2 = u2;
+
+	return (t1->value == t2->value);
+}
+
 static void test_tree_simple(void)
 {
 	struct peak_tree *root = NIL;
 	struct test t1, t2, t3;
 
+	peak_tree_init(test_tree_lt, test_tree_eq);
 	peak_tree_compare = test_tree_cmp;
 
 	t1.value = 1;
 	t2.value = 2;
 	t3.value = 3;
 
-	assert(!peak_tree_lookup(root, &t1));
-	assert(!peak_tree_lookup(root, &t2));
-	assert(!peak_tree_lookup(root, &t3));
+	assert(NIL == peak_tree_lookup(root, &t1));
+	assert(NIL == peak_tree_lookup(root, &t2));
+	assert(NIL == peak_tree_lookup(root, &t3));
 
 	root = peak_tree_insert(root, &t1);
 
@@ -320,6 +337,7 @@ static void test_tree_complex(void)
 
 	assert(mem);
 
+	peak_tree_init(test_tree_lt, test_tree_eq);
 	peak_tree_compare = test_tree_cmp;
 
 	while ((e = _peak_preget(mem))) {

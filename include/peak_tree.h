@@ -2,8 +2,11 @@
 #define PEAK_TREE_H
 
 typedef s32 (*peak_tree_compare_func) (void *u1, void *u2);
+typedef u32 (*peak_tree_compare_funk) (const void *u1, const void *u2);
 
 static peak_tree_compare_func peak_tree_compare = NULL;
+static peak_tree_compare_funk __peak_tree_lt = NULL;
+static peak_tree_compare_funk __peak_tree_eq = NULL;
 
 struct peak_tree {
 	struct peak_tree *t[2];
@@ -13,6 +16,12 @@ struct peak_tree {
 static struct peak_tree peak_tree_sentinel = { { NULL, NULL }, 1, 0 };
 
 #define NIL (&peak_tree_sentinel)
+
+static inline void peak_tree_init(peak_tree_compare_funk lt, peak_tree_compare_funk eq)
+{
+	__peak_tree_lt = lt;
+	__peak_tree_eq = eq;
+}
 
 static inline struct peak_tree *peak_tree_skew(struct peak_tree *t)
 {
@@ -69,16 +78,22 @@ static inline void *peak_tree_insert(void *t, void *n)
 
 static struct peak_tree *_peak_tree_lookup(struct peak_tree *t, struct peak_tree *o)
 {
-	while (t != NIL) {
-		s32 ret = peak_tree_compare(o, t);
-		if (!ret) {
-			return t;
-		}
+	struct peak_tree *c = NIL;
 
-		t = ret < 0 ? t->t[0] : t->t[1];
+	while (t != NIL) {
+		if (__peak_tree_lt(o, t)) {
+			t = t->t[0];
+		} else {
+			c = t;
+			t = t->t[1];
+		}
 	}
 
-	return NULL;
+	if (c != NIL && __peak_tree_eq(o, c)) {
+		return c;
+	}
+
+	return NIL;
 }
 
 static inline void *peak_tree_lookup(void *t, void *o)
