@@ -158,29 +158,44 @@ static inline struct peak_tree *peak_tree_leaf(struct peak_tree *t, const u32 di
 
 static struct peak_tree *_peak_tree_remove(struct peak_tree *t, struct peak_tree *o)
 {
+	struct peak_tree *h[PEAK_TREE_STACK_SIZE];
+	u32 i = 0;
+
 	if (t == NIL) {
 		return t;
 	}
 
-	/* that's a shortcut: we expect the caller to know the
-	 * object it wants to remove from the tree structure! */ 
-	if (t == o) {
-		if (t->t[0] == NIL && t->t[1] == NIL) {
-			return NIL;
+	for (;;) {
+		if (PEAK_TREE_STACK_SIZE == i) {
+			peak_panic("stack overflow\n");
 		}
 
+		h[i++] = t;
+
+		/* that's a shortcut: we expect the caller to know the
+		 * object it wants to remove from the tree structure! */ 
+		if (t == o) {
+			--i;
+			break;
+		}
+
+		t = t->t[__peak_tree_lt(t, o)];
+		if (t == NIL) {
+			return h[0];
+		}
+	}
+
+	if (t->t[0] == NIL && t->t[1] == NIL) {
+		t = NIL;
+	} else {
 		/* instead of switching the node data, we'll do
 		 * a full transform into a leaf case, which is
 		 * a bit more expensive, but we don't know the
 		 * size of the actual data in this implementation! */
 		t = peak_tree_leaf(t, t->t[1] != NIL);
-	} else {
-		const u32 dir = __peak_tree_lt(t, o);
- 
-		t->t[dir] = _peak_tree_remove(t->t[dir], o);
 	}
 
-	{
+	for (;;) {
 		const u32 should_be = t->l - 1;
 
 		if (t->t[0]->l < should_be || t->t[1]->l < should_be) {
@@ -196,6 +211,13 @@ static struct peak_tree *_peak_tree_remove(struct peak_tree *t, struct peak_tree
 			t = peak_tree_split(t);
 			t->t[1] = peak_tree_split(t->t[1]);
 		}
+
+		if (!i--) {
+			break;
+		}
+
+		h[i]->t[h[i]->t[1] == h[i + 1]] = t;
+		t = h[i];
 	}
 
 	return t;
