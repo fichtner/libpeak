@@ -89,14 +89,15 @@ static struct peak_tree *_peak_tree_insert(struct peak_tree *t, struct peak_tree
 	}
 
 	for (;;) {
-		t = peak_tree_split(peak_tree_skew(h[i]));
+		t = peak_tree_split(peak_tree_skew(t));
 
 		if (!i--) {
 			break;
 		}
 
 		/* quite dodgy: propagate new subtree upwards */
-		h[i]->t[h[i]->t[1] == h[i + 1]] = t;		
+		h[i]->t[h[i]->t[1] == h[i + 1]] = t;
+		t = h[i];
 	}
 
 	return t;
@@ -216,6 +217,7 @@ static struct peak_tree *_peak_tree_remove(struct peak_tree *t, struct peak_tree
 			break;
 		}
 
+		/* still not pretty: propagate new subtree upwards */
 		h[i]->t[h[i]->t[1] == h[i + 1]] = t;
 		t = h[i];
 	}
