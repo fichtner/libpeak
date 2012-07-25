@@ -99,9 +99,6 @@ static inline void *peak_tree_lookup(void *t, void *o)
 	return _peak_tree_lookup(t, o);
 }
 
-#define PREDECESSOR	0
-#define SUCCESSOR	1
-
 static inline struct peak_tree *peak_tree_leaf(struct peak_tree *t, const u32 dir)
 {
 	struct peak_tree **l = &t->t[dir];
@@ -129,17 +126,19 @@ static struct peak_tree *_peak_tree_remove(struct peak_tree *t, struct peak_tree
 	if (t == NIL) {
 		return t;
 	}
- 
-	if (__peak_tree_eq(t, o)) {
-		if (t->t[0] == NIL) {
-			if (t->t[1] == NIL) {
-				return NIL;
-			}
 
-			t = peak_tree_leaf(t, SUCCESSOR);
-		} else {
-			t = peak_tree_leaf(t, PREDECESSOR);
+	/* that's a shortcut: we expect the caller to know the
+	 * object it wants to remove from the tree structure! */ 
+	if (t == o) {
+		if (t->t[0] == NIL && t->t[1] == NIL) {
+			return NIL;
 		}
+
+		/* instead of switching the node data, we'll do
+		 * a full transform into a leaf case, which is
+		 * a bit more expensive, but we don't know the
+		 * size of the actual data in this implementation! */
+		t = peak_tree_leaf(t, t->t[1] != NIL);
 	} else {
 		const u32 dir = __peak_tree_lt(t, o);
  

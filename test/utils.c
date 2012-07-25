@@ -301,9 +301,15 @@ static void test_tree_simple(void)
 	assert(root->t[0] == NIL);
 	assert(root->t[1] == &t3.t);
 
+	root = peak_tree_remove(root, &t1);
+
+	assert(root != &t1.t);
+	assert(root == &t3.t);
+	assert(root->t[0] == NIL);
+	assert(root->t[1] == NIL);
+
 	root = peak_tree_remove(root, &t3);
-	root = peak_tree_remove(root, &t1);
-	root = peak_tree_remove(root, &t1);
+	root = peak_tree_remove(root, &t3);
 
 	assert(root == NIL);
 }
