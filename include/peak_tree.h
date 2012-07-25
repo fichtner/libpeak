@@ -50,21 +50,53 @@ static inline struct peak_tree *peak_tree_split(struct peak_tree *t)
 	return t;
 }
 
+#define PEAK_TREE_STACK_SIZE 32
+
 static struct peak_tree *_peak_tree_insert(struct peak_tree *t, struct peak_tree *n)
 {
-	if (t != NIL) {
-		const u32 dir = __peak_tree_lt(t, n);
+	struct peak_tree *h[PEAK_TREE_STACK_SIZE];
+	u32 i = 0;
 
-		t->t[dir] = _peak_tree_insert(t->t[dir], n);
-
-		return peak_tree_split(peak_tree_skew(t));
+	if (t == NIL) {
+		n->t[0] = n->t[1] = NIL;
+		n->l = 2;
+		return n;
 	}
 
-	/* new leaf is easy */
-	n->t[0] = n->t[1] = NIL;
-	n->l = 2;
+	for (;;) {
+		const u32 dir = __peak_tree_lt(t, n);
 
-	return n;
+		if (PEAK_TREE_STACK_SIZE == i) {
+			peak_panic("stack overflow\n");
+			/* although it would be funny to fall back
+			 * to recursive mode in this case... :) */
+		}
+
+		h[i++] = t;
+
+		if (t->t[dir] == NIL) {
+			n->t[0] = n->t[1] = NIL;
+			t->t[dir] = n;
+			n->l = 2;
+			--i;
+			break;
+		}
+
+		t = t->t[dir];
+	}
+
+	for (;;) {
+		t = peak_tree_split(peak_tree_skew(h[i]));
+
+		if (!i--) {
+			break;
+		}
+
+		/* quite dodgy: propagate new subtree upwards */
+		h[i]->t[h[i]->t[1] == h[i + 1]] = t;		
+	}
+
+	return t;
 }
 
 static inline void *peak_tree_insert(void *t, void *n)
