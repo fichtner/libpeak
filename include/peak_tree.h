@@ -128,18 +128,11 @@ static inline struct peak_tree *peak_tree_leaf(struct peak_tree *t, const u32 di
 
 static struct peak_tree *_peak_tree_remove(struct peak_tree *t, struct peak_tree *o)
 {
-	s32 ret;
-
 	if (t == NIL) {
 		return t;
 	}
-
-	ret = peak_tree_compare(o, t);
-	if (ret < 0) {
-		t->t[0] = _peak_tree_remove(t->t[0], o);
-	} else if (ret > 0) {
-		t->t[1] = _peak_tree_remove(t->t[1], o);
-	} else {
+ 
+	if (__peak_tree_eq(t, o)) {
 		if (t->t[0] == NIL) {
 			if (t->t[1] == NIL) {
 				return NIL;
@@ -149,6 +142,10 @@ static struct peak_tree *_peak_tree_remove(struct peak_tree *t, struct peak_tree
 		} else {
 			t = peak_tree_leaf(t, PREDECESSOR);
 		}
+	} else {
+		const u32 dir = __peak_tree_lt(t, o);
+ 
+		t->t[dir] = _peak_tree_remove(t->t[dir], o);
 	}
 
 	{
