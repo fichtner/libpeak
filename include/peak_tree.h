@@ -156,12 +156,18 @@ static struct peak_tree *_peak_tree_remove(struct peak_tree *t, struct peak_tree
 		}
 	}
 
-	if (t->t[0]->l < t->l - 1 || t->t[1]->l < t->l - 1) {
-		if (t->t[1]->l > --t->l) {
-			t->t[1]->l = t->l;
-		}
+	{
+		const u32 should_be = t->l - 1;
 
-		t = peak_tree_split(peak_tree_skew(t));
+		if (t->t[0]->l < should_be || t->t[1]->l < should_be) {
+			t->l = should_be;
+
+			if (t->t[1]->l > should_be) {
+				t->t[1]->l = should_be;
+			}
+
+			t = peak_tree_split(peak_tree_skew(t));
+		}
 	}
 
 	return t;
