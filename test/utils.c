@@ -180,6 +180,7 @@ static void test_prealloc(void)
 	assert(PEAK_PREALLOC_MISSING_CHUNKS == _peak_prefree(test_mem));
 
 	peak_preput(test_mem, test_chunk);
+	peak_prefree(test_mem);
 
 	test_mem = peak_prealloc(8, sizeof(u64));
 
