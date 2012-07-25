@@ -187,7 +187,13 @@ static struct peak_tree *_peak_tree_remove(struct peak_tree *t, struct peak_tree
 				t->t[1]->l = should_be;
 			}
 
-			t = peak_tree_split(peak_tree_skew(t));
+			t = peak_tree_skew(t);
+			t->t[1] = peak_tree_skew(t->t[1]);
+			if (t->t[1] != NIL) {
+				t->t[1]->t[1] = peak_tree_skew(t->t[1]->t[1]);
+			}
+			t = peak_tree_split(t);
+			t->t[1] = peak_tree_split(t->t[1]);
 		}
 	}
 
