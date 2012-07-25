@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS=-g -Wall -Wextra -Iinclude
-LDLIBS=-lc
+LDLIBS=-lc -pthread
 
 all: bin/utils
 

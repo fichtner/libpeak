@@ -1,8 +1,6 @@
 #ifndef PEAK_PREALLOC_H
 #define PEAK_PREALLOC_H
 
-#include <libkern/OSAtomic.h>
-
 #define PEAK_PREALLOC_VALUE 0x1234ABBA5678AC97ULL
 
 struct peak_prealloc_element {
@@ -16,7 +14,7 @@ struct peak_prealloc_struct {
 	size_t count, used, size, mem_size;
 	void *mem;
 
-	OSSpinLock lock;
+	peak_spinlock_t lock;
 };
 
 #define PEAK_PREALLOC_TO_USER(__e__)		((void *)((__e__)->user))
@@ -47,9 +45,9 @@ static inline void *peak_preget(struct peak_prealloc_struct *ptr)
 {
 	void *ret;
 
-	OSSpinLockLock(&ptr->lock);
+	peak_spin_lock(&ptr->lock);
 	ret = _peak_preget(ptr);
-	OSSpinLockUnlock(&ptr->lock);
+	peak_spin_unlock(&ptr->lock);
 
 	return ret;
 }
@@ -93,9 +91,9 @@ static inline u32 __peak_preput(struct peak_prealloc_struct *ptr, void *chunk)
 
 #define peak_preput(__ptr__, __chunk__)		\
 	do {									\
-		OSSpinLockLock(&(__ptr__)->lock);	\
+		peak_spin_lock(&(__ptr__)->lock);	\
 		_peak_preput(__ptr__, __chunk__);	\
-		OSSpinLockUnlock(&(__ptr__)->lock);	\
+		peak_spin_unlock(&(__ptr__)->lock);	\
 	} while (0)
 
 static inline struct peak_prealloc_struct *peak_prealloc(size_t count, size_t size)
@@ -120,6 +118,7 @@ static inline struct peak_prealloc_struct *peak_prealloc(size_t count, size_t si
 		return NULL;
 	}
 
+	peak_spin_init(&ptr->lock);
 	ptr->mem_size = mem_size;
 	ptr->count = count;
 	ptr->size = size;
@@ -161,6 +160,7 @@ static inline u32 _peak_prefree(struct peak_prealloc_struct *ptr)
 		return PEAK_PREALLOC_MISSING_CHUNKS;
 	}
 
+	peak_spin_destroy(&ptr->lock);
 	peak_free(ptr->mem);
 	peak_free(ptr);
 

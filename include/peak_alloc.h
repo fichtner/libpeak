@@ -192,8 +192,11 @@ static inline u32 _peak_check_memalign(void *ptr)
 	return ret;
 }
 
-/* TODO mac hack! */
+#ifdef __APPLE__
 #define memalign(__boundary__, __size__)	malloc(__size__)
+#else /* __APPLE__ */
+#include <malloc.h>
+#endif /* __APPLE__ */
 
 static inline void *peak_malign(size_t size)
 {

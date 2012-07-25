@@ -1,6 +1,46 @@
 #ifndef PEAK_TYPES_H
 #define PEAK_TYPES_H
 
+#ifdef __APPLE__
+
+#include <libkern/OSAtomic.h>
+
+typedef OSSpinLock peak_spinlock_t;
+
+#define peak_spin_unlock	OSSpinLockUnlock
+#define peak_spin_lock		OSSpinLockLock
+
+static inline void peak_spin_init(peak_spinlock_t *lock)
+{
+	*lock = 0;
+}
+
+static inline void peak_spin_destroy(peak_spinlock_t *lock)
+{
+	(void) lock;
+}
+
+#else /* __APPLE__ */
+
+#include <pthread.h>
+
+typedef pthread_spinlock_t peak_spinlock_t;
+
+#define peak_spin_unlock	pthread_spin_unlock
+#define peak_spin_lock		pthread_spin_lock
+
+static inline void peak_spin_init(peak_spinlock_t *lock)
+{
+	pthread_spin_init(lock, PTHREAD_PROCESS_PRIVATE);
+}
+
+static inline void peak_spin_destroy(peak_spinlock_t *lock)
+{
+	pthread_spin_destroy(lock);
+}
+
+#endif /* __APPLE__*/
+
 /* this is only true for 64 bit systems */
 #define s8      char
 #define s16     short
