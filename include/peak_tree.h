@@ -1,6 +1,24 @@
 #ifndef PEAK_TREE_H
 #define PEAK_TREE_H
 
+/* General thoughts on this AA tree implementation:
+ * 
+ *  - The best performance of these trees seems to be in the 5k
+ *    to 10k nodes range. Anything else is just wrecking inserts
+ *    and removes.
+ *  - Lookups are generally faster, because they don't have to
+ *    do any rebalance stuff. I can't say how much, but then you
+ *    really shouldn't worry about it in the first place.
+ *  - In the past, I have used these trees mainly for storage
+ *    and retrieval. Once the data was outdated, the whole thing
+ *    was just being dissolved, so there wasn't any need to do
+ *    sophisticated removes.
+ *  - This implementation uses embedded structures and compare
+ *    function pointers to provide better real world applications
+ *    with complex value sets and private data.
+ *  - Locks are not provided and need to be implemented by the user.
+ */
+
 typedef u32 (*peak_tree_compare_funk) (const void *u1, const void *u2);
 
 static peak_tree_compare_funk __peak_tree_lt = NULL;
@@ -109,7 +127,7 @@ static inline void *peak_tree_insert(void *t, void *n)
 	return _peak_tree_insert(t, n);
 }
 
-static struct peak_tree *_peak_tree_lookup(struct peak_tree *t, struct peak_tree *o)
+static inline struct peak_tree *_peak_tree_lookup(struct peak_tree *t, struct peak_tree *o)
 {
 	struct peak_tree *c = NIL;
 
