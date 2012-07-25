@@ -87,45 +87,26 @@ static inline void *peak_tree_lookup(void *t, void *o)
 	return _peak_tree_lookup(t, o);
 }
 
-static inline struct peak_tree *peak_tree_successor(struct peak_tree *t)
+#define PREDECESSOR	0
+#define SUCCESSOR	1
+
+static inline struct peak_tree *peak_tree_leaf(struct peak_tree *t, const u32 dir)
 {
-	struct peak_tree **s = &t->t[1];
+	struct peak_tree **l = &t->t[dir];
 	struct peak_tree *ret;
 
-	while ((*s)->t[0] != NIL) {
-		s = &(*s)->t[0];
+	while ((*l)->t[!dir] != NIL) {
+		l = &(*l)->t[!dir];
 	}
 
-	ret = *s; 
-	*s = NIL;
+	ret = *l; 
+	*l = NIL;
 
-	if (ret != t->t[1]) {
-		ret->t[1] = t->t[1];
+	if (ret != t->t[dir]) {
+		ret->t[dir] = t->t[dir];
 	}
 
-	ret->t[0] = t->t[0];
-	ret->l = t->l;
-
-	return ret;
-}
-
-static inline struct peak_tree *peak_tree_predecessor(struct peak_tree *t)
-{
-	struct peak_tree **p = &t->t[0];
-	struct peak_tree *ret;
-
-	while ((*p)->t[1] != NIL) {
-		p = &(*p)->t[1];
-	}
-
-	ret = *p;
-	*p = NIL;
-
-	if (ret != t->t[0]) {
-		ret->t[0] = t->t[0];
-	}
-
-	ret->t[1] = t->t[1];
+	ret->t[!dir] = t->t[!dir];
 	ret->l = t->l;
 
 	return ret;
@@ -150,9 +131,9 @@ static struct peak_tree *_peak_tree_remove(struct peak_tree *t, struct peak_tree
 				return NIL;
 			}
 
-			t = peak_tree_successor(t);
+			t = peak_tree_leaf(t, SUCCESSOR);
 		} else {
-			t = peak_tree_predecessor(t);
+			t = peak_tree_leaf(t, PREDECESSOR);
 		}
 	}
 
