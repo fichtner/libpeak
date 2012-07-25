@@ -28,8 +28,8 @@ static inline size_t peak_cacheline_aligned(const size_t size)
 		}												\
 	} while (0)
 
-#define PEAK_MEMALIGN_VALUE	0x8897A6B5C4D3E2F1ULL
-#define PEAK_MALLOC_VALUE	0x1F2E3D4C5B6A7988ULL
+#define PEAK_MEMALIGN_VALUE	0x8897A6B5C4D3E2F1ull
+#define PEAK_MALLOC_VALUE	0x1F2E3D4C5B6A7988ull
 
 #define PEAK_MALLOC_MEMALIGN_START	((u8 *) ptr - sizeof(u64))
 

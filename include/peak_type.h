@@ -71,6 +71,11 @@ static inline void peak_spin_destroy(peak_spinlock_t *lock)
 #define peak_byteswap_32(__val__)	__builtin_bswap32(__val__)
 #define peak_byteswap_64(__val__)	__builtin_bswap64(__val__)
 
+#ifdef __CHECKER__
+#define __builtin_bswap32(__val__) (__val__)
+#define __builtin_bswap64(__val__) (__val__)
+#endif /* __CHECKER__ */
+
 static inline u16 _peak_get_u16_le(const u8 *ptr)
 {
 	return ptr[0] | ptr[1] << 8;

@@ -1,7 +1,7 @@
 #ifndef PEAK_PREALLOC_H
 #define PEAK_PREALLOC_H
 
-#define PEAK_PREALLOC_VALUE 0x1234ABBA5678AC97ULL
+#define PEAK_PREALLOC_VALUE 0x1234ABBA5678AC97ull
 
 struct peak_prealloc_element {
 	struct peak_prealloc_element *next;
