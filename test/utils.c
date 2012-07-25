@@ -279,15 +279,15 @@ static void test_tree_simple(void)
 	root = peak_tree_insert(root, &t2);
 
 	assert(root == &t1.t);
-	assert(root->right == &t2.t);
+	assert(root->t[1] == &t2.t);
 	assert(&t1.t == peak_tree_lookup(root, &t1));
 	assert(&t2.t == peak_tree_lookup(root, &t2));
 
 	root = peak_tree_insert(root, &t3);
 
 	assert(root == &t2.t);
-	assert(root->right == &t3.t);
-	assert(root->left == &t1.t);
+	assert(root->t[1] == &t3.t);
+	assert(root->t[0] == &t1.t);
 	assert(&t1.t == peak_tree_lookup(root, &t1));
 	assert(&t2.t == peak_tree_lookup(root, &t2));
 	assert(&t3.t == peak_tree_lookup(root, &t3));
@@ -296,8 +296,8 @@ static void test_tree_simple(void)
 
 	assert(root != &t2.t);
 	assert(root == &t1.t);
-	assert(root->left == NIL);
-	assert(root->right == &t3.t);
+	assert(root->t[0] == NIL);
+	assert(root->t[1] == &t3.t);
 
 	root = peak_tree_remove(root, &t3);
 	root = peak_tree_remove(root, &t1);
@@ -337,8 +337,8 @@ static void test_tree_complex(void)
 		e = peak_tree_lookup(root, &helper);
 		assert(e);
 		root = peak_tree_remove(root, e);
-		assert(e->t.left == NIL);
-		assert(e->t.right == NIL);
+		assert(e->t.t[0] == NIL);
+		assert(e->t.t[1] == NIL);
 		assert(i - 1 == peak_tree_count(root));
 		_peak_preput(mem, e);
 	}

@@ -6,22 +6,21 @@ typedef s32 (*peak_tree_compare_func) (void *u1, void *u2);
 static peak_tree_compare_func peak_tree_compare = NULL;
 
 struct peak_tree {
-	struct peak_tree *right;
-	struct peak_tree *left;
-	u32 level, reserved;
+	struct peak_tree *t[2];
+	u32 l, reserved;
 };
 
-static struct peak_tree peak_tree_sentinel = { NULL, NULL, 1, 0 };
+static struct peak_tree peak_tree_sentinel = { { NULL, NULL }, 1, 0 };
 
 #define NIL (&peak_tree_sentinel)
 
 static inline struct peak_tree *peak_tree_skew(struct peak_tree *t)
 {
-	if (t != NIL && t->left->level == t->level) {
-		struct peak_tree *l = t->left;
+	if (t != NIL && t->t[0]->l == t->l) {
+		struct peak_tree *l = t->t[0];
 
-		t->left = l->right;
-		l->right = t;
+		t->t[0] = l->t[1];
+		l->t[1] = t;
 
 		return l;
 	}
@@ -31,12 +30,12 @@ static inline struct peak_tree *peak_tree_skew(struct peak_tree *t)
 
 static inline struct peak_tree *peak_tree_split(struct peak_tree *t)
 {
-	if (t != NIL && t->right != NIL && t->right->right->level == t->level) {
-		struct peak_tree *r = t->right;
+	if (t != NIL && t->t[1] != NIL && t->t[1]->t[1]->l == t->l) {
+		struct peak_tree *r = t->t[1];
 
-		t->right = r->left;
-		r->left = t;
-		++r->level;
+		t->t[1] = r->t[0];
+		r->t[0] = t;
+		++r->l;
 
 		return r;
 	}
@@ -47,15 +46,15 @@ static inline struct peak_tree *peak_tree_split(struct peak_tree *t)
 static struct peak_tree *_peak_tree_insert(struct peak_tree *t, struct peak_tree *n)
 {
 	if (t == NIL) {
-		n->left = n->right = NIL;
-		n->level = 2;
+		n->t[0] = n->t[1] = NIL;
+		n->l = 2;
 		t = n;
 	} else {
 		s32 ret = peak_tree_compare(n, t);
 		if (ret < 0) {
-			t->left = _peak_tree_insert(t->left, n);
+			t->t[0] = _peak_tree_insert(t->t[0], n);
 		} else if (ret > 0) {
-			t->right = _peak_tree_insert(t->right, n);
+			t->t[1] = _peak_tree_insert(t->t[1], n);
 		}
 	}
 
@@ -76,7 +75,7 @@ static struct peak_tree *_peak_tree_lookup(struct peak_tree *t, struct peak_tree
 			return t;
 		}
 
-		t = ret < 0 ? t->left : t->right;
+		t = ret < 0 ? t->t[0] : t->t[1];
 	}
 
 	return NULL;
@@ -90,44 +89,44 @@ static inline void *peak_tree_lookup(void *t, void *o)
 
 static inline struct peak_tree *peak_tree_successor(struct peak_tree *t)
 {
-	struct peak_tree **s = &t->right;
+	struct peak_tree **s = &t->t[1];
 	struct peak_tree *ret;
 
-	while ((*s)->left != NIL) {
-		s = &(*s)->left;
+	while ((*s)->t[0] != NIL) {
+		s = &(*s)->t[0];
 	}
 
 	ret = *s; 
 	*s = NIL;
 
-	if (ret != t->right) {
-		ret->right = t->right;
+	if (ret != t->t[1]) {
+		ret->t[1] = t->t[1];
 	}
 
-	ret->level = t->level;
-	ret->left = t->left;
+	ret->t[0] = t->t[0];
+	ret->l = t->l;
 
 	return ret;
 }
 
 static inline struct peak_tree *peak_tree_predecessor(struct peak_tree *t)
 {
-	struct peak_tree **p = &t->left;
+	struct peak_tree **p = &t->t[0];
 	struct peak_tree *ret;
 
-	while ((*p)->right != NIL) {
-		p = &(*p)->right;
+	while ((*p)->t[1] != NIL) {
+		p = &(*p)->t[1];
 	}
 
 	ret = *p;
 	*p = NIL;
 
-	if (ret != t->left) {
-		ret->left = t->left;
+	if (ret != t->t[0]) {
+		ret->t[0] = t->t[0];
 	}
 
-	ret->level = t->level;
-	ret->right = t->right;
+	ret->t[1] = t->t[1];
+	ret->l = t->l;
 
 	return ret;
 }
@@ -142,12 +141,12 @@ static struct peak_tree *_peak_tree_remove(struct peak_tree *t, struct peak_tree
 
 	ret = peak_tree_compare(o, t);
 	if (ret < 0) {
-		t->left = _peak_tree_remove(t->left, o);
+		t->t[0] = _peak_tree_remove(t->t[0], o);
 	} else if (ret > 0) {
-		t->right = _peak_tree_remove(t->right, o);
+		t->t[1] = _peak_tree_remove(t->t[1], o);
 	} else {
-		if (t->left == NIL) {
-			if (t->right == NIL) {
+		if (t->t[0] == NIL) {
+			if (t->t[1] == NIL) {
 				return NIL;
 			}
 
@@ -157,9 +156,9 @@ static struct peak_tree *_peak_tree_remove(struct peak_tree *t, struct peak_tree
 		}
 	}
 
-	if (t->left->level < t->level - 1 || t->right->level < t->level - 1) {
-		if (t->right->level > --t->level) {
-			t->right->level = t->level;
+	if (t->t[0]->l < t->l - 1 || t->t[1]->l < t->l - 1) {
+		if (t->t[1]->l > --t->l) {
+			t->t[1]->l = t->l;
 		}
 
 		t = peak_tree_split(peak_tree_skew(t));
@@ -178,8 +177,8 @@ static u32 _peak_tree_height(struct peak_tree *t)
 	u32 l = 0, r = 0;
 
 	if (t != NIL) {
-		l = _peak_tree_height(t->left) + 1;
-		r = _peak_tree_height(t->right) + 1;
+		l = _peak_tree_height(t->t[0]) + 1;
+		r = _peak_tree_height(t->t[1]) + 1;
 	}
 
 	return r > l ? r : l;
@@ -196,7 +195,7 @@ static u32 _peak_tree_count(struct peak_tree *t)
 		return 0;
 	}
 
-	return 1 + _peak_tree_count(t->left) + _peak_tree_count(t->right);
+	return 1 + _peak_tree_count(t->t[0]) + _peak_tree_count(t->t[1]);
 }
 
 static inline u32 peak_tree_count(void *t)
