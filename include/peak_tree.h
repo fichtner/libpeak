@@ -54,20 +54,19 @@ static inline struct peak_tree *peak_tree_split(struct peak_tree *t)
 
 static struct peak_tree *_peak_tree_insert(struct peak_tree *t, struct peak_tree *n)
 {
-	if (t == NIL) {
-		n->t[0] = n->t[1] = NIL;
-		n->l = 2;
-		t = n;
-	} else {
-		s32 ret = peak_tree_compare(n, t);
-		if (ret < 0) {
-			t->t[0] = _peak_tree_insert(t->t[0], n);
-		} else if (ret > 0) {
-			t->t[1] = _peak_tree_insert(t->t[1], n);
-		}
+	if (t != NIL) {
+		const u32 dir = __peak_tree_lt(t, n);
+
+		t->t[dir] = _peak_tree_insert(t->t[dir], n);
+
+		return peak_tree_split(peak_tree_skew(t));
 	}
 
-	return peak_tree_split(peak_tree_skew(t));
+	/* new leaf is easy */
+	n->t[0] = n->t[1] = NIL;
+	n->l = 2;
+
+	return n;
 }
 
 static inline void *peak_tree_insert(void *t, void *n)
