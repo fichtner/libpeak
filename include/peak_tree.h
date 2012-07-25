@@ -11,14 +11,17 @@ struct peak_tree {
 	u32 l, reserved;
 };
 
-static struct peak_tree peak_tree_sentinel = { { NULL, NULL }, 1, 0 };
+static struct peak_tree __peak_tree_sentinel = { { NULL, NULL }, 1, 0 };
 
-#define NIL (&peak_tree_sentinel)
+#define NIL (&__peak_tree_sentinel)
 
 static inline void peak_tree_init(peak_tree_compare_funk lt, peak_tree_compare_funk eq)
 {
 	__peak_tree_lt = lt;
 	__peak_tree_eq = eq;
+
+	__peak_tree_sentinel.t[0] = NIL;
+	__peak_tree_sentinel.t[1] = NIL;
 }
 
 static inline struct peak_tree *peak_tree_skew(struct peak_tree *t)
@@ -189,9 +192,7 @@ static struct peak_tree *_peak_tree_remove(struct peak_tree *t, struct peak_tree
 
 			t = peak_tree_skew(t);
 			t->t[1] = peak_tree_skew(t->t[1]);
-			if (t->t[1] != NIL) {
-				t->t[1]->t[1] = peak_tree_skew(t->t[1]->t[1]);
-			}
+			t->t[1]->t[1] = peak_tree_skew(t->t[1]->t[1]);
 			t = peak_tree_split(t);
 			t->t[1] = peak_tree_split(t->t[1]);
 		}
