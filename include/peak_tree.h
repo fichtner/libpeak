@@ -243,6 +243,25 @@ static struct peak_tree *_peak_tree_remove(struct peak_tree *t, struct peak_tree
 	return t;
 }
 
+static void _peak_tree_collapse(struct peak_tree *t)
+{
+	if (t == NIL) {
+		return;
+	}
+
+	_peak_tree_collapse(t->t[0]);
+	_peak_tree_collapse(t->t[1]);
+
+	t->t[0] = t->t[1] = NIL;
+}
+
+static inline void *peak_tree_collapse(void *t)
+{
+	_peak_tree_collapse(t);
+
+	return NIL;
+}
+
 static inline void *peak_tree_remove(void *t, void *r)
 {
 	return _peak_tree_remove(t, r);

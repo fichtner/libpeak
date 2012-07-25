@@ -270,9 +270,9 @@ static void test_tree_simple(void)
 	t2.value = 2;
 	t3.value = 3;
 
-	assert(NIL == peak_tree_lookup(root, &t1));
-	assert(NIL == peak_tree_lookup(root, &t2));
-	assert(NIL == peak_tree_lookup(root, &t3));
+	assert(peak_tree_lookup(root, &t1) == NIL);
+	assert(peak_tree_lookup(root, &t2) == NIL);
+	assert(peak_tree_lookup(root, &t3) == NIL);
 
 	root = peak_tree_insert(root, &t1);
 
@@ -313,6 +313,16 @@ static void test_tree_simple(void)
 	root = peak_tree_remove(root, &t3);
 
 	assert(root == NIL);
+
+	root = peak_tree_insert(root, &t1);
+	root = peak_tree_insert(root, &t2);
+	root = peak_tree_insert(root, &t3);
+
+	assert(peak_tree_count(root) == 3);
+
+	root = peak_tree_collapse(root);
+
+	assert(peak_tree_count(root) == 0);
 }
 
 #define TREE_COUNT 10000
