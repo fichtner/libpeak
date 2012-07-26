@@ -267,7 +267,7 @@ static inline void *peak_tree_remove(void *t, void *r)
 	return _peak_tree_remove(t, r);
 }
 
-static u32 _peak_tree_height(struct peak_tree *t)
+static u32 _peak_tree_height(const struct peak_tree *t)
 {
 	u32 l = 0, r = 0;
 
@@ -279,21 +279,38 @@ static u32 _peak_tree_height(struct peak_tree *t)
 	return r > l ? r : l;
 }
 
-static inline u32 peak_tree_height(void *t)
+static inline u32 peak_tree_height(const void *t)
 {
 	return _peak_tree_height(t);
 }
 
-static u32 _peak_tree_count(struct peak_tree *t)
+static u32 _peak_tree_count(const struct peak_tree *t)
 {
-	if (t == NIL) {
-		return 0;
+	const struct peak_tree *h[PEAK_TREE_STACK_SIZE];
+	u32 i = 0, count = 0;
+
+	for (;;) {
+		if (t != NIL) {
+			if (PEAK_TREE_STACK_SIZE == i) {
+				peak_panic("stack overflow\n");
+			}
+			h[i++] = t;
+			t = t->t[0];
+		} else {
+			if (!i) {
+				break;
+			}
+
+			t = h[--i];
+			t = t->t[1];
+			++count;
+		}
 	}
 
-	return 1 + _peak_tree_count(t->t[0]) + _peak_tree_count(t->t[1]);
+	return count;
 }
 
-static inline u32 peak_tree_count(void *t)
+static inline u32 peak_tree_count(const void *t)
 {
 	return _peak_tree_count(t);
 }

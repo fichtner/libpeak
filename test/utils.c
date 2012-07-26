@@ -273,16 +273,22 @@ static void test_tree_simple(void)
 	assert(peak_tree_lookup(root, &t1) == NIL);
 	assert(peak_tree_lookup(root, &t2) == NIL);
 	assert(peak_tree_lookup(root, &t3) == NIL);
+	assert(!peak_tree_height(root));
+	assert(!peak_tree_count(root));
 
 	root = peak_tree_insert(root, &t1);
 
 	assert(root == &t1.t);
+	assert(peak_tree_height(root) == 1);
+	assert(peak_tree_count(root) == 1);
 	assert(&t1.t == peak_tree_lookup(root, &t1));
 
 	root = peak_tree_insert(root, &t2);
 
 	assert(root == &t1.t);
 	assert(root->t[1] == &t2.t);
+	assert(peak_tree_height(root) == 2);
+	assert(peak_tree_count(root) == 2);
 	assert(&t1.t == peak_tree_lookup(root, &t1));
 	assert(&t2.t == peak_tree_lookup(root, &t2));
 
@@ -291,6 +297,8 @@ static void test_tree_simple(void)
 	assert(root == &t2.t);
 	assert(root->t[1] == &t3.t);
 	assert(root->t[0] == &t1.t);
+	assert(peak_tree_height(root) == 2);
+	assert(peak_tree_count(root) == 3);
 	assert(&t1.t == peak_tree_lookup(root, &t1));
 	assert(&t2.t == peak_tree_lookup(root, &t2));
 	assert(&t3.t == peak_tree_lookup(root, &t3));
@@ -347,8 +355,8 @@ static void test_tree_complex(void)
 		root = peak_tree_insert(root, e);
 	}
 
-	assert(TREE_COUNT == peak_tree_count(root));
-	assert(18 == peak_tree_height(root));
+	assert(peak_tree_count(root) == TREE_COUNT);
+	assert(peak_tree_height(root) == 18);
 	memset(&helper, 0, sizeof(struct test));
 
 	for (i = TREE_COUNT; i; --i) {
