@@ -2,7 +2,7 @@
 #define PEAK_TREE_H
 
 /* General thoughts on this AA tree implementation:
- * 
+ *
  *  - The best performance of these trees seems to be in the 5k
  *    to 10k nodes range. Anything else is just wrecking inserts
  *    and removes.
@@ -163,7 +163,7 @@ static inline struct peak_tree *peak_tree_leaf(struct peak_tree *t, const u32 di
 		l = &(*l)->t[!dir];
 	}
 
-	ret = *l; 
+	ret = *l;
 	*l = NIL;
 
 	if (ret != t->t[dir]) {
@@ -193,7 +193,7 @@ static struct peak_tree *_peak_tree_remove(struct peak_tree *t, struct peak_tree
 		h[i++] = t;
 
 		/* that's a shortcut: we expect the caller to know the
-		 * object it wants to remove from the tree structure! */ 
+		 * object it wants to remove from the tree structure! */
 		if (t == o) {
 			--i;
 			break;

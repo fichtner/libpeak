@@ -384,7 +384,7 @@ static void test_tree_complex(void)
 		root = peak_tree_insert(root, e);
 	}
 
-	peak_tree_collapse(root, test_tree_free, mem); 
+	peak_tree_collapse(root, test_tree_free, mem);
 
 	peak_prefree(mem);
 }
