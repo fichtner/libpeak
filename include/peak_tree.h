@@ -246,22 +246,35 @@ static struct peak_tree *_peak_tree_remove(struct peak_tree *t, struct peak_tree
 
 static void _peak_tree_collapse(struct peak_tree *t, peak_tree_callback_funk cb, void *ctx)
 {
-	if (t == NIL) {
-		return;
+	struct peak_tree *h[PEAK_TREE_STACK_SIZE];
+	u32 i = 0;
+
+	for (;;) {
+		if (t != NIL) {
+			if (PEAK_TREE_STACK_SIZE == i) {
+				peak_panic("stack overflow\n");
+			}
+			h[i++] = t;
+			t = t->t[0];
+		} else {
+			if (!i) {
+				break;
+			}
+
+			t = h[--i];
+			t = t->t[1];
+
+			cb(h[i], ctx);
+		}
 	}
-
-	_peak_tree_collapse(t->t[0], cb, ctx);
-	_peak_tree_collapse(t->t[1], cb, ctx);
-
-	t->t[0] = t->t[1] = NIL;
-
-	cb(t, ctx);
 }
 
 static void __peak_tree_callback_empty(void *ptr, void *ctx)
 {
-	(void) ptr;
+	struct peak_tree *t = ptr;
 	(void) ctx;
+
+	t->t[0] = t->t[1] = NIL;
 }
 
 static inline void *peak_tree_collapse(void *t, peak_tree_callback_funk cb, void *ctx)
