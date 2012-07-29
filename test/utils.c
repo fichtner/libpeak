@@ -328,9 +328,17 @@ static void test_tree_simple(void)
 
 	assert(peak_tree_count(root) == 3);
 
-	root = peak_tree_collapse(root);
+	root = peak_tree_collapse(root, NULL, NULL);
 
 	assert(peak_tree_count(root) == 0);
+}
+
+static void test_tree_free(void *ptr, void *ctx)
+{
+	struct peak_prealloc_struct *mem = ctx;
+	struct test *e = ptr;
+
+	peak_preput(mem, e);
 }
 
 #define TREE_COUNT 10000
@@ -369,6 +377,14 @@ static void test_tree_complex(void)
 		assert(i - 1 == peak_tree_count(root));
 		_peak_preput(mem, e);
 	}
+
+	for (i = 1; i < 5; --i) {
+		e = _peak_preget(mem);
+		e->value = i;
+		root = peak_tree_insert(root, e);
+	}
+
+	peak_tree_collapse(root, test_tree_free, mem); 
 
 	peak_prefree(mem);
 }

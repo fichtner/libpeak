@@ -20,6 +20,7 @@
  */
 
 typedef u32 (*peak_tree_compare_funk) (const void *u1, const void *u2);
+typedef void (*peak_tree_callback_funk) (void *ptr, void *ctx);
 
 static peak_tree_compare_funk __peak_tree_lt = NULL;
 static peak_tree_compare_funk __peak_tree_eq = NULL;
@@ -243,21 +244,29 @@ static struct peak_tree *_peak_tree_remove(struct peak_tree *t, struct peak_tree
 	return t;
 }
 
-static void _peak_tree_collapse(struct peak_tree *t)
+static void _peak_tree_collapse(struct peak_tree *t, peak_tree_callback_funk cb, void *ctx)
 {
 	if (t == NIL) {
 		return;
 	}
 
-	_peak_tree_collapse(t->t[0]);
-	_peak_tree_collapse(t->t[1]);
+	_peak_tree_collapse(t->t[0], cb, ctx);
+	_peak_tree_collapse(t->t[1], cb, ctx);
 
 	t->t[0] = t->t[1] = NIL;
+
+	cb(t, ctx);
 }
 
-static inline void *peak_tree_collapse(void *t)
+static void __peak_tree_callback_empty(void *ptr, void *ctx)
 {
-	_peak_tree_collapse(t);
+	(void) ptr;
+	(void) ctx;
+}
+
+static inline void *peak_tree_collapse(void *t, peak_tree_callback_funk cb, void *ctx)
+{
+	_peak_tree_collapse(t, cb ? : __peak_tree_callback_empty, ctx);
 
 	return NIL;
 }
