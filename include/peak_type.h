@@ -1,6 +1,9 @@
 #ifndef PEAK_TYPES_H
 #define PEAK_TYPES_H
 
+#include <pthread.h>
+#include <stdint.h>
+
 #ifdef __APPLE__
 
 #include <libkern/OSAtomic.h>
@@ -10,202 +13,263 @@ typedef OSSpinLock peak_spinlock_t;
 #define peak_spin_unlock	OSSpinLockUnlock
 #define peak_spin_lock		OSSpinLockLock
 
-static inline void peak_spin_init(peak_spinlock_t *lock)
+static inline void
+peak_spin_init(peak_spinlock_t *lock)
 {
 	*lock = 0;
 }
 
-static inline void peak_spin_destroy(peak_spinlock_t *lock)
+static inline void
+peak_spin_exit(peak_spinlock_t *lock)
 {
 	(void) lock;
 }
 
-#else /* __APPLE__ */
+#define PTHREAD_BARRIER_SERIAL_THREAD -1
 
-#include <pthread.h>
+#else /* !__APPLE__ */
 
 typedef pthread_spinlock_t peak_spinlock_t;
 
 #define peak_spin_unlock	pthread_spin_unlock
 #define peak_spin_lock		pthread_spin_lock
 
-static inline void peak_spin_init(peak_spinlock_t *lock)
+static inline void
+peak_spin_init(peak_spinlock_t *lock)
 {
 	pthread_spin_init(lock, PTHREAD_PROCESS_PRIVATE);
 }
 
-static inline void peak_spin_destroy(peak_spinlock_t *lock)
+static inline void
+peak_spin_exit(peak_spinlock_t *lock)
 {
 	pthread_spin_destroy(lock);
 }
 
 #endif /* __APPLE__*/
 
-/* this is only true for 64 bit systems */
-#define s8      char
-#define s16     short
-#define s32     int
-#define s64     long
+#define PEAK_BARRIER_SERIAL_THREAD PTHREAD_BARRIER_SERIAL_THREAD
 
-#define u8      unsigned s8
-#define u16     unsigned s16
-#define u32     unsigned s32
-#define u64     unsigned s64
+typedef struct {
+	pthread_mutex_t mutex;
+	pthread_cond_t cond;
+	unsigned int count, threads;
+} peak_barrier_t;
 
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-#define peak_get_u16	peak_get_u16_le
-#define peak_put_u16	peak_put_u16_le
-#define peak_get_u32	peak_get_u32_le
-#define peak_put_u32	peak_put_u32_le
-#define peak_get_u64	peak_get_u64_le
-#define peak_put_u64	peak_put_u64_le
-#else
-#define peak_get_u16	peak_get_u16_be
-#define peak_put_u16	peak_put_u16_be
-#define peak_get_u32	peak_get_u32_be
-#define peak_put_u32	peak_put_u32_be
-#define peak_get_u64	peak_get_u64_be
-#define peak_put_u64	peak_put_u64_be
-#endif
+static inline int
+peak_barrier_init(peak_barrier_t *barrier)
+{
+	pthread_mutex_init(&barrier->mutex, NULL);
+	pthread_cond_init(&barrier->cond, NULL);
+	barrier->threads = 0U - 1U;
+	barrier->count = 0;
 
-#define peak_byteswap_32(__val__)	__builtin_bswap32(__val__)
-#define peak_byteswap_64(__val__)	__builtin_bswap64(__val__)
+	return (0);
+}
+
+static inline int
+peak_barrier_exit(peak_barrier_t *barrier)
+{
+	pthread_mutex_destroy(&barrier->mutex);
+	pthread_cond_destroy(&barrier->cond);
+	barrier->threads = 0;
+	barrier->count = 0;
+
+	return (0);
+}
+
+static inline int
+peak_barrier_wait(peak_barrier_t *barrier)
+{
+	int ret = 0;
+
+	pthread_mutex_lock(&barrier->mutex);
+	if (barrier->count < barrier->threads) {
+		++barrier->count;
+		pthread_cond_wait(&barrier->cond, &barrier->mutex);
+	} else {
+		ret = PEAK_BARRIER_SERIAL_THREAD;
+	}
+	pthread_mutex_unlock(&barrier->mutex);
+
+	return (ret);
+}
+
+static inline int
+peak_barrier_wake(peak_barrier_t *barrier)
+{
+	pthread_mutex_lock(&barrier->mutex);
+	if (barrier->count == barrier->threads) {
+		pthread_cond_broadcast(&barrier->cond);
+		barrier->count = 0;
+	}
+	pthread_mutex_unlock(&barrier->mutex);
+
+	return (0);
+}
+
+static inline int
+peak_barrier_join(peak_barrier_t *barrier)
+{
+	int ret = 0;
+
+	pthread_mutex_lock(&barrier->mutex);
+	if (!barrier->count) {
+		++barrier->threads;
+	} else {
+		ret = 1;
+	}
+	pthread_mutex_unlock(&barrier->mutex);
+
+	return (ret);
+}
+
+static inline int
+peak_barrier_leave(peak_barrier_t *barrier)
+{
+	int ret = 0;
+
+	pthread_mutex_lock(&barrier->mutex);
+	if (!barrier->count) {
+		--barrier->threads;
+	} else {
+		ret = 1;
+	}
+	pthread_mutex_unlock(&barrier->mutex);
+
+	return (ret);
+}
+
+static inline uint16_t
+bswap16(uint16_t u)
+{
+	return ((u << 8) | (u >> 8));
+}
+
+#define bswap32(__val__)	__builtin_bswap32(__val__)
+#define bswap64(__val__)	__builtin_bswap64(__val__)
 
 #ifdef __CHECKER__
-#define __builtin_bswap32(__val__) (__val__)
-#define __builtin_bswap64(__val__) (__val__)
+#define __sync_nand_and_fetch(__ptr__, __val__)	(__val__)
+#define __sync_fetch_and_nand(__ptr__, __val__)	(__val__)
+#define __sync_and_and_fetch(__ptr__, __val__)	(__val__)
+#define __sync_fetch_and_and(__ptr__, __val__)	(__val__)
+#define __sync_add_and_fetch(__ptr__, __val__)	(__val__)
+#define __sync_fetch_and_add(__ptr__, __val__)	(__val__)
+#define __sync_sub_and_fetch(__ptr__, __val__)	(__val__)
+#define __sync_fetch_and_sub(__ptr__, __val__)	(__val__)
+#define __sync_xor_and_fetch(__ptr__, __val__)	(__val__)
+#define __sync_fetch_and_xor(__ptr__, __val__)	(__val__)
+#define __sync_or_and_fetch(__ptr__, __val__)	(__val__)
+#define __sync_fetch_and_or(__ptr__, __val__)	(__val__)
+#define __builtin_bswap32(__val__)		(__val__)
+#define __builtin_bswap64(__val__)		(__val__)
 #endif /* __CHECKER__ */
 
-static inline u16 _peak_get_u16_le(const u8 *ptr)
+static inline uint16_t
+le16dec(const void *pp)
 {
-	return ptr[0] | ptr[1] << 8;
+	const unsigned char *p = pp;
+
+	return (p[1] << 8 | p[0]);
 }
 
-static inline u16 peak_get_u16_le(const void *ptr)
+static inline void
+le16enc(void *pp, const uint16_t u)
 {
-	return _peak_get_u16_le(ptr);
+	unsigned char *p = pp;
+
+	p[0] = u;
+	p[1] = u >> 8;
 }
 
-static inline void _peak_put_u16_le(const u16 val, u8 *ptr)
+static inline uint32_t
+le32dec(const void *pp)
 {
-	*ptr++ = val;
-	*ptr = val >> 8;
+	const unsigned char *p = pp;
+
+	return ((p[3] << 24) | (p[2] << 16) | (p[1] << 8) | p[0]);
 }
 
-static inline void peak_put_u16_le(const u16 val, void *ptr)
+static inline void
+le32enc(void *pp, const uint32_t u)
 {
-	_peak_put_u16_le(val, ptr);
+	unsigned char *p = pp;
+
+	p[0] = u;
+	p[1] = u >> 8;
+	p[2] = u >> 16;
+	p[3] = u >> 24;
 }
 
-static inline u32 _peak_get_u32_le(const u8 *ptr)
+static inline uint64_t
+le64dec(const void *pp)
 {
-	return ptr[0] | ptr[1] << 8 | ptr[2] << 16 | ptr[3] << 24;
+	const unsigned char *p = pp;
+
+	return (((uint64_t)le32dec(p + 4) << 32) | le32dec(p));
 }
 
-static inline u32 peak_get_u32_le(const void *ptr)
+static inline void
+le64enc(void *pp, const uint64_t u)
 {
-	return _peak_get_u32_le(ptr);
+	unsigned char *p = pp;
+
+	le32enc(p, u);
+	le32enc(p + 4, u >> 32);
 }
 
-static inline void _peak_put_u32_le(const u32 val, u8 *ptr)
+static inline uint16_t
+be16dec(const void *pp)
 {
-	*ptr++ = val;
-	*ptr++ = val >> 8;
-	*ptr++ = val >> 16;
-	*ptr = val >> 24;
+	const unsigned char *p = pp;
+
+	return (p[1] | (p[0] << 8));
 }
 
-static inline void peak_put_u32_le(const u32 val, void *ptr)
+static inline void
+be16enc(void *pp, const uint16_t u)
 {
-	_peak_put_u32_le(val, ptr);
+	unsigned char *p = pp;
+
+	p[0] = u >> 8;
+	p[1] = u;
 }
 
-static inline u64 _peak_get_u64_le(const u8 *ptr)
+static inline uint32_t
+be32dec(const void *pp)
 {
-	return (u64) _peak_get_u32_le(ptr) |
-		(u64) _peak_get_u32_le(ptr + 4) << 32;
+	const unsigned char *p = pp;
+
+	return ((p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3]);
 }
 
-static inline u64 peak_get_u64_le(const void *ptr)
+static inline void
+be32enc(void *pp, const uint32_t u)
 {
-	return _peak_get_u64_le(ptr);
+	unsigned char *p = pp;
+
+	p[0] = u >> 24;
+	p[1] = u >> 16;
+	p[2] = u >> 8;
+	p[3] = u;
 }
 
-static inline void _peak_put_u64_le(const u64 val, u8 *ptr)
+static inline uint64_t
+be64dec(const void *pp)
 {
-	_peak_put_u32_le(val, ptr);
-	_peak_put_u32_le(val >> 32, ptr + 4);
+	const unsigned char *p = pp;
+
+	return (((uint64_t)be32dec(p) << 32) | be32dec(p + 4));
 }
 
-static inline void peak_put_u64_le(const u64 val, void *ptr)
+static inline void
+be64enc(void *pp, const uint64_t u)
 {
-	_peak_put_u64_le(val, ptr);
+	unsigned char *p = pp;
+
+	be32enc(p, u >> 32);
+	be32enc(p + 4, u);
 }
 
-static inline u16 _peak_get_u16_be(const u8 *ptr)
-{
-	return ptr[0] << 8 | ptr[1];
-}
-
-static inline u16 peak_get_u16_be(const void *ptr)
-{
-	return _peak_get_u16_be(ptr);
-}
-
-static inline void _peak_put_u16_be(const u16 val, u8 *ptr)
-{
-	*ptr++ = val >> 8;
-	*ptr = val;
-}
-
-static inline void peak_put_u16_be(const u16 val, void *ptr)
-{
-	_peak_put_u16_be(val, ptr);
-}
-
-static inline u32 _peak_get_u32_be(const u8 *ptr)
-{
-	return ptr[0] << 24 | ptr[1] << 16 | ptr[2] << 8 | ptr[3];
-}
-
-static inline u32 peak_get_u32_be(const void *ptr)
-{
-	return _peak_get_u32_be(ptr);
-}
-
-static inline void _peak_put_u32_be(const u32 val, u8 *ptr)
-{
-	*ptr++ = val >> 24;
-	*ptr++ = val >> 16;
-	*ptr++ = val >> 8;
-	*ptr = val;
-}
-
-static inline void peak_put_u32_be(const u32 val, void *ptr)
-{
-	_peak_put_u32_be(val, ptr);
-}
-
-static inline u64 _peak_get_u64_be(const u8 *ptr)
-{
-	return (u64) _peak_get_u32_be(ptr) << 32 |
-		(u64) _peak_get_u32_be(ptr + 4);
-}
-
-static inline u64 peak_get_u64_be(const void *ptr)
-{
-	return _peak_get_u64_be(ptr);
-}
-
-static inline void _peak_put_u64_be(const u64 val, u8 *ptr)
-{
-	_peak_put_u32_be(val >> 32, ptr);
-	_peak_put_u32_be(val, ptr + 4);
-}
-
-static inline void peak_put_u64_be(const u64 val, void *ptr)
-{
-	_peak_put_u64_be(val, ptr);
-}
-
-#endif /* PEAK_TYPES_H */
+#endif /* !PEAK_TYPES_H */
