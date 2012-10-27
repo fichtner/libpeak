@@ -222,107 +222,94 @@ test_hash(void)
 }
 
 struct test {
-	struct peak_tree t;
+	AA_ENTRY(test) t;
 	unsigned int value;
 };
 
-static unsigned int
-test_tree_lt(const void *u1, const void *u2)
-{
-	const struct test *t1 = u1;
-	const struct test *t2 = u2;
+#define test_tree_lt(t1, t2)	((t1)->value < (t2)->value)
+#define test_tree_eq(t1, t2)	((t1)->value == (t2)->value)
 
-	return (t1->value < t2->value);
-}
-
-static unsigned int
-test_tree_eq(const void *u1, const void *u2)
-{
-	const struct test *t1 = u1;
-	const struct test *t2 = u2;
-
-	return (t1->value == t2->value);
-}
+AA_GENERATE_STATIC(, test, t, test_tree_lt, test_tree_eq);
 
 static void
 test_tree_simple(void)
 {
-	struct test *root = NULL;
 	struct test t1, t2, t3;
+	AA_HEAD(test) root;
 
-	peak_tree_init(test_tree_lt, test_tree_eq);
+	AA_INIT(, &root, t);
 
 	t1.value = 1;
 	t2.value = 2;
 	t3.value = 3;
 
-	assert(!peak_tree_lookup(root, &t1));
-	assert(!peak_tree_lookup(root, &t2));
-	assert(!peak_tree_lookup(root, &t3));
-	assert(!peak_tree_height(root));
-	assert(!peak_tree_count(root));
+	assert(!AA_FIND(, &root, &t1));
+	assert(!AA_FIND(, &root, &t2));
+	assert(!AA_FIND(, &root, &t3));
+	assert(!AA_HEIGHT(, &root));
+	assert(!AA_COUNT(, &root));
 
-	root = peak_tree_insert(root, &t1);
+	AA_INSERT(, &root, &t1);
 
-	assert(root == &t1);
-	assert(peak_tree_height(root) == 1);
-	assert(peak_tree_count(root) == 1);
-	assert(&t1 == peak_tree_lookup(root, &t1));
+	assert(AA_ROOT(&root) == &t1);
+	assert(AA_HEIGHT(, &root) == 1);
+	assert(AA_COUNT(, &root) == 1);
+	assert(AA_FIND(, &root, &t1) == &t1);
 
-	root = peak_tree_insert(root, &t2);
+	AA_INSERT(, &root, &t2);
 
-	assert(root == &t1);
-	assert(root->t.t[1] == &t2.t);
-	assert(peak_tree_height(root) == 2);
-	assert(peak_tree_count(root) == 2);
-	assert(&t1 == peak_tree_lookup(root, &t1));
-	assert(&t2 == peak_tree_lookup(root, &t2));
+	assert(AA_ROOT(&root) == &t1);
+	assert(AA_RIGHT(root, t) == &t2);
+	assert(AA_HEIGHT(, &root) == 2);
+	assert(AA_COUNT(, &root) == 2);
+	assert(AA_FIND(, &root, &t1) == &t1);
+	assert(AA_FIND(, &root, &t2) == &t2);
 
-	root = peak_tree_insert(root, &t3);
+	AA_INSERT(, &root, &t3);
 
-	assert(root == &t2);
-	assert(root->t.t[1] == &t3.t);
-	assert(root->t.t[0] == &t1.t);
-	assert(peak_tree_height(root) == 2);
-	assert(peak_tree_count(root) == 3);
-	assert(&t1.t == peak_tree_lookup(root, &t1));
-	assert(&t2.t == peak_tree_lookup(root, &t2));
-	assert(&t3.t == peak_tree_lookup(root, &t3));
+	assert(AA_ROOT(&root) == &t2);
+	assert(AA_RIGHT(root, t) == &t3);
+	assert(AA_LEFT(root, t) == &t1);
+	assert(AA_HEIGHT(, &root) == 2);
+	assert(AA_COUNT(, &root) == 3);
+	assert(AA_FIND(, &root, &t1) == &t1);
+	assert(AA_FIND(, &root, &t2) == &t2);
+	assert(AA_FIND(, &root, &t3) == &t3);
 
-	root = peak_tree_remove(root, &t2);
+	AA_REMOVE(, &root, &t2);
 
-	assert(root != &t2);
-	assert(root == &t1);
-	assert(root->t.t[1] == &t3.t);
+	assert(AA_ROOT(&root) != &t2);
+	assert(AA_ROOT(&root) == &t1);
+	assert(AA_RIGHT(root, t) == &t3);
 
-	root = peak_tree_remove(root, &t1);
+	AA_REMOVE(, &root, &t1);
 
-	assert(root != &t1);
-	assert(root == &t3);
+	assert(AA_ROOT(&root) != &t1);
+	assert(AA_ROOT(&root) == &t3);
 
-	root = peak_tree_remove(root, &t3);
-	root = peak_tree_remove(root, &t3);
+	AA_REMOVE(, &root, &t3);
+	AA_REMOVE(, &root, &t3);
 
-	assert(!root);
+	assert(AA_EMPTY(&root));
 
-	root = peak_tree_insert(root, &t1);
-	root = peak_tree_insert(root, &t2);
-	root = peak_tree_insert(root, &t3);
+	AA_INSERT(, &root, &t1);
+	AA_INSERT(, &root, &t2);
+	AA_INSERT(, &root, &t3);
 
-	assert(peak_tree_count(root) == 3);
+	assert(AA_COUNT(, &root) == 3);
 
-	root = peak_tree_collapse(root, NULL, NULL);
+	AA_COLLAPSE(, &root, NULL, NULL);
 
-	assert(peak_tree_count(root) == 0);
+	assert(AA_COUNT(, &root) == 0);
+	assert(AA_EMPTY(&root));
 }
 
 static void
-test_tree_free(void *ptr, void *ctx)
+test_tree_free(struct test *elm, void *ctx)
 {
 	struct peak_prealloc *mem = ctx;
-	struct test *e = ptr;
 
-	peak_preput(mem, e);
+	peak_preput(mem, elm);
 }
 
 #define TREE_COUNT 10000
@@ -330,43 +317,44 @@ test_tree_free(void *ptr, void *ctx)
 static void
 test_tree_complex(void)
 {
-	struct test *e, *root = NULL;
 	struct peak_prealloc *mem;
 	struct test helper;
 	unsigned int i = 1;
+	AA_HEAD(test) root;
+	struct test *e;
 
 	mem = peak_prealloc(TREE_COUNT, sizeof(struct test));
 
 	assert(mem);
 
-	peak_tree_init(test_tree_lt, test_tree_eq);
+	AA_INIT(, &root, t);
 
 	while ((e = _peak_preget(mem))) {
-		assert(i - 1 == peak_tree_count(root));
+		assert(i - 1 == AA_COUNT(, &root));
 		e->value = i++;
-		root = peak_tree_insert(root, e);
+		AA_INSERT(, &root, e);
 	}
 
-	assert(peak_tree_count(root) == TREE_COUNT);
-	assert(peak_tree_height(root) == 18);
+	assert(AA_COUNT(, &root) == TREE_COUNT);
+	assert(AA_HEIGHT(, &root) == 18);
 	bzero(&helper, sizeof(struct test));
 
 	for (i = TREE_COUNT; i; --i) {
 		helper.value = i;
-		e = peak_tree_lookup(root, &helper);
+		e = AA_FIND(, &root, &helper);
 		assert(e);
-		root = peak_tree_remove(root, e);
-		assert(i - 1 == peak_tree_count(root));
+		AA_REMOVE(, &root, e);
+		assert(i - 1 == AA_COUNT(, &root));
 		_peak_preput(mem, e);
 	}
 
 	for (i = 1; i < 5; --i) {
 		e = _peak_preget(mem);
 		e->value = i;
-		root = peak_tree_insert(root, e);
+		AA_INSERT(, &root, e);
 	}
 
-	peak_tree_collapse(root, test_tree_free, mem);
+	AA_COLLAPSE(, &root, test_tree_free, mem);
 
 	peak_prefree(mem);
 }
