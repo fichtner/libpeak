@@ -1,6 +1,8 @@
 #ifndef PEAK_MACRO_H
 #define PEAK_MACRO_H
 
+#include <sys/queue.h>
+
 #define lengthof(__x__)		(sizeof(__x__)/sizeof((__x__)[0]))
 #define unlikely(__cond__)	__builtin_expect(!!(__cond__), 0)
 #define likely(__cond__)	__builtin_expect(!!(__cond__), 1)
