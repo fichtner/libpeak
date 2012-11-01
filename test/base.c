@@ -13,7 +13,7 @@
 peak_priority_init();
 
 static void
-test_types(void)
+test_type(void)
 {
 	uint16_t test_val_16 = UNALIGNED_16_ORIG;
 	uint64_t test_val_64 = UNALIGNED_64_ORIG;
@@ -359,18 +359,74 @@ test_tree_complex(void)
 	peak_prefree(mem);
 }
 
+static void
+test_tree_fringe(void)
+{
+	struct test t1, t2, t3;
+	AA_HEAD(test) root;
+
+	AA_INIT(, &root, t);
+
+	t1.t.aae_child[0] = t1.t.aae_child[1] = NIL();
+	t2.t.aae_child[0] = t2.t.aae_child[1] = NIL();
+	t3.t.aae_child[0] = t3.t.aae_child[1] = NIL();
+
+	assert(!AA_COUNT(, &root));
+	assert(!AA_HEIGHT(, &root));
+
+	AA_ROOT(&root) = &t1;
+
+	assert(AA_COUNT(, &root) == 1);
+	assert(AA_HEIGHT(, &root) == 1);
+
+	t1.t.aae_child[1] = &t2;
+
+	assert(AA_COUNT(, &root) == 2);
+	assert(AA_HEIGHT(, &root) == 2);
+
+	t1.t.aae_child[0] = &t3;
+
+	assert(AA_COUNT(, &root) == 3);
+	assert(AA_HEIGHT(, &root) == 2);
+
+	t1.t.aae_child[0] = NIL();
+	t2.t.aae_child[1] = &t3;
+
+	assert(AA_COUNT(, &root) == 3);
+	assert(AA_HEIGHT(, &root) == 3);
+
+	t2.t.aae_child[1] = NIL();
+	t2.t.aae_child[0] = &t3;
+
+	assert(AA_COUNT(, &root) == 3);
+	assert(AA_HEIGHT(, &root) == 3);
+
+	t1.t.aae_child[1] = NIL();
+	t1.t.aae_child[0] = &t2;
+
+	assert(AA_COUNT(, &root) == 3);
+	assert(AA_HEIGHT(, &root) == 3);
+
+	t2.t.aae_child[0] = NIL();
+	t2.t.aae_child[1] = &t3;
+
+	assert(AA_COUNT(, &root) == 3);
+	assert(AA_HEIGHT(, &root) == 3);
+}
+
 UNITTEST int
 main(void)
 {
-	peak_log(LOG_EMERG, "peak utilities test suite... ");
+	peak_log(LOG_EMERG, "peak base test suite... ");
 
-	test_types();
+	test_type();
 	test_alloc();
 	test_prealloc();
 	test_output();
 	test_hash();
 	test_tree_simple();
 	test_tree_complex();
+	test_tree_fringe();
 
 	peak_log(LOG_EMERG, "ok\n");
 

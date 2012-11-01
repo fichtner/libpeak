@@ -38,7 +38,7 @@ struct {								\
 #define AA_LEVEL(elm, field)		(elm)->field.aae_level
 #define AA_ROOT(head)			*(head)
 #define AA_EMPTY(head)			(AA_ROOT(head) == NULL)
-#define AA_STACK_SIZE			32
+#define AA_STACK_DEPTH			32
 
 #define AA_INIT(name, head, field) do {					\
 	AA_LEFT(NIL(name), field) = NIL(name);				\
@@ -81,7 +81,7 @@ attr struct type name##_AA_SENTINEL;					\
 attr inline struct type *						\
 name##_AA_INSERT_INTERNAL(struct type *cur, struct type *elm)		\
 {									\
-	struct type *h[AA_STACK_SIZE];					\
+	struct type *h[AA_STACK_DEPTH];					\
 	struct type *tmp;						\
 	unsigned int i = 0;						\
 									\
@@ -94,7 +94,7 @@ name##_AA_INSERT_INTERNAL(struct type *cur, struct type *elm)		\
 	for (;;) {							\
 		const unsigned int dir = lt(cur, elm);			\
 									\
-		if (AA_STACK_SIZE == i) {				\
+		if (AA_STACK_DEPTH == i) {				\
 			peak_panic("stack overflow\n");			\
 			/* although it would be funny to fall back	\
 			 * to recursive mode in this case... :) */	\
@@ -139,7 +139,6 @@ name##_AA_INSERT(struct type *t, struct type *n)			\
 	void *ret = name##_AA_INSERT_INTERNAL(TO_NIL(name, t),		\
 	    TO_NIL(name, n));						\
 									\
-	/* because casting sucks */					\
 	return (TO_NULL(name, ret));					\
 }									\
 									\
@@ -170,7 +169,6 @@ name##_AA_FIND(struct type *t, struct type *o)				\
 	void *ret = name##_AA_FIND_INTERNAL(TO_NIL(name, t),		\
 	    TO_NIL(name, o));						\
 									\
-	/* (most of the time) */					\
 	return (TO_NULL(name, ret));					\
 }									\
 									\
@@ -200,7 +198,7 @@ name##_AA_LEAF(struct type *cur, const unsigned int dir)		\
 attr struct type *							\
 name##_AA_REMOVE_INTERNAL(struct type *cur, struct type *elm)		\
 {									\
-	struct type *h[AA_STACK_SIZE];					\
+	struct type *h[AA_STACK_DEPTH];					\
 	struct type *tmp;						\
 	unsigned int i = 0;						\
 									\
@@ -209,7 +207,7 @@ name##_AA_REMOVE_INTERNAL(struct type *cur, struct type *elm)		\
 	}								\
 									\
 	for (;;) {							\
-		if (AA_STACK_SIZE == i) {				\
+		if (AA_STACK_DEPTH == i) {				\
 			peak_panic("stack overflow\n");			\
 		}							\
 									\
@@ -295,12 +293,12 @@ attr void								\
 name##_AA_COLLAPSE_INTERNAL(struct type *elm,				\
 	AA_COLLAPSE_FUNK cb, void *ctx)					\
 {									\
-	struct type *h[AA_STACK_SIZE];					\
+	struct type *h[AA_STACK_DEPTH];					\
 	unsigned int i = 0;						\
 									\
 	for (;;) {							\
 		if (elm != NIL(name)) {					\
-			if (AA_STACK_SIZE == i) {			\
+			if (AA_STACK_DEPTH == i) {			\
 				peak_panic("stack overflow\n");		\
 			}						\
 			h[i++] = elm;					\
@@ -343,16 +341,36 @@ name##_AA_COLLAPSE(struct type *t, AA_COLLAPSE_FUNK cb, void *ctx)	\
 attr unsigned int							\
 name##_AA_HEIGHT_INTERNAL(const struct type *elm)			\
 {									\
-	unsigned int l = 0, r = 0;					\
+	const struct type *h[AA_STACK_DEPTH];				\
+	unsigned int p[AA_STACK_DEPTH];					\
+	unsigned int i = 0, depth = 0;					\
 									\
-	if (elm != NIL(name)) {						\
-		l = name##_AA_HEIGHT_INTERNAL(AA_LEFT(elm,		\
-		    field)) + 1;					\
-		r = name##_AA_HEIGHT_INTERNAL(AA_RIGHT(elm,		\
-		    field)) + 1;					\
+	p[0] = 0;							\
+									\
+	for (;;) {							\
+		if (elm != NIL(name)) {					\
+			if (AA_STACK_DEPTH == i) {			\
+				peak_panic("stack overflow\n");		\
+			}						\
+									\
+			h[i++] = elm;					\
+			p[i] = p[i - 1] + 1;				\
+			elm = AA_LEFT(elm, field);			\
+		} else {						\
+			if (!i) {					\
+				break;					\
+			}						\
+									\
+			elm = h[--i];					\
+			p[i] = p[i] + 1;				\
+			if (depth < p[i]) {				\
+				depth = p[i];				\
+			}						\
+			elm = AA_RIGHT(elm, field);			\
+		}							\
 	}								\
 									\
-	return (r > l ? r : l);						\
+	return (depth);							\
 }									\
 									\
 attr inline unsigned int						\
@@ -364,12 +382,12 @@ name##_AA_HEIGHT(const struct type *elm)				\
 attr unsigned int							\
 name##_AA_COUNT_INTERNAL(const struct type *elm)			\
 {									\
-	const struct type *h[AA_STACK_SIZE];				\
+	const struct type *h[AA_STACK_DEPTH];				\
 	unsigned int i = 0, count = 0;					\
 									\
 	for (;;) {							\
 		if (elm != NIL(name)) {					\
-			if (AA_STACK_SIZE == i) {			\
+			if (AA_STACK_DEPTH == i) {			\
 				peak_panic("stack overflow\n");		\
 			}						\
 			h[i++] = elm;					\

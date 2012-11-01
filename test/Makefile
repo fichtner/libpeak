@@ -1,3 +1,3 @@
-PROG=	utils
+PROG=	base
 
 include ../build.mk

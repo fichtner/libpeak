@@ -1,5 +1,5 @@
-#ifndef PEAK_TYPES_H
-#define PEAK_TYPES_H
+#ifndef PEAK_TYPE_H
+#define PEAK_TYPE_H
 
 #include <pthread.h>
 #include <stdint.h>
@@ -272,4 +272,6 @@ be64enc(void *pp, const uint64_t u)
 	be32enc(p + 4, u);
 }
 
-#endif /* !PEAK_TYPES_H */
+#define peak_uint32_wrap(__x__) ((uint32_t)(__x__) > UINT32_MAX / 2U)
+
+#endif /* !PEAK_TYPE_H */
