@@ -13,10 +13,11 @@
  *    and retrieval. Once the data was outdated, the whole thing
  *    was just being dissolved, so there wasn't any need to do
  *    sophisticated removes.
- *  - This implementation uses embedded structures and compare
- *    function pointers to provide better real world applications
- *    with complex value sets and private data.
- *  - Locks are not provided and need to be implemented by the user.
+ *  - This implementation uses an embedded structure and user-defined
+ *    compare functions to provide the best possible real world
+ *    experience when used with complex value sets and private data.
+ *  - Locks are not provided and need to be implemented by the
+ *    user when required.
  */
 
 #define TO_NULL(name, x)	((x) != NIL(name) ? (x) : NULL)
@@ -136,13 +137,13 @@ name##_AA_INSERT_INTERNAL(struct type *cur, struct type *elm)		\
 attr struct type *							\
 name##_AA_INSERT(struct type *t, struct type *n)			\
 {									\
-	void *ret = name##_AA_INSERT_INTERNAL(TO_NIL(name, t),		\
+	struct type *ret = name##_AA_INSERT_INTERNAL(TO_NIL(name, t),	\
 	    TO_NIL(name, n));						\
 									\
 	return (TO_NULL(name, ret));					\
 }									\
 									\
-attr inline struct type *						\
+attr struct type *							\
 name##_AA_FIND_INTERNAL(struct type *t, struct type *o)			\
 {									\
 	struct type *c = NIL(name);					\
@@ -166,7 +167,7 @@ name##_AA_FIND_INTERNAL(struct type *t, struct type *o)			\
 attr inline struct type *						\
 name##_AA_FIND(struct type *t, struct type *o)				\
 {									\
-	void *ret = name##_AA_FIND_INTERNAL(TO_NIL(name, t),		\
+	struct type *ret = name##_AA_FIND_INTERNAL(TO_NIL(name, t),	\
 	    TO_NIL(name, o));						\
 									\
 	return (TO_NULL(name, ret));					\
@@ -283,7 +284,7 @@ name##_AA_REMOVE_INTERNAL(struct type *cur, struct type *elm)		\
 attr inline struct type *						\
 name##_AA_REMOVE(struct type *t, struct type *r)			\
 {									\
-	void *ret = name##_AA_REMOVE_INTERNAL(TO_NIL(name, t),		\
+	struct type *ret = name##_AA_REMOVE_INTERNAL(TO_NIL(name, t),	\
 	    TO_NIL(name, r));						\
 									\
 	return (TO_NULL(name, ret));					\
@@ -410,11 +411,41 @@ attr inline unsigned int						\
 name##_AA_COUNT(const struct type *elm)					\
 {									\
 	return (name##_AA_COUNT_INTERNAL(TO_NIL(name, elm)));		\
+}									\
+									\
+attr struct type *							\
+name##_AA_MINMAX_INTERNAL(struct type *tmp, int val)			\
+{									\
+	struct type *parent = NIL(name);				\
+	while (tmp != NIL(name)) {					\
+		parent = tmp;						\
+		if (val < 0) {						\
+			tmp = AA_LEFT(tmp, field);			\
+		} else {						\
+			tmp = AA_RIGHT(tmp, field);			\
+		}							\
+	}								\
+									\
+	return (parent);						\
+}									\
+									\
+attr inline struct type *						\
+name##_AA_MINMAX(struct type *tmp, int val)				\
+{									\
+	struct type *ret =						\
+	    name##_AA_MINMAX_INTERNAL(TO_NIL(name, tmp), val);		\
+									\
+	return (TO_NULL(name, ret));					\
 }
 
-#define AA_FIND(name, x, y)		name##_AA_FIND(AA_ROOT(x), y)
-#define AA_HEIGHT(name, x)		name##_AA_HEIGHT(AA_ROOT(x))
-#define AA_COUNT(name, x)		name##_AA_COUNT(AA_ROOT(x))
+#define AA_NEGINF		-1
+#define AA_INF			1
+
+#define AA_FIND(name, x, y)	name##_AA_FIND(AA_ROOT(x), y)
+#define AA_HEIGHT(name, x)	name##_AA_HEIGHT(AA_ROOT(x))
+#define AA_COUNT(name, x)	name##_AA_COUNT(AA_ROOT(x))
+#define AA_MIN(name, x)		name##_AA_MINMAX(AA_ROOT(x), AA_NEGINF)
+#define AA_MAX(name, x)		name##_AA_MINMAX(AA_ROOT(x), AA_INF)
 
 #define AA_INSERT(name, x, y) do {					\
 	AA_ROOT(x) = name##_AA_INSERT(AA_ROOT(x), y);			\

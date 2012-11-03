@@ -33,6 +33,13 @@ test_type(void)
 	assert(le64dec(&test_val_64) == bswap64(be64dec(&test_val_64)));
 	be64enc(&test_val_64, bswap64(UNALIGNED_64_ORIG));
 	assert(UNALIGNED_64_ORIG == test_val_64);
+
+	assert(!peak_uint16_wrap(test_val_16 = 0));
+	assert(peak_uint16_wrap(test_val_16 - 1));
+	assert(!peak_uint32_wrap(test_val_32 = 0));
+	assert(peak_uint32_wrap(test_val_32 - 1));
+	assert(!peak_uint64_wrap(test_val_64 = 0));
+	assert(peak_uint64_wrap(test_val_64 - 1));
 }
 
 static void
@@ -248,6 +255,8 @@ test_tree_simple(void)
 	assert(!AA_FIND(, &root, &t3));
 	assert(!AA_HEIGHT(, &root));
 	assert(!AA_COUNT(, &root));
+	assert(!AA_MIN(, &root));
+	assert(!AA_MAX(, &root));
 
 	AA_INSERT(, &root, &t1);
 
@@ -255,6 +264,8 @@ test_tree_simple(void)
 	assert(AA_HEIGHT(, &root) == 1);
 	assert(AA_COUNT(, &root) == 1);
 	assert(AA_FIND(, &root, &t1) == &t1);
+	assert(AA_MIN(, &root) == &t1);
+	assert(AA_MAX(, &root) == &t1);
 
 	AA_INSERT(, &root, &t2);
 
@@ -264,6 +275,8 @@ test_tree_simple(void)
 	assert(AA_COUNT(, &root) == 2);
 	assert(AA_FIND(, &root, &t1) == &t1);
 	assert(AA_FIND(, &root, &t2) == &t2);
+	assert(AA_MIN(, &root) == &t1);
+	assert(AA_MAX(, &root) == &t2);
 
 	AA_INSERT(, &root, &t3);
 
@@ -275,6 +288,8 @@ test_tree_simple(void)
 	assert(AA_FIND(, &root, &t1) == &t1);
 	assert(AA_FIND(, &root, &t2) == &t2);
 	assert(AA_FIND(, &root, &t3) == &t3);
+	assert(AA_MIN(, &root) == &t1);
+	assert(AA_MAX(, &root) == &t3);
 
 	AA_REMOVE(, &root, &t2);
 
