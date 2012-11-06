@@ -5,8 +5,8 @@
 
 struct _peak_prealloc {
 	SLIST_ENTRY(_peak_prealloc) next;
-	uint64_t magic;
-	uint8_t user[];
+	unsigned long long magic;
+	unsigned char user[];
 };
 
 struct peak_prealloc {
@@ -18,13 +18,16 @@ struct peak_prealloc {
 };
 
 #define PEAK_PREALLOC_TO_USER(__e__)	((void *)((__e__)->user))
-#define PEAK_PREALLOC_FROM_USER(__e__)	((void *)(((uint8_t *)(__e__)) \
-    - sizeof(struct _peak_prealloc)))
+#define PEAK_PREALLOC_FROM_USER(__e__)					\
+    ((void *)(((unsigned char *)(__e__)) -				\
+    sizeof(struct _peak_prealloc)))
 
 #define PEAK_PREALLOC_HEALTHY		0
 #define PEAK_PREALLOC_UNDERFLOW		1
 #define PEAK_PREALLOC_DOUBLE_FREE	2
 #define PEAK_PREALLOC_MISSING_CHUNKS	3
+
+#define PREALLOC_EMPTY(x)	SLIST_EMPTY(&(x)->free)
 
 static inline void *
 _peak_preget(struct peak_prealloc *ptr)
@@ -142,7 +145,7 @@ peak_prealloc(size_t count, size_t size)
 	e->magic = PEAK_PREALLOC_VALUE;
 
 	for (i = 1; i < count; ++i) {
-		f = (void *)((uint8_t *) e + chunk_size);
+		f = (void *)((unsigned char *) e + chunk_size);
 		f->magic = PEAK_PREALLOC_VALUE;
 
 		SLIST_INSERT_AFTER(e, f, next);

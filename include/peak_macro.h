@@ -16,6 +16,13 @@
 #endif /* __APPLE__ */
 #define __packed		__attribute__((__packed__))
 
+#ifndef MIN
+#define MIN(a,b)	(((a)<(b))?(a):(b))
+#endif /* !MIN */
+#ifndef MAX
+#define MAX(a,b)	(((a)>(b))?(a):(b))
+#endif /* !MAX */
+
 #ifdef __CHECKER__
 #define UNITTEST static
 #else /* !__CHECKER__ */

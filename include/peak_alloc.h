@@ -124,7 +124,7 @@ _peak_realloc(void *ptr, size_t size)
 
 		size = old_size < size ? old_size : size;
 		if (likely(size)) {
-			memcpy(new_ptr, PEAK_MALLOC_TO_USER, size);
+			bcopy(PEAK_MALLOC_TO_USER, new_ptr, size);
 		}
 	}
 

@@ -121,7 +121,7 @@ test_alloc(void)
 
 	char *test_str_aligned = peak_malign(sizeof(THIS_IS_A_STRING));
 
-	memcpy(test_str_aligned, THIS_IS_A_STRING,
+	bcopy(THIS_IS_A_STRING, test_str_aligned,
 	    sizeof(THIS_IS_A_STRING));
 
 	char *test_str_mod_aligned = test_str_aligned - 1;
