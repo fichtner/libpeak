@@ -3,14 +3,14 @@
 
 #define PEAK_PREALLOC_VALUE 0x1234ABBA5678AC97ull
 
-struct _peak_prealloc {
-	SLIST_ENTRY(_peak_prealloc) next;
+struct peak_prealloc {
+	SLIST_ENTRY(peak_prealloc) next;
 	unsigned long long magic;
 	unsigned char user[];
 };
 
-struct peak_prealloc {
-	SLIST_HEAD(, _peak_prealloc) free;
+struct peak_preallocs {
+	SLIST_HEAD(, peak_prealloc) free;
 	size_t count, used, size, mem_size;
 	void *mem;
 
@@ -20,7 +20,7 @@ struct peak_prealloc {
 #define PEAK_PREALLOC_TO_USER(__e__)	((void *)((__e__)->user))
 #define PEAK_PREALLOC_FROM_USER(__e__)					\
     ((void *)(((unsigned char *)(__e__)) -				\
-    sizeof(struct _peak_prealloc)))
+    sizeof(struct peak_prealloc)))
 
 #define PEAK_PREALLOC_HEALTHY		0
 #define PEAK_PREALLOC_UNDERFLOW		1
@@ -30,60 +30,60 @@ struct peak_prealloc {
 #define PREALLOC_EMPTY(x)	SLIST_EMPTY(&(x)->free)
 
 static inline void *
-_peak_preget(struct peak_prealloc *ptr)
+_peak_preget(struct peak_preallocs *self)
 {
-	struct _peak_prealloc *e = SLIST_FIRST(&ptr->free);
+	struct peak_prealloc *e = SLIST_FIRST(&self->free);
 	if (unlikely(!e)) {
 		return (NULL);
 	}
 
-	SLIST_REMOVE_HEAD(&ptr->free, next);
+	SLIST_REMOVE_HEAD(&self->free, next);
 	SLIST_NEXT(e, next) = NULL;
-	++ptr->used;
+	++self->used;
 
 	return (PEAK_PREALLOC_TO_USER(e));
 }
 
 static inline void *
-peak_preget(struct peak_prealloc *ptr)
+peak_preget(struct peak_preallocs *self)
 {
 	void *ret;
 
-	peak_spin_lock(&ptr->lock);
-	ret = _peak_preget(ptr);
-	peak_spin_unlock(&ptr->lock);
+	peak_spin_lock(&self->lock);
+	ret = _peak_preget(self);
+	peak_spin_unlock(&self->lock);
 
 	return (ret);
 }
 
 static inline unsigned int
-__peak_preput(struct peak_prealloc *ptr, void *chunk)
+__peak_preput(struct peak_preallocs *self, void *ptr)
 {
 	unsigned int ret = PEAK_PREALLOC_HEALTHY;
 
-	if (unlikely(!chunk)) {
+	if (unlikely(!ptr)) {
 		return (ret);
 	}
 
-	struct _peak_prealloc *e = PEAK_PREALLOC_FROM_USER(chunk);
+	struct peak_prealloc *e = PEAK_PREALLOC_FROM_USER(ptr);
 
 	if (unlikely(PEAK_PREALLOC_VALUE != e->magic)) {
 		return (PEAK_PREALLOC_UNDERFLOW);
 	}
 
 	if (unlikely(SLIST_NEXT(e, next) ||
-	    e == SLIST_FIRST(&ptr->free))) {
+	    e == SLIST_FIRST(&self->free))) {
 		return (PEAK_PREALLOC_DOUBLE_FREE);
 	}
 
-	SLIST_INSERT_HEAD(&ptr->free, e, next);
-	--ptr->used;
+	SLIST_INSERT_HEAD(&self->free, e, next);
+	--self->used;
 
 	return (ret);
 }
 
-#define _peak_preput(__ptr__, __chunk__) do {				\
-	switch (__peak_preput(__ptr__, __chunk__)) {			\
+#define _peak_preput(x, y) do {						\
+	switch (__peak_preput(x, y)) {					\
 	case PEAK_PREALLOC_HEALTHY:					\
 		break;							\
 	case PEAK_PREALLOC_UNDERFLOW:					\
@@ -95,57 +95,53 @@ __peak_preput(struct peak_prealloc *ptr, void *chunk)
 	}								\
 } while (0)
 
-#define peak_preput(__ptr__, __chunk__) do {				\
-	peak_spin_lock(&(__ptr__)->lock);				\
-	_peak_preput(__ptr__, __chunk__);				\
-	peak_spin_unlock(&(__ptr__)->lock);				\
+#define peak_preput(x, y) do {						\
+	peak_spin_lock(&(x)->lock);					\
+	_peak_preput(x, y);						\
+	peak_spin_unlock(&(x)->lock);					\
 } while (0)
 
-static inline struct peak_prealloc *
-peak_prealloc(size_t count, size_t size)
+static inline unsigned int
+_peak_prealloc(struct peak_preallocs *self, size_t count, size_t size)
 {
 	if (!count || !size) {
-		return (NULL);
+		return (0);
 	}
 
 	if (size & 0x7) {
 		/* only allow 8 byte aligned structs */
-		return (NULL);
+		return (0);
 	}
 
-	const size_t chunk_size = size + sizeof(struct _peak_prealloc);
-	const size_t mem_size = count * chunk_size;
-	if (mem_size / count != chunk_size) {
-		return (NULL);
+	const size_t ptr_size = size + sizeof(struct peak_prealloc);
+	const size_t mem_size = count * ptr_size;
+	if (mem_size / count != ptr_size) {
+		return (0);
 	}
 
-	struct peak_prealloc *ptr = peak_zalloc(sizeof(*ptr));
-	if (!ptr) {
-		return (NULL);
+	bzero(self, sizeof(*self));
+
+	peak_spin_init(&self->lock);
+	self->mem_size = mem_size;
+	self->count = count;
+	self->size = size;
+	self->used = 0;
+
+	self->mem = peak_malign(mem_size);
+	if (!self->mem) {
+		return (0);
 	}
 
-	peak_spin_init(&ptr->lock);
-	ptr->mem_size = mem_size;
-	ptr->count = count;
-	ptr->size = size;
-	ptr->used = 0;
-
-	ptr->mem = peak_malign(mem_size);
-	if (!ptr->mem) {
-		peak_free(ptr);
-		return (NULL);
-	}
-
-	struct _peak_prealloc *e = ptr->mem;
-	struct _peak_prealloc *f;
+	struct peak_prealloc *e = self->mem;
+	struct peak_prealloc *f;
 	size_t i;
 
-	SLIST_INIT(&ptr->free);
-	SLIST_INSERT_HEAD(&ptr->free, e, next);
+	SLIST_INIT(&self->free);
+	SLIST_INSERT_HEAD(&self->free, e, next);
 	e->magic = PEAK_PREALLOC_VALUE;
 
 	for (i = 1; i < count; ++i) {
-		f = (void *)((unsigned char *) e + chunk_size);
+		f = (void *)((unsigned char *) e + ptr_size);
 		f->magic = PEAK_PREALLOC_VALUE;
 
 		SLIST_INSERT_AFTER(e, f, next);
@@ -155,37 +151,57 @@ peak_prealloc(size_t count, size_t size)
 
 	SLIST_NEXT(e, next) = NULL;
 
-	return (ptr);
+	return (1);
+}
+
+static inline struct peak_preallocs *
+peak_prealloc(size_t count, size_t size)
+{
+	struct peak_preallocs *self = peak_malloc(sizeof(*self));
+	if (!self) {
+		return (NULL);
+	}
+
+	if (!_peak_prealloc(self, count, size)) {
+		peak_free(self);
+		return (NULL);
+	}
+
+	return (self);
 }
 
 static inline unsigned int
-_peak_prefree(struct peak_prealloc *ptr)
+__peak_prefree(struct peak_preallocs *self)
 {
 	unsigned int ret = PEAK_PREALLOC_HEALTHY;
 
-	if (!ptr) {
+	if (!self) {
 		return (ret);
 	}
 
-	if (ptr->used) {
+	if (self->used) {
 		return (PEAK_PREALLOC_MISSING_CHUNKS);
 	}
 
-	peak_spin_exit(&ptr->lock);
-	peak_free(ptr->mem);
-	peak_free(ptr);
+	peak_spin_exit(&self->lock);
+	peak_free(self->mem);
 
 	return (ret);
 }
 
-#define peak_prefree(__ptr__) do {					\
-	switch (_peak_prefree(__ptr__)) {				\
+#define _peak_prefree(x) do {						\
+	switch (__peak_prefree(x)) {					\
 	case PEAK_PREALLOC_HEALTHY:					\
 		break;							\
 	case PEAK_PREALLOC_MISSING_CHUNKS:				\
 		peak_panic("missing chunks detected\n");		\
 		/* NOTREACHED */					\
 	}								\
+} while (0)
+
+#define peak_prefree(x) do {						\
+	_peak_prefree(x);						\
+	peak_free(x);							\
 } while (0)
 
 #undef PEAK_PREALLOC_FROM_USER

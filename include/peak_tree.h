@@ -204,7 +204,7 @@ name##_AA_REMOVE_INTERNAL(struct type *cur, struct type *elm)		\
 	unsigned int i = 0;						\
 									\
 	if ((cur) == NIL(name)) {					\
-		return NIL(name);					\
+		return (NIL(name));					\
 	}								\
 									\
 	for (;;) {							\

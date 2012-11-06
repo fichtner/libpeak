@@ -148,7 +148,7 @@ test_alloc(void)
 static void
 test_prealloc(void)
 {
-	struct peak_prealloc *test_mem = peak_prealloc(1, 8);
+	struct peak_preallocs *test_mem = peak_prealloc(1, 8);
 	void *test_chunk = peak_preget(test_mem);
 
 	assert(test_chunk && !peak_preget(test_mem));
@@ -156,7 +156,7 @@ test_prealloc(void)
 	peak_preput(test_mem, test_chunk);
 	test_chunk = peak_preget(test_mem);
 
-	assert(PEAK_PREALLOC_MISSING_CHUNKS == _peak_prefree(test_mem));
+	assert(PEAK_PREALLOC_MISSING_CHUNKS == __peak_prefree(test_mem));
 
 	peak_preput(test_mem, test_chunk);
 	peak_prefree(test_mem);
@@ -322,7 +322,7 @@ test_tree_simple(void)
 static void
 test_tree_free(struct test *elm, void *ctx)
 {
-	struct peak_prealloc *mem = ctx;
+	struct peak_preallocs *mem = ctx;
 
 	peak_preput(mem, elm);
 }
@@ -332,7 +332,7 @@ test_tree_free(struct test *elm, void *ctx)
 static void
 test_tree_complex(void)
 {
-	struct peak_prealloc *mem;
+	struct peak_preallocs *mem;
 	struct test helper;
 	unsigned int i = 1;
 	AA_HEAD(test) root;
