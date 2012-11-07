@@ -9,24 +9,24 @@ bswap16(uint16_t u)
 	return ((u << 8) | (u >> 8));
 }
 
-#define bswap32(__val__)	__builtin_bswap32(__val__)
-#define bswap64(__val__)	__builtin_bswap64(__val__)
+#define bswap32(x)	__builtin_bswap32(x)
+#define bswap64(x)	__builtin_bswap64(x)
 
 #ifdef __CHECKER__
-#define __sync_nand_and_fetch(__ptr__, __val__)	(__val__)
-#define __sync_fetch_and_nand(__ptr__, __val__)	(__val__)
-#define __sync_and_and_fetch(__ptr__, __val__)	(__val__)
-#define __sync_fetch_and_and(__ptr__, __val__)	(__val__)
-#define __sync_add_and_fetch(__ptr__, __val__)	(__val__)
-#define __sync_fetch_and_add(__ptr__, __val__)	(__val__)
-#define __sync_sub_and_fetch(__ptr__, __val__)	(__val__)
-#define __sync_fetch_and_sub(__ptr__, __val__)	(__val__)
-#define __sync_xor_and_fetch(__ptr__, __val__)	(__val__)
-#define __sync_fetch_and_xor(__ptr__, __val__)	(__val__)
-#define __sync_or_and_fetch(__ptr__, __val__)	(__val__)
-#define __sync_fetch_and_or(__ptr__, __val__)	(__val__)
-#define __builtin_bswap32(__val__)		(__val__)
-#define __builtin_bswap64(__val__)		(__val__)
+#define __sync_nand_and_fetch(x, y)	(y)
+#define __sync_fetch_and_nand(x, y)	(y)
+#define __sync_and_and_fetch(x, y)	(y)
+#define __sync_fetch_and_and(x, y)	(y)
+#define __sync_add_and_fetch(x, y)	(y)
+#define __sync_fetch_and_add(x, y)	(y)
+#define __sync_sub_and_fetch(x, y)	(y)
+#define __sync_fetch_and_sub(x, y)	(y)
+#define __sync_xor_and_fetch(x, y)	(y)
+#define __sync_fetch_and_xor(x, y)	(y)
+#define __sync_or_and_fetch(x, y)	(y)
+#define __sync_fetch_and_or(x, y)	(y)
+#define __builtin_bswap32(x)		(x)
+#define __builtin_bswap64(x)		(x)
 #endif /* __CHECKER__ */
 
 static inline uint16_t

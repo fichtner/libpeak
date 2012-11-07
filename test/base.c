@@ -57,7 +57,7 @@ test_alloc(void)
 	uint64_t backup = *test_ptr;
 	*test_ptr = 0;
 
-	assert(PEAK_ALLOC_OVERFLOW == peak_check(test_ptr));
+	assert(ALLOC_OVERFLOW == peak_check(test_ptr));
 
 	*test_ptr = backup;
 
@@ -92,27 +92,27 @@ test_alloc(void)
 
 	*test_str_mod = 0;
 
-	assert(PEAK_ALLOC_UNDERFLOW == _peak_free(test_str));
+	assert(ALLOC_UNDERFLOW == _peak_free(test_str));
 
 	*test_str_mod = test_char;
 	test_str_mod = test_str + strlen(test_str) + 1;
 	test_char = *test_str_mod;
 	*test_str_mod = 0;
 
-	assert(PEAK_ALLOC_OVERFLOW == _peak_free(test_str));
+	assert(ALLOC_OVERFLOW == _peak_free(test_str));
 
 	*test_str_mod = test_char;
 
 	peak_free(test_str);
 
 	assert(0 == peak_cacheline_aligned(0));
-	assert(PEAK_CACHELINE_SIZE ==
-	    peak_cacheline_aligned(PEAK_CACHELINE_SIZE - 1));
-	assert(PEAK_CACHELINE_SIZE ==
-	    peak_cacheline_aligned(PEAK_CACHELINE_SIZE));
-	assert(PEAK_CACHELINE_SIZE == peak_cacheline_aligned(1));
-	assert(2 * PEAK_CACHELINE_SIZE ==
-	    peak_cacheline_aligned(PEAK_CACHELINE_SIZE + 1));
+	assert(CACHELINE_SIZE ==
+	    peak_cacheline_aligned(CACHELINE_SIZE - 1));
+	assert(CACHELINE_SIZE ==
+	    peak_cacheline_aligned(CACHELINE_SIZE));
+	assert(CACHELINE_SIZE == peak_cacheline_aligned(1));
+	assert(2 * CACHELINE_SIZE ==
+	    peak_cacheline_aligned(CACHELINE_SIZE + 1));
 
 	peak_free(peak_zalign(0));
 	peak_free(peak_zalign(1));
@@ -129,18 +129,18 @@ test_alloc(void)
 
 	*test_str_mod_aligned = 0;
 
-	assert(PEAK_ALLOC_UNDERFLOW == peak_check(test_str_aligned));
+	assert(ALLOC_UNDERFLOW == peak_check(test_str_aligned));
 
 	*test_str_mod_aligned = test_char_aligned;
 	test_str_mod_aligned = test_str_aligned + sizeof(THIS_IS_A_STRING);
 	test_char_aligned = *test_str_mod_aligned;
 	*test_str_mod_aligned = 0;
 
-	assert(PEAK_ALLOC_OVERFLOW == peak_check(test_str_aligned));
+	assert(ALLOC_OVERFLOW == peak_check(test_str_aligned));
 
 	*test_str_mod_aligned = test_char_aligned;
 
-	assert(PEAK_ALLOC_HEALTHY == peak_check(test_str_aligned));
+	assert(ALLOC_HEALTHY == peak_check(test_str_aligned));
 
 	peak_free(test_str_aligned);
 }
@@ -156,7 +156,7 @@ test_prealloc(void)
 	peak_preput(test_mem, test_chunk);
 	test_chunk = peak_preget(test_mem);
 
-	assert(PEAK_PREALLOC_MISSING_CHUNKS == __peak_prefree(test_mem));
+	assert(PREALLOC_MISSING_CHUNKS == __peak_prefree(test_mem));
 
 	peak_preput(test_mem, test_chunk);
 	peak_prefree(test_mem);
@@ -173,9 +173,9 @@ test_prealloc(void)
 
 		*test_chunks[i] = i;
 
-		assert(PEAK_PREALLOC_HEALTHY ==
+		assert(PREALLOC_HEALTHY ==
 		    __peak_preput(test_mem, test_chunks[i]));
-		assert(PEAK_PREALLOC_DOUBLE_FREE ==
+		assert(PREALLOC_DOUBLE_FREE ==
 		    __peak_preput(test_mem, test_chunks[i]));
 		assert(peak_preget(test_mem) == test_chunks[i]);
 	}
@@ -188,7 +188,7 @@ test_prealloc(void)
 		uint64_t magic = *(test_chunks[i] - 1);
 		*(test_chunks[i] - 1) = 0;
 
-		assert(PEAK_PREALLOC_UNDERFLOW ==
+		assert(PREALLOC_UNDERFLOW ==
 		    __peak_preput(test_mem, test_chunks[i]));
 
 		*(test_chunks[i] - 1) = magic;
