@@ -212,11 +212,9 @@ _peak_check_memalign(void *ptr)
 	return (ret);
 }
 
-#ifdef __APPLE__
+#ifndef memalign
 #define memalign(x, y)	malloc(y)
-#else /* !__APPLE__ */
-#include <malloc.h>
-#endif /* __APPLE__ */
+#endif /* !memalign */
 
 static inline void *
 peak_malign(size_t size)
