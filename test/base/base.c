@@ -429,7 +429,7 @@ test_tree_fringe(void)
 	assert(AA_HEIGHT(, &root) == 3);
 }
 
-UNITTEST int
+int
 main(void)
 {
 	peak_log(LOG_EMERG, "peak base test suite... ");

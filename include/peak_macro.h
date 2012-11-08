@@ -23,10 +23,4 @@
 #define MAX(a,b)	(((a)>(b))?(a):(b))
 #endif /* !MAX */
 
-#ifdef __CHECKER__
-#define UNITTEST static
-#else /* !__CHECKER__ */
-#define UNITTEST
-#endif /* __CHECKER__ */
-
 #endif /* !PEAK_MACRO_H */
