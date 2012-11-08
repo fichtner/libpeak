@@ -1,3 +1,2 @@
-SUBDIR=	test
-
+include makefile.mk
 include recurse.mk

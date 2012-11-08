@@ -1,31 +1,28 @@
-CFLAGS=	-g -Wall -Wextra -I../include -m64
-LDLIBS=	-lc -pthread
-
+MKDEP=	mkdep
 ECHO=	echo
-CC=		gcc
-AR=		ar
+CC=	gcc
+AR=	ar
 
-SRCS=	$(wildcard *.c)
-DEPS=	$(SRCS:.c=.d)
 ifdef LIB
+_LIBS=	lib$(LIB).a
 OBJS=	$(SRCS:.c=.o)
 endif
 
-all: $(LIB) $(PROG)
+all: .depend $(_LIBS) $(PROG)
 
 regress:
 ifdef PROG
-	@for test in $(PROG); do (exec $(ECHO) | ./$$test); done
+	@exec $(ECHO) | ./$(PROG)
 endif
 
-%.d: %.c
+-include .depend
+
 ifdef PROG
-	@$(CC) $(CFLAGS) -MM -MT '$*' $< -MF $@
-else
-	@$(CC) $(CFLAGS) -MM -MT '$*.o' $< -MF $@
+MKDEP	+= -p
 endif
 
--include $(DEPS)
+.depend:
+	@$(MKDEP) $(CFLAGS) $(SRCS)
 
 %.o: %.c
 	@$(ECHO) "building $(@F)"
@@ -36,10 +33,10 @@ endif
 	@$(AR) crus $@ $^
 
 $(PROG): $(SRCS)
-	$(CC) $(CFLAGS) $@.c -o $@ $(LDLIBS)
+	$(CC) $(CFLAGS) $(SRCS) -o $@ $(LDADD)
 
 clean:
-	@$(RM) $(OBJS) $(DEPS) $(LIB) $(PROG)
+	@$(RM) $(OBJS) $(_LIBS) $(PROG) .depend
 	@$(RM) -r *.dSYM
 
 # Ubuntu 12.04 needs this...

@@ -1,3 +1,2 @@
-PROG=	base
-
-include ../build.mk
+include makefile.mk
+include ../recurse.mk

@@ -1,4 +1,6 @@
-*.a
-*.o
-*.d
+*.[ao]
+*.so
+*.po
 *.dSYM
+*.manlint
+.depend
