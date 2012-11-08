@@ -10,11 +10,6 @@ endif
 
 all: .depend $(_LIBS) $(PROG)
 
-regress:
-ifdef PROG
-	@exec $(ECHO) | ./$(PROG)
-endif
-
 -include .depend
 
 ifdef PROG
@@ -49,4 +44,4 @@ ifdef SRCS
 	$(GCCDIR) -D__CHECKER__ $^
 endif
 
-.PHONY: clean check regress
+.PHONY: clean check
