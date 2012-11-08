@@ -9,8 +9,25 @@ bswap16(uint16_t u)
 	return ((u << 8) | (u >> 8));
 }
 
+#ifdef __builtin_bswap32
 #define bswap32(x)	__builtin_bswap32(x)
+#else /* !__builtin_bswap32 */
+static inline uint32_t
+bswap32(uint32_t u)
+{
+	return (((uint32_t)bswap16(u)) << 16) | bswap16(u >> 16);
+}
+#endif /* __builtin_bswap32 */
+
+#ifdef __builtin_bswap64
 #define bswap64(x)	__builtin_bswap64(x)
+#else /* !__builtin_bswap64 */
+static inline uint64_t
+bswap64(uint64_t u)
+{
+	return (((uint64_t)bswap32(u)) << 32) | bswap32(u >> 32);
+}
+#endif /* __builtin_bswap64 */
 
 #ifdef __CHECKER__
 #define __sync_nand_and_fetch(x, y)	(y)
