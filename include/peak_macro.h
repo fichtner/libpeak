@@ -1,24 +1,28 @@
 #ifndef PEAK_MACRO_H
 #define PEAK_MACRO_H
 
+#include <sys/cdefs.h>
 #include <sys/queue.h>
 
-#define lengthof(__x__)		(sizeof(__x__)/sizeof((__x__)[0]))
-#define unlikely(__cond__)	__builtin_expect(!!(__cond__), 0)
-#define likely(__cond__)	__builtin_expect(!!(__cond__), 1)
-#define msleep(__x__)		usleep((__x__)*1000)
+#define lengthof(x)	(sizeof(x)/sizeof((x)[0]))
+#define msleep(x)	usleep((x)*1000)
 
-#ifdef __APPLE__
-#define __read_mostly
-#else /* !__APPLE__ */
-#define __read_mostly	__attribute__((__section__(".data.read_mostly")))
-#define __dead			__attribute__((__noreturn__))
-#endif /* __APPLE__ */
-#define __packed		__attribute__((__packed__))
+#ifndef unlikely
+#define unlikely(exp)	__builtin_expect((exp) != 0, 0)
+#endif /* !unlikely */
+
+#ifndef likely
+#define likely(exp)	__builtin_expect((exp) != 0, 1)
+#endif /* !likely */
+
+#ifndef __packed
+#define __packed	__attribute__((__packed__))
+#endif /* !__packed */
 
 #ifndef MIN
 #define MIN(a,b)	(((a)<(b))?(a):(b))
 #endif /* !MIN */
+
 #ifndef MAX
 #define MAX(a,b)	(((a)>(b))?(a):(b))
 #endif /* !MAX */
