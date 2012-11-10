@@ -1,2 +1,2 @@
 include makefile.mk
-include ../recurse.mk
+include ../subdir.mk

@@ -1,2 +1,3 @@
 include makefile.mk
-include ../../build.mk
+include ../../prog.mk
+include ../../check.mk
