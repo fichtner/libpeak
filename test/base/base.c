@@ -16,8 +16,8 @@ static void
 test_type(void)
 {
 	uint16_t test_val_16 = UNALIGNED_16_ORIG;
-	uint64_t test_val_64 = UNALIGNED_64_ORIG;
 	uint32_t test_val_32 = UNALIGNED_32_ORIG;
+	uint64_t test_val_64 = UNALIGNED_64_ORIG;
 
 	le16enc(&test_val_16, test_val_16);
 	assert(le16dec(&test_val_16) == bswap16(be16dec(&test_val_16)));

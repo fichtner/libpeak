@@ -36,7 +36,7 @@ struct peak_alloc_magic {
 
 #define ALLOC_PAD(name)		(sizeof(struct peak_##name##_head) +	\
     sizeof(struct peak_alloc_magic))
-#define ALLOC_MAGIC(x)	 						\
+#define ALLOC_MAGIC(x)							\
     (((struct peak_alloc_magic *)(x)) - 1)->magic
 #define ALLOC_HEAD(name, x)	(((struct peak_##name##_head *)(x)) - 1)
 #define ALLOC_USER(x)		&(x)->user

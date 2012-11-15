@@ -13,7 +13,8 @@ struct peak_preallocs {
 	SLIST_HEAD(, peak_prealloc) free;
 	size_t used;
 	size_t size;
-	void *mem;
+	void *mem_start;
+	void *mem_stop;
 
 	peak_spinlock_t lock;
 };
@@ -26,6 +27,8 @@ struct peak_preallocs {
 #define PREALLOC_DOUBLE_FREE	2
 #define PREALLOC_MISSING_CHUNKS	3
 
+#define PREALLOC_VALID(x, y)	(((void *)(y) >= (x)->mem_start) &&	\
+    ((void*)(y) < (x)->mem_stop))
 #define PREALLOC_EMPTY(x)	SLIST_EMPTY(&(x)->free)
 #define PREALLOC_USED(x)	(x)->used
 #define PREALLOC_SIZE(x)	(x)->size
@@ -126,12 +129,14 @@ _peak_prealloc(struct peak_preallocs *self, size_t count, size_t size)
 	PREALLOC_SIZE(self) = size;
 	PREALLOC_USED(self) = 0;
 
-	self->mem = peak_malign(mem_size);
-	if (!self->mem) {
+	self->mem_start = peak_malign(mem_size);
+	if (!self->mem_start) {
 		return (0);
 	}
 
-	struct peak_prealloc *e = self->mem;
+	self->mem_stop = ((unsigned char *)self->mem_start) + mem_size;
+
+	struct peak_prealloc *e = self->mem_start;
 	struct peak_prealloc *f;
 	size_t i;
 
@@ -183,7 +188,7 @@ __peak_prefree(struct peak_preallocs *self)
 	}
 
 	peak_spin_exit(&self->lock);
-	peak_free(self->mem);
+	peak_free(self->mem_start);
 
 	return (ret);
 }

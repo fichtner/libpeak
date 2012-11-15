@@ -8,11 +8,11 @@
 #define msleep(x)	usleep((x)*1000)
 
 #ifndef unlikely
-#define unlikely(exp)	__builtin_expect((exp) != 0, 0)
+#define unlikely(exp)	__builtin_expect(!!(exp), 0)
 #endif /* !unlikely */
 
 #ifndef likely
-#define likely(exp)	__builtin_expect((exp) != 0, 1)
+#define likely(exp)	__builtin_expect(!!(exp), 1)
 #endif /* !likely */
 
 #ifndef __packed
