@@ -5,7 +5,11 @@ SFLAGS+=	-D__CHECKER__
 # Ubuntu 12.04 needs this...
 CCDIR=		/usr/lib/gcc/x86_64-linux-gnu/4.6
 
-check: $(SRCS)
+_SRCS=		$(filter %.c,$(SRCS))
+
+check: $(_SRCS)
+ifdef _SRCS
 	@$(SPARSE) $(SFLAGS) $(CFLAGS) -gcc-base-dir $(CCDIR) $^
+endif
 
 .PHONY: check

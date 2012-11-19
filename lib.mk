@@ -1,5 +1,4 @@
 MKDEP=	mkdep
-ECHO=	echo
 CC=	gcc
 AR=	ar
 
@@ -14,12 +13,10 @@ all: .depend $(_LIBS)
 	@$(MKDEP) $(CFLAGS) $(SRCS)
 
 %.o: %.c
-	@$(ECHO) "building $(@F)"
-	@$(CC) $(CFLAGS) $< -c -o $@
+	$(CC) $(CFLAGS) $< -c -o $@
 
 %.a: $(OBJS)
-	@$(ECHO) "bundling $(@F)"
-	@$(AR) crus $@ $^
+	$(AR) crus $@ $^
 
 clean:
 	@$(RM) $(OBJS) $(_LIBS) .depend

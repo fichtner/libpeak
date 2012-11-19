@@ -124,6 +124,12 @@ peak_zalloc(size_t size)
 }
 
 static inline void *
+peak_calloc(size_t count, size_t size)
+{
+	return (peak_zalloc(count * size));
+}
+
+static inline void *
 _peak_realloc(void *ptr, size_t size)
 {
 	struct peak_malloc_head *h = NULL;

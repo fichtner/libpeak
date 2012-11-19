@@ -19,6 +19,10 @@
 #define __packed	__attribute__((__packed__))
 #endif /* !__packed */
 
+#ifndef __unused
+#define __unused	__attribute__((__unused__))
+#endif /* !__unused */
+
 #ifndef MIN
 #define MIN(a,b)	(((a)<(b))?(a):(b))
 #endif /* !MIN */

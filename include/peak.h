@@ -1,4 +1,6 @@
+#ifndef _BSD_SOURCE
 #define _BSD_SOURCE
+#endif /* !_BSD_SOURCE */
 
 /* base headers */
 #include "peak_type.h"
