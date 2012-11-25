@@ -1,0 +1,132 @@
+.Dd November 25, 2012
+.Dt PEAK_HASH 3
+.Os
+.Sh NAME
+.Nm peak_hash_fnv32 ,
+.Nm peak_hash_joaat ,
+.Nm peak_hash_roll ,
+.Nm ROLL_HEAD ,
+.Nm ROLL_INIT ,
+.Nm ROLL_NEXT ,
+.Nm ROLL_SHIFT ,
+.Nm ROLL_NEXTN ,
+.Nm ROLL_SHIFTN ,
+.Nm ROLL_HASH
+.Nd assorted hash functions
+.Sh SYNOPSIS
+.Fd #include <peak.h>
+.Ft uint32_t
+.Fn peak_hash_fnv32 "const void *buf" "const unsigned int len"
+.Ft uint32_t
+.Fn peak_hash_joaat "const void *buf" "const unsigned int len"
+.Ft uint32_t
+.Fn peak_hash_roll "const void *buf" "const unsigned int len"
+.Fn ROLL_HEAD NAME
+.Fn ROLL_INIT HEAD BUF
+.Fn ROLL_NEXT HEAD
+.Fn ROLL_SHIFT HEAD
+.Fn ROLL_NEXTN HEAD LEN
+.Fn ROLL_SHIFTN HEAD LEN
+.Ft uint32_t
+.Fn ROLL_HASH HEAD
+.Sh DESCRIPTION
+These
+.Nm peak_hash
+functions and macros provide support for different types of hashing:
+Fowler-Noll-Vo, Jenkins One-At-A-Time, and a rolling hash. All
+function prototypes share the same layout so that they remain fully
+interchangable.
+.Sh FOWLER-NOLL-VO HASH
+The FNV is a set of non-cryptographic hash functions, which suppy a
+means of creating non-zero FNV offset basis. The speed of computation
+is excellent. Avalanche characteristics are ok, especially with version
+1a, which is used internally for
+.Fn peak_hash_fnv32 .
+Values of zero in the input should be avoided, which makes this a good
+and fast hash for strings.
+.Sh JENKINS ONE-AT-A-TIME HASH
+The Jenkins One-At-A-Time hash is a non-cryptographic hash function.
+In contrast to FNV, this function has (almost) spotless avalanche
+characteristics and is safe for use with binary data containing zeroes.
+On the downside, this hash function is marginally slower than FNV. The
+hash calculation is invoked by calling
+.Fn peak_hash_joaat .
+.Sh ROLLING HASH
+The rolling hash provided is a cyclic polynomial, non-cryptographic
+hash function which is sometimes also refered to as Buzhash. It can
+be used to compute hashes of a fixed sliding window through the
+input data - shifing the window only needs to process the first and
+the next character in the stream as well as the current hash value.
+This provides an edge over the other hash functions described here
+in the particular use-case. The function
+.Fn peak_hash_roll
+provides a compatible prototype, but can't shift a window. To shift
+or grow a window, the
+.Li ROLL_*
+macro family needs to be used explicitely.
+.Pp
+A rolling hash is headed by a structure defined by the
+.Li ROLL_HEAD
+macro. A
+.Fa HEAD
+structure is decladed as follows:
+.Bd -literal -offset indent
+ROLL_HEAD(struct_name_if_desired) head;
+.Ed
+.Pp
+The
+.Fa HEAD
+must then be initialized by calling
+.Li ROLL_INIT .
+Here, the beginning of the buffer must be given as the
+.Fa BUF
+argument:
+.Bd -literal -offset indent
+const char *buf = "test";
+ROLL_INIT(&head, buf);
+.Ed
+.Pp
+Afterwards, the amount of characters to be hashed can be controlled
+with
+.Li ROLL_NEXT
+or
+.Li ROLL_NEXTN .
+.Li ROLL_NEXT
+only takes
+.Fa HEAD
+as an argument and adds the next character from the input buffer
+to the hash.
+.Li ROLL_NEXTN
+uses its sibling internally to hash
+.Fa LEN
+characters at once:
+.Bd -literal -offset indent
+ROLL_NEXT(&head);
+ROLL_NEXT(&head, 4);
+.Ed
+.Pp
+Similarily,
+.Li ROLL_SHIFT
+and
+.Li ROLL_SHIFTN
+are used to shift the hash to the right, losing the first character
+and gaining the next one in the process (or the number of characters
+specified by the
+.Fa LEN
+argument):
+.Bd -literal -offset indent
+ROLL_SHIFT(&head);
+ROLL_SHIFTN(&head, 4);
+.Ed
+.Pp
+Finally, the hash value can be retrieved using the macro
+.Li ROLL_HASH
+at any time like so:
+.Bd -literal -offset indent
+uint32_t hash = ROLL_HASH(&head);
+.Ed
+.Sh RETURN VALUES
+All functions return the calculated hash value for the given input.
+.Sh AUTHORS
+.An Franco Fichtner
+.Aq franco@lastsummer.de

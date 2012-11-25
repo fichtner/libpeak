@@ -224,8 +224,43 @@ test_output(void)
 static void
 test_hash(void)
 {
+	ROLL_HEAD(whatever) head;
+	uint32_t backup;
+
 	assert(peak_hash_fnv32("test", 4) == 0xAFD071E5u);
 	assert(peak_hash_fnv32(NULL, 0) == 0x811C9DC5u);
+
+	assert(peak_hash_joaat("test", 4) == 0x3F75CCC1u);
+	assert(peak_hash_joaat(NULL, 0) == 0x0u);
+
+	ROLL_INIT(&head, "test");
+	assert(!ROLL_HASH(&head));
+	ROLL_NEXT(&head);
+	backup = ROLL_HASH(&head);
+	assert(backup);
+	ROLL_SHIFT(&head);
+	assert(backup != ROLL_HASH(&head));
+	ROLL_SHIFTN(&head, 2);
+	assert(backup == ROLL_HASH(&head));
+
+	ROLL_INIT(&head, "test");
+	ROLL_NEXT(&head);
+	ROLL_NEXT(&head);
+	ROLL_NEXT(&head);
+	ROLL_NEXT(&head);
+	backup = ROLL_HASH(&head);
+
+	assert(backup == peak_hash_roll("test", 4));
+
+	ROLL_INIT(&head, "testest");
+	ROLL_NEXTN(&head, 4);
+	assert(backup == ROLL_HASH(&head));
+	ROLL_SHIFT(&head);
+	assert(backup != ROLL_HASH(&head));
+	ROLL_SHIFTN(&head, 2);
+	assert(backup == ROLL_HASH(&head));
+
+	assert(backup != peak_hash_roll("tesT", 4));
 }
 
 int
