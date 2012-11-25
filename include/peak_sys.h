@@ -24,8 +24,6 @@ peak_spin_exit(peak_spinlock_t *lock)
 	(void) lock;
 }
 
-#define PTHREAD_BARRIER_SERIAL_THREAD -1
-
 #else /* !__APPLE__ */
 
 typedef pthread_spinlock_t peak_spinlock_t;
@@ -46,8 +44,6 @@ peak_spin_exit(peak_spinlock_t *lock)
 }
 
 #endif /* __APPLE__*/
-
-#define PEAK_BARRIER_SERIAL_THREAD PTHREAD_BARRIER_SERIAL_THREAD
 
 typedef struct {
 	pthread_mutex_t mutex;
@@ -88,7 +84,7 @@ peak_barrier_wait(peak_barrier_t *barrier)
 		++barrier->count;
 		pthread_cond_wait(&barrier->cond, &barrier->mutex);
 	} else {
-		ret = PEAK_BARRIER_SERIAL_THREAD;
+		ret = 1;
 	}
 	pthread_mutex_unlock(&barrier->mutex);
 
