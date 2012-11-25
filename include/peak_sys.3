@@ -38,27 +38,28 @@
 .Sh DESCRIPTION
 The
 .Nm peak_sys
-API provide wrappers for POSIX thread-like functionality for all
-target operating systems. In particular, it implements spinlocks
+API provides POSIX thread-like functionality for all target
+operating systems. In particular, it implements spinlocks
 and customized barriers. Please be aware that both types can
-produce deadlock scenarios if you don't follow the given instructions.
+produce deadlock scenarios if you don't adhere to the given
+instructions.
 .Sh SPINLOCKS
-The spinlocks have the type
+The spinlocks are of type
 .Fa peak_spinlock_t ,
 which must be provided by the caller. Invoking
 .Fn peak_spinlock_init
 yields a usable lock, which can be operated by subsequent calls of
 .Fn peak_spin_lock
-followed by
+and
 .Fn peak_spin_unlock .
 The lock can be destroyed by calling
 .Fn peak_spin_exit .
-Locking or unlocking an uninitialized or destroyed spinlock yields
+Operating an uninitialized or previously destroyed spinlock yields
 an undefined behavior.
 .Sh BARRIERS
 The implementation of barriers of type
 .Fa peak_barrier_t
-is a bit more complex than its POSIX equivalent. Creating a barrier via
+is a bit more complex than its POSIX equivalent. Creation via
 .Fn peak_barrier_init
 will initialize the barrier, but the number of threads waiting on
 a barrier is dynamic. Thus, after creation, zero threads are
@@ -113,15 +114,15 @@ if (needed) {
 .Pp
 This ensures the serializing thread can do data structure
 manipulations while no other thread is able to change or even
-reference it. Traditionally, this had to be implemented by
+reference it, because all those threads are being blocked by
+the barrier. Traditionally, this had to be implemented by
 invoking a second barrier wait operation. This was considered
 an unnecessary complication.
 .Pp
-Finally, the barrier can be destroyed
-by calling
+Finally, the barrier can be destroyed by calling
 .Fn peak_barrier_exit .
-Operating an uninitialized or destroyed barrier results in undefined
-behavior.
+Operating an uninitialized or previously destroyed barrier
+results in undefined behavior.
 .Sh AUTHORS
 .An Franco Fichtner
 .Aq franco@lastsummer.de
