@@ -230,8 +230,8 @@ test_hash(void)
 	assert(peak_hash_fnv32("test", 4) == 0xAFD071E5u);
 	assert(peak_hash_fnv32(NULL, 0) == 0x811C9DC5u);
 
-	assert(peak_hash_joaat("test", 4) == 0x3F75CCC1u);
-	assert(peak_hash_joaat(NULL, 0) == 0x0u);
+	assert(peak_hash_joaat("test", 4) == 0x76705442u);
+	assert(peak_hash_joaat(NULL, 0) == 0x11C50567u);
 
 	ROLL_INIT(&head, "test");
 	assert(!ROLL_HASH(&head));

@@ -140,11 +140,13 @@ peak_hash_roll(const void *buf, const unsigned int len)
 	return (ROLL_HASH(&head));
 }
 
+#define JOAAT_SALT	0x5E1F27D3u
+
 static inline uint32_t
 peak_hash_joaat(const void *buf, const unsigned int len)
 {
+	uint32_t hash = JOAAT_SALT;
 	const uint8_t *p = buf;
-	uint32_t hash = 0;
 	unsigned int i;
 
 	for (i = 0; i < len; ++i) {
@@ -159,5 +161,7 @@ peak_hash_joaat(const void *buf, const unsigned int len)
 
 	return (hash);
 }
+
+#undef JOAAT_SALT
 
 #endif /* !PEAK_HASH_H */
