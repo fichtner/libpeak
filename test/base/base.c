@@ -148,39 +148,39 @@ test_alloc(void)
 static void
 test_prealloc(void)
 {
-	struct peak_preallocs *test_mem = peak_prealloc(1, 8);
-	void *test_chunk = peak_preget(test_mem);
+	struct peak_preallocs *test_mem = prealloc_initd(1, 8);
+	void *test_chunk = prealloc_gets(test_mem);
 
-	assert(test_chunk && !peak_preget(test_mem));
+	assert(test_chunk && !prealloc_gets(test_mem));
 
-	peak_preput(test_mem, test_chunk);
-	test_chunk = peak_preget(test_mem);
+	prealloc_puts(test_mem, test_chunk);
+	test_chunk = prealloc_gets(test_mem);
 
-	assert(PREALLOC_MISSING_CHUNKS == __peak_prefree(test_mem));
+	assert(PREALLOC_MISSING_CHUNKS == _prealloc_exit(test_mem));
 
-	peak_preput(test_mem, test_chunk);
-	peak_prefree(test_mem);
+	prealloc_puts(test_mem, test_chunk);
+	prealloc_exitd(test_mem);
 
-	test_mem = peak_prealloc(8, sizeof(uint64_t));
+	test_mem = prealloc_initd(8, sizeof(uint64_t));
 
 	uint64_t *test_chunks[8];
 	unsigned int i;
 
 	for (i = 0; i < 8; ++i) {
-		test_chunks[i] = peak_preget(test_mem);
+		test_chunks[i] = prealloc_gets(test_mem);
 
 		assert(test_chunks[i]);
 
 		*test_chunks[i] = i;
 
 		assert(PREALLOC_HEALTHY ==
-		    __peak_preput(test_mem, test_chunks[i]));
+		    _prealloc_put(test_mem, test_chunks[i]));
 		assert(PREALLOC_DOUBLE_FREE ==
-		    __peak_preput(test_mem, test_chunks[i]));
-		assert(peak_preget(test_mem) == test_chunks[i]);
+		    _prealloc_put(test_mem, test_chunks[i]));
+		assert(prealloc_gets(test_mem) == test_chunks[i]);
 	}
 
-	assert(!peak_preget(test_mem));
+	assert(!prealloc_gets(test_mem));
 
 	for (i = 0; i < 8; ++i) {
 		assert(i == *test_chunks[i]);
@@ -189,17 +189,20 @@ test_prealloc(void)
 		*(test_chunks[i] - 1) = 0;
 
 		assert(PREALLOC_UNDERFLOW ==
-		    __peak_preput(test_mem, test_chunks[i]));
+		    _prealloc_put(test_mem, test_chunks[i]));
 
 		*(test_chunks[i] - 1) = magic;
 
-		peak_preput(test_mem, test_chunks[i]);
+		prealloc_puts(test_mem, test_chunks[i]);
 	}
 
-	peak_prefree(test_mem);
+	assert(PREALLOC_POOL_MISMATCH ==
+	    _prealloc_put(test_mem, test_chunks));
 
-	assert(!peak_prealloc(1, 151));
-	assert(!peak_prealloc(2, ~0ULL));
+	prealloc_exitd(test_mem);
+
+	assert(!prealloc_initd(1, 151));
+	assert(!prealloc_initd(2, ~0ULL));
 }
 
 static void
