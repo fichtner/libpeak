@@ -5,7 +5,7 @@
 #define FNV_PRIME_32	16777619u
 
 static inline uint32_t
-_peak_hash_fnv32(const uint8_t *buf, const uint32_t len)
+_hash_fnv32(const uint8_t *buf, const uint32_t len)
 {
     uint32_t i, h = FNV_OFFSET_32;
 
@@ -21,16 +21,16 @@ _peak_hash_fnv32(const uint8_t *buf, const uint32_t len)
 #undef FNV_PRIME_32
 
 static inline uint32_t
-peak_hash_fnv32(const void *buf, const unsigned int len)
+hash_fnv32(const void *buf, const unsigned int len)
 {
-	return (_peak_hash_fnv32(buf, len));
+	return (_hash_fnv32(buf, len));
 }
 
 #define _ROLL_SHIFTN(x, y)	(((x) << (y)) | ((x) >> (_ROLL_BITS - (y))))
 #define _ROLL_SHIFT(x)		(((x) << 1) | ((x) >> (_ROLL_BITS - 1)))
 #define _ROLL_BITS 32
 
-static const uint32_t peak_hash_roll_values[256] = {
+static const uint32_t hash_roll_values[256] = {
 	/* values taken from https://code.google.com/p/yara-project/ */
 	0xC3113E7F, 0x4C353C5F, 0x7423810B, 0x258D264E, 0xDAD39DED,
 	0x75D0B694, 0x98CE1216, 0x93334482, 0xC5C48EA5, 0xF57E0E8B,
@@ -102,7 +102,7 @@ struct name {								\
 
 #define ROLL_NEXT(head) do {						\
 	(head)->rhh_hash = _ROLL_SHIFT((head)->rhh_hash) ^		\
-	    peak_hash_roll_values[*((head)->rhh_next++)];		\
+	    hash_roll_values[*((head)->rhh_next++)];			\
 } while (0)
 
 #define ROLL_NEXTN(head, len) do {					\
@@ -116,10 +116,10 @@ struct name {								\
         const uint32_t _len = ((head)->rhh_next - (head)->rhh_first) &	\
 	    (_ROLL_BITS - 1);						\
         const uint32_t _val =						\
-		peak_hash_roll_values[*((head)->rhh_first++)];		\
+		hash_roll_values[*((head)->rhh_first++)];		\
         (head)->rhh_hash = _ROLL_SHIFT((head)->rhh_hash) ^		\
 	    _ROLL_SHIFTN(_val, _len) ^					\
-	    peak_hash_roll_values[*((head)->rhh_next++)];		\
+	    hash_roll_values[*((head)->rhh_next++)];			\
 } while (0);
 
 #define ROLL_SHIFTN(head, len) do {					\
@@ -130,7 +130,7 @@ struct name {								\
 } while (0);
 
 static inline uint32_t
-peak_hash_roll(const void *buf, const unsigned int len)
+hash_roll(const void *buf, const unsigned int len)
 {
 	ROLL_HEAD() head;
 
@@ -143,7 +143,7 @@ peak_hash_roll(const void *buf, const unsigned int len)
 #define JOAAT_SALT	0x5E1F27D3u
 
 static inline uint32_t
-peak_hash_joaat(const void *buf, const unsigned int len)
+hash_joaat(const void *buf, const unsigned int len)
 {
 	uint32_t hash = JOAAT_SALT;
 	const uint8_t *p = buf;
