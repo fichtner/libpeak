@@ -2,73 +2,73 @@
 .Dt PEAK_SYS 3
 .Os
 .Sh NAME
-.Nm peak_spin_init ,
-.Nm peak_spin_lock ,
-.Nm peak_spin_unlock ,
-.Nm peak_spin_exit ,
-.Nm peak_barrier_init ,
-.Nm peak_parrier_wait ,
-.Nm peak_parrier_wake ,
-.Nm peak_barrier_join ,
-.Nm peak_barrier_leave ,
-.Nm peak_barrier_exit
+.Nm spin_init ,
+.Nm spin_exit ,
+.Nm spin_lock ,
+.Nm spin_unlock ,
+.Nm barrier_init ,
+.Nm barrier_exit ,
+.Nm barrier_wait ,
+.Nm barrier_wake ,
+.Nm barrier_join ,
+.Nm barrier_leave
 .Nd synchonization wrappers
 .Sh SYNOPSIS
 .Fd #include <peak.h>
 .Ft void
-.Fn peak_spin_init "peak_spinlock_t *lock"
+.Fn spin_init "spinlock_t *lock"
 .Ft void
-.Fn peak_spin_lock "peak_spinlock_t *lock"
+.Fn spin_exit "spinlock_t *lock"
 .Ft void
-.Fn peak_spin_unlock "peak_spinlock_t *lock"
+.Fn spin_lock "spinlock_t *lock"
 .Ft void
-.Fn peak_spin_exit "peak_spinlock_t *lock"
+.Fn spin_unlock "spinlock_t *lock"
 .Ft void
-.Fn peak_barrier_init "peak_barrier_t *barrier"
+.Fn barrier_init "barrier_t *barrier"
+.Ft void
+.Fn barrier_exit "barrier_t *barrier"
 .Ft int
-.Fn peak_barrier_wait "peak_barrier_t *barrier"
+.Fn barrier_wait "barrier_t *barrier"
 .Ft void
-.Fn peak_barrier_wake "peak_barrier_t *barrier"
+.Fn barrier_wake "barrier_t *barrier"
 .Ft int
-.Fn peak_barrier_join "peak_barrier_t *barrier"
+.Fn barrier_join "barrier_t *barrier"
 .Ft int
-.Fn peak_barrier_leave "peak_barrier_t *barrier"
-.Ft void
-.Fn peak_barrier_exit "peak_barrier_t *barrier"
+.Fn barrier_leave "barrier_t *barrier"
 .Sh DESCRIPTION
 The
 .Nm peak_sys
 API provides POSIX thread-like functionality for all target
 operating systems. In particular, it implements spinlocks
-and customized barriers. Please be aware that both types can
+and extended barriers. Please be aware that both types can
 produce deadlock scenarios if you don't adhere to the given
 instructions.
 .Sh SPINLOCKS
 The spinlocks are of type
-.Fa peak_spinlock_t ,
+.Fa spinlock_t ,
 which must be provided by the caller. Invoking
-.Fn peak_spinlock_init
+.Fn spinlock_init
 yields a usable lock, which can be operated by subsequent calls of
-.Fn peak_spin_lock
+.Fn spin_lock
 and
-.Fn peak_spin_unlock .
+.Fn spin_unlock .
 The lock can be destroyed by calling
-.Fn peak_spin_exit .
+.Fn spin_exit .
 Operating an uninitialized or previously destroyed spinlock yields
 an undefined behavior.
 .Sh BARRIERS
 The implementation of barriers of type
-.Fa peak_barrier_t
+.Fa barrier_t
 is a bit more complex than its POSIX equivalent. Creation via
-.Fn peak_barrier_init
+.Fn barrier_init
 will initialize the barrier, but the number of threads waiting on
 a barrier is dynamic. Thus, after creation, zero threads are
 registered by the barrier. Waiting on such a barrier is undefined.
 .Pp
 Instead, the functions
-.Fn peak_barrier_join
+.Fn barrier_join
 and
-.Fn peak_barrier_leave
+.Fn barrier_leave
 must be used to register or unregister a thread to the barrier. In
 some cases, the operation may not succeed, which is indicated by the
 return value of both functions. A zero return value indicates the
@@ -76,7 +76,7 @@ operation could be finished, otherwise a non-zero value is returned.
 So in both cases, these functions need to be polled in order to
 invoke the requested operation:
 .Bd -literal -offset indent
-while (peak_barrier_join(&barrier)) {
+while (barrier_join(&barrier)) {
 	msleep(1);
 }
 .Ed
@@ -85,28 +85,28 @@ In case of leaving a barrier, care must be taken to invoke the
 internal barrier synchronization mechanism as long as the thread
 cannot leave the barrier:
 .Bd -literal -offset indent
-while (peak_barrier_leave(&barrier)) {
+while (barrier_leave(&barrier)) {
 	wait_and_wake_if_needed(&barrier);
 }
 .Ed
 .Pp
 The acutal barrier synchronization mechanism is implemented using
-.Fn peak_barrier_wait
+.Fn barrier_wait
 and
-.Fn peak_barrier_wake .
+.Fn barrier_wake .
 This provides another API twist: the serializing thread doesn't
 block - it is in charge of calling the wake function to wake up
 all other threads. To indicate this behavior,
-.Fn peak_barrier_wait
+.Fn barrier_wait
 returns non-zero. Otherwise, zero is returned, meaning the
 serialization was complete and all threads have been woken up.
 The code may look like so:
 .Bd -literal -offset indent
 if (needed) {
 	/* all threads invoke barrier wait */
-	if (peak_barrier_wait(&barrier)) {
+	if (barrier_wait(&barrier)) {
 		/* winner gets to do all the work */
-		peak_barrier_wake(&barrier);
+		barrier_wake(&barrier);
 	}
 	/* all threads are awake again */
 }
@@ -120,7 +120,7 @@ invoking a second barrier wait operation. This was considered
 an unnecessary complication.
 .Pp
 Finally, the barrier can be destroyed by calling
-.Fn peak_barrier_exit .
+.Fn barrier_exit .
 Operating an uninitialized or previously destroyed barrier
 results in undefined behavior.
 .Sh AUTHORS

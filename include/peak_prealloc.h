@@ -15,7 +15,7 @@ struct peak_preallocs {
 	size_t size;
 	void *mem_start;
 	void *mem_stop;
-	peak_spinlock_t lock;
+	spinlock_t lock;
 };
 
 #define PREALLOC_FROM_USER(x)	(((struct peak_prealloc *)(x)) - 1)
@@ -53,9 +53,9 @@ prealloc_gets(struct peak_preallocs *self)
 {
 	void *ret;
 
-	peak_spin_lock(&self->lock);
+	spin_lock(&self->lock);
 	ret = prealloc_get(self);
-	peak_spin_unlock(&self->lock);
+	spin_unlock(&self->lock);
 
 	return (ret);
 }
@@ -107,9 +107,9 @@ _prealloc_put(struct peak_preallocs *self, void *p)
 } while (0)
 
 #define prealloc_puts(self, p) do {					\
-	peak_spin_lock(&(self)->lock);					\
+	spin_lock(&(self)->lock);					\
 	prealloc_put(self, p);						\
-	peak_spin_unlock(&(self)->lock);				\
+	spin_unlock(&(self)->lock);					\
 } while (0)
 
 static inline unsigned int
@@ -132,7 +132,7 @@ prealloc_init(struct peak_preallocs *self, size_t count, size_t size)
 		return (0);
 	}
 
-	peak_spin_init(&self->lock);
+	spin_init(&self->lock);
 	prealloc_size(self) = size;
 	prealloc_used(self) = 0;
 
@@ -194,7 +194,7 @@ _prealloc_exit(struct peak_preallocs *self)
 		return (PREALLOC_MISSING_CHUNKS);
 	}
 
-	peak_spin_exit(&self->lock);
+	spin_exit(&self->lock);
 	peak_free(self->mem_start);
 
 	return (ret);
