@@ -148,7 +148,7 @@ test_alloc(void)
 static void
 test_prealloc(void)
 {
-	struct peak_preallocs *test_mem = prealloc_initd(1, 8);
+	prealloc_t *test_mem = prealloc_initd(1, 8);
 	void *test_chunk = prealloc_gets(test_mem);
 
 	assert(test_chunk && !prealloc_gets(test_mem));

@@ -19,23 +19,23 @@
 .Fd #include <peak.h>
 .Ft unsigned int
 .Fo prealloc_init
-.Fa "struct peak_preallocs *self"
+.Fa "prealloc_t *self"
 .Fa "size_t count" "size_t size"
 .Fc
 .Ft void
-.Fn prealloc_exit "struct peak_preallocs *self"
-.Ft struct peak_preallocs *
+.Fn prealloc_exit "prealloc_t *self"
+.Ft prealloc_t *
 .Fn prealloc_initd "size_t count" "size_t size"
 .Ft void
-.Fn prealloc_exitd "struct peak_preallocs *self"
+.Fn prealloc_exitd "prealloc_t *self"
 .Ft void *
-.Fn prealloc_get "struct peak_preallocs *self"
+.Fn prealloc_get "prealloc_t *self"
 .Ft void
-.Fn prealloc_put "struct peak_preallocs *self" "void *p"
+.Fn prealloc_put "prealloc_t *self" "void *p"
 .Ft void *
-.Fn prealloc_gets "struct peak_preallocs *self"
+.Fn prealloc_gets "prealloc_t *self"
 .Ft void
-.Fn prealloc_puts "struct peak_preallocs *self" "void *p"
+.Fn prealloc_puts "prealloc_t *self" "void *p"
 .Ft int
 .Fn prealloc_valid HEAD P
 .Ft int
@@ -64,7 +64,7 @@ create and destroy a dynamically allocated pool struct, while
 and
 .Fn prealloc_exit
 work on an externally provided
-.Fa "struct peak_preallocs" .
+.Fa prealloc_t .
 However, the actual memory pool is always allocated dynamically.
 Either memory pool can be operated by all following functions.
 .Pp

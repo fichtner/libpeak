@@ -9,14 +9,14 @@ struct peak_prealloc {
 	unsigned char user[];
 };
 
-struct peak_preallocs {
+typedef struct {
 	SLIST_HEAD(, peak_prealloc) free;
 	size_t used;
 	size_t size;
 	void *mem_start;
 	void *mem_stop;
 	spinlock_t lock;
-};
+} prealloc_t;
 
 #define PREALLOC_FROM_USER(x)	(((struct peak_prealloc *)(x)) - 1)
 #define PREALLOC_TO_USER(x)	&(x)->user
@@ -34,7 +34,7 @@ struct peak_preallocs {
 #define prealloc_size(self)	(self)->size
 
 static inline void *
-prealloc_get(struct peak_preallocs *self)
+prealloc_get(prealloc_t *self)
 {
 	struct peak_prealloc *e = SLIST_FIRST(&self->free);
 	if (unlikely(!e)) {
@@ -49,7 +49,7 @@ prealloc_get(struct peak_preallocs *self)
 }
 
 static inline void *
-prealloc_gets(struct peak_preallocs *self)
+prealloc_gets(prealloc_t *self)
 {
 	void *ret;
 
@@ -61,7 +61,7 @@ prealloc_gets(struct peak_preallocs *self)
 }
 
 static inline unsigned int
-_prealloc_put(struct peak_preallocs *self, void *p)
+_prealloc_put(prealloc_t *self, void *p)
 {
 	unsigned int ret = PREALLOC_HEALTHY;
 
@@ -113,7 +113,7 @@ _prealloc_put(struct peak_preallocs *self, void *p)
 } while (0)
 
 static inline unsigned int
-prealloc_init(struct peak_preallocs *self, size_t count, size_t size)
+prealloc_init(prealloc_t *self, size_t count, size_t size)
 {
 	bzero(self, sizeof(*self));
 
@@ -165,10 +165,10 @@ prealloc_init(struct peak_preallocs *self, size_t count, size_t size)
 	return (1);
 }
 
-static inline struct peak_preallocs *
+static inline prealloc_t *
 prealloc_initd(size_t count, size_t size)
 {
-	struct peak_preallocs *self = peak_malloc(sizeof(*self));
+	prealloc_t *self = peak_malloc(sizeof(*self));
 	if (!self) {
 		return (NULL);
 	}
@@ -182,7 +182,7 @@ prealloc_initd(size_t count, size_t size)
 }
 
 static inline unsigned int
-_prealloc_exit(struct peak_preallocs *self)
+_prealloc_exit(prealloc_t *self)
 {
 	unsigned int ret = PREALLOC_HEALTHY;
 
