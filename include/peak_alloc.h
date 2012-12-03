@@ -4,20 +4,16 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define CACHELINE_SIZE 64
+#define ALLOC_CACHELINE		64
 
-static inline size_t
-peak_cacheline_aligned(const size_t size)
-{
-	return (size + CACHELINE_SIZE -
-	    (size % CACHELINE_SIZE ? : CACHELINE_SIZE));
-}
+#define ALLOC_ALIGN(x)		((x) + ALLOC_CACHELINE -		\
+	    ((x) % ALLOC_CACHELINE ? : ALLOC_CACHELINE))
 
 #define ALLOC_HEALTHY		0
 #define ALLOC_UNDERFLOW		1
 #define ALLOC_OVERFLOW		2
 
-#define peak_alloc_error(x) do {					\
+#define ALLOC_ERROR(x) do {						\
 	switch (x) {							\
 	case ALLOC_HEALTHY:						\
 		break;							\
@@ -82,7 +78,7 @@ _peak_finalize_malloc(const uint64_t size, struct peak_malloc_head *h)
 }
 
 static inline unsigned int
-_peak_check_malloc(void *ptr)
+_peak_mcheck_malloc(void *ptr)
 {
 	unsigned int ret = ALLOC_HEALTHY;
 	struct peak_malloc_head *h;
@@ -159,7 +155,7 @@ _peak_realloc(void *ptr, size_t size)
 }
 
 #define peak_realloc(x, y) ({						\
-	peak_alloc_error(_peak_check_malloc(x));			\
+	ALLOC_ERROR(_peak_mcheck_malloc(x));				\
 	_peak_realloc(x, y);						\
 })
 
@@ -200,7 +196,7 @@ _peak_finalize_memalign(const uint64_t size, struct peak_memalign_head *h)
 }
 
 static inline unsigned int
-_peak_check_memalign(void *ptr)
+_peak_mcheck_memalign(void *ptr)
 {
 	unsigned int ret = ALLOC_HEALTHY;
 	struct peak_memalign_head *h;
@@ -218,9 +214,17 @@ _peak_check_memalign(void *ptr)
 	return (ret);
 }
 
-#ifndef memalign
-#define memalign(x, y)	malloc(y)
-#endif /* !memalign */
+static inline void *
+peak_bare_memalign(size_t alignment, size_t size)
+{
+	void *ptr;
+
+	if (unlikely(posix_memalign(&ptr, alignment, size))) {
+		return (NULL);
+	}
+
+	return (ptr);
+}
 
 static inline void *
 peak_malign(size_t size)
@@ -229,25 +233,14 @@ peak_malign(size_t size)
 		return (NULL);
 	}
 
-	void *ptr = memalign(CACHELINE_SIZE,
-	    peak_cacheline_aligned(size) + ALLOC_PAD(memalign));
+	void *ptr = peak_bare_memalign(ALLOC_CACHELINE,
+	    ALLOC_ALIGN(size) + ALLOC_PAD(memalign));
 
 	return (_peak_finalize_memalign(size, ptr));
 }
 
-static inline void *
-peak_zalign(size_t size)
-{
-	void *ptr = peak_malign(size);
-	if (likely(ptr)) {
-		bzero(ptr, size);
-	}
-
-	return (ptr);
-}
-
 static inline unsigned int
-peak_check(void *ptr)
+_peak_mcheck(void *ptr)
 {
 	unsigned int ret = ALLOC_HEALTHY;
 
@@ -257,10 +250,10 @@ peak_check(void *ptr)
 
 	switch (ALLOC_MAGIC(ptr)) {
 	case ALLOC_VALUE(malloc):
-		ret = _peak_check_malloc(ptr);
+		ret = _peak_mcheck_malloc(ptr);
 		break;
 	case ALLOC_VALUE(memalign):
-		ret = _peak_check_memalign(ptr);
+		ret = _peak_mcheck_memalign(ptr);
 		break;
 	default:
 		ret = ALLOC_UNDERFLOW;
@@ -277,13 +270,13 @@ __peak_free(void *ptr)
 
 	switch (ALLOC_MAGIC(ptr)) {
 	case ALLOC_VALUE(malloc):
-		ret = _peak_check_malloc(ptr);
+		ret = _peak_mcheck_malloc(ptr);
 		if (likely(!ret)) {
 			free(ALLOC_HEAD(malloc, ptr));
 		}
 		break;
 	case ALLOC_VALUE(memalign):
-		ret = _peak_check_memalign(ptr);
+		ret = _peak_mcheck_memalign(ptr);
 		if (likely(!ret)) {
 			free(ALLOC_HEAD(memalign, ptr));
 		}
@@ -325,6 +318,18 @@ _peak_free(void *ptr)
 	return (ret);
 }
 
-#define peak_free(x)	peak_alloc_error(_peak_free(x))
+#define peak_mcheck(x)	ALLOC_ERROR(_peak_mcheck(x))
+#define peak_free(x)	ALLOC_ERROR(_peak_free(x))
+
+/* pave over all standard functions */
+#define reallocf	peak_reallocf
+#define realloc		peak_realloc
+#define malign		peak_malign
+#define zalloc		peak_zalloc
+#define malloc		peak_malloc
+#define calloc		peak_calloc
+#define strdup		peak_strdup
+#define mcheck		peak_mcheck
+#define free		peak_free
 
 #endif /* !PEAK_ALLOC_H */

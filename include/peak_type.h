@@ -152,8 +152,8 @@ be64enc(void *pp, const uint64_t u)
 	be32enc(p + 4, u);
 }
 
-#define peak_uint16_wrap(__x__) ((uint16_t)(__x__) > UINT16_MAX / 2U)
-#define peak_uint32_wrap(__x__) ((uint32_t)(__x__) > UINT32_MAX / 2U)
-#define peak_uint64_wrap(__x__) ((uint64_t)(__x__) > UINT64_MAX / 2ULL)
+#define wrap16(x)	((uint16_t)(x) > UINT16_MAX / 2U)
+#define wrap32(x)	((uint32_t)(x) > UINT32_MAX / 2U)
+#define wrap64(x)	((uint64_t)(x) > UINT64_MAX / 2ULL)
 
 #endif /* !PEAK_TYPE_H */

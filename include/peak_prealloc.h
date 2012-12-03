@@ -136,7 +136,7 @@ prealloc_init(prealloc_t *self, size_t count, size_t size)
 	prealloc_size(self) = size;
 	prealloc_used(self) = 0;
 
-	self->mem_start = peak_malign(mem_size);
+	self->mem_start = malign(mem_size);
 	if (!self->mem_start) {
 		return (0);
 	}
@@ -168,13 +168,13 @@ prealloc_init(prealloc_t *self, size_t count, size_t size)
 static inline prealloc_t *
 prealloc_initd(size_t count, size_t size)
 {
-	prealloc_t *self = peak_malloc(sizeof(*self));
+	prealloc_t *self = malloc(sizeof(*self));
 	if (!self) {
 		return (NULL);
 	}
 
 	if (!prealloc_init(self, count, size)) {
-		peak_free(self);
+		free(self);
 		return (NULL);
 	}
 
@@ -195,7 +195,7 @@ _prealloc_exit(prealloc_t *self)
 	}
 
 	spin_exit(&self->lock);
-	peak_free(self->mem_start);
+	free(self->mem_start);
 
 	return (ret);
 }
@@ -212,7 +212,7 @@ _prealloc_exit(prealloc_t *self)
 
 #define prealloc_exitd(self) do {					\
 	prealloc_exit(self);						\
-	peak_free(self);						\
+	free(self);							\
 } while (0)
 
 #undef PREALLOC_FROM_USER

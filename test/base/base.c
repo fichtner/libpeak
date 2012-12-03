@@ -34,12 +34,12 @@ test_type(void)
 	be64enc(&test_val_64, bswap64(UNALIGNED_64_ORIG));
 	assert(UNALIGNED_64_ORIG == test_val_64);
 
-	assert(!peak_uint16_wrap(test_val_16 = 0));
-	assert(peak_uint16_wrap(test_val_16 - 1));
-	assert(!peak_uint32_wrap(test_val_32 = 0));
-	assert(peak_uint32_wrap(test_val_32 - 1));
-	assert(!peak_uint64_wrap(test_val_64 = 0));
-	assert(peak_uint64_wrap(test_val_64 - 1));
+	assert(!wrap16(test_val_16 = 0));
+	assert(wrap16(test_val_16 - 1));
+	assert(!wrap32(test_val_32 = 0));
+	assert(wrap32(test_val_32 - 1));
+	assert(!wrap64(test_val_64 = 0));
+	assert(wrap64(test_val_64 - 1));
 }
 
 static void
@@ -57,7 +57,7 @@ test_alloc(void)
 	uint64_t backup = *test_ptr;
 	*test_ptr = 0;
 
-	assert(ALLOC_OVERFLOW == peak_check(test_ptr));
+	assert(ALLOC_OVERFLOW == _peak_mcheck(test_ptr));
 
 	*test_ptr = backup;
 
@@ -105,17 +105,14 @@ test_alloc(void)
 
 	peak_free(test_str);
 
-	assert(0 == peak_cacheline_aligned(0));
-	assert(CACHELINE_SIZE ==
-	    peak_cacheline_aligned(CACHELINE_SIZE - 1));
-	assert(CACHELINE_SIZE ==
-	    peak_cacheline_aligned(CACHELINE_SIZE));
-	assert(CACHELINE_SIZE == peak_cacheline_aligned(1));
-	assert(2 * CACHELINE_SIZE ==
-	    peak_cacheline_aligned(CACHELINE_SIZE + 1));
+	assert(2 * ALLOC_CACHELINE == ALLOC_ALIGN(ALLOC_CACHELINE + 1));
+	assert(ALLOC_CACHELINE == ALLOC_ALIGN(ALLOC_CACHELINE - 1));
+	assert(ALLOC_CACHELINE == ALLOC_ALIGN(ALLOC_CACHELINE));
+	assert(ALLOC_CACHELINE == ALLOC_ALIGN(1));
+	assert(0 == ALLOC_ALIGN(0));
 
-	peak_free(peak_zalign(0));
-	peak_free(peak_zalign(1));
+	peak_free(peak_malign(0));
+	peak_free(peak_malign(1));
 	peak_free(peak_zalloc(0));
 	peak_free(peak_zalloc(1));
 
@@ -129,18 +126,18 @@ test_alloc(void)
 
 	*test_str_mod_aligned = 0;
 
-	assert(ALLOC_UNDERFLOW == peak_check(test_str_aligned));
+	assert(ALLOC_UNDERFLOW == _peak_mcheck(test_str_aligned));
 
 	*test_str_mod_aligned = test_char_aligned;
 	test_str_mod_aligned = test_str_aligned + sizeof(THIS_IS_A_STRING);
 	test_char_aligned = *test_str_mod_aligned;
 	*test_str_mod_aligned = 0;
 
-	assert(ALLOC_OVERFLOW == peak_check(test_str_aligned));
+	assert(ALLOC_OVERFLOW == _peak_mcheck(test_str_aligned));
 
 	*test_str_mod_aligned = test_char_aligned;
 
-	assert(ALLOC_HEALTHY == peak_check(test_str_aligned));
+	assert(ALLOC_HEALTHY == _peak_mcheck(test_str_aligned));
 
 	peak_free(test_str_aligned);
 }
