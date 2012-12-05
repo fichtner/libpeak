@@ -32,12 +32,12 @@
 .Sh DESCRIPTION
 The
 .Nm peak_alloc
-functions allocate and free memory. They wrap around
+functions allocate and deallocate memory. They wrap around
 .Xr malloc 3
 and
-.Xr free 3
-to provide better consistency checks. They can detect
-simple buffer over- and underflows and also provide inline
+.Xr free 3 ,
+and provide better inline consistency checks. They can detect
+simple buffer over- and underflows and also provide on demand
 checks via the
 .Fn mcheck
 function.

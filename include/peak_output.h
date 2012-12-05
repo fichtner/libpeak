@@ -1,6 +1,7 @@
 #ifndef PEAK_OUTPUT_H
 #define PEAK_OUTPUT_H
 
+#include <execinfo.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -47,6 +48,24 @@ peak_log(int priority, const char *message, ...)
 
 #define peak_logging(__p__) ((__p__) <= _peak_log_priority)
 
+#define BACKTRACE_NORMAL	1
+#define BACKTRACE_SIGNAL	3
+#define BACKTRACE_MAX		128
+
+static inline void
+peak_backtrace(const int skip)
+{
+	void *callstack[BACKTRACE_MAX];
+	int frames;
+
+	peak_bug(LOG_EMERG, "====== stack trace begin ======\n");
+	frames = backtrace(callstack, BACKTRACE_MAX) - skip;
+	backtrace_symbols_fd(&callstack[skip], frames, 2);
+	peak_bug(LOG_EMERG, "======= stack trace end =======\n");
+}
+
+#undef BACKTRACE_MAX
+
 /* fiddle around with macros to make panics show file/line info */
 #define _STRING_HACK(x)	#x
 #define STRING_HACK(x)	_STRING_HACK(x)
@@ -54,6 +73,7 @@ peak_log(int priority, const char *message, ...)
 
 #define peak_panic(__message__, args...) do {				\
 	peak_bug(LOG_EMERG, WHERE_HACK __message__, ##args);		\
+	peak_backtrace(BACKTRACE_NORMAL);				\
 	abort();							\
 } while (0)
 

@@ -6,6 +6,7 @@
 #include <sys/queue.h>
 
 #define lengthof(x)	(sizeof(x)/sizeof((x)[0]))
+#define segv()		*((volatile int *)0)
 #define msleep(x)	usleep((x)*1000)
 
 #ifndef unlikely
