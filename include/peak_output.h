@@ -1,7 +1,6 @@
 #ifndef PEAK_OUTPUT_H
 #define PEAK_OUTPUT_H
 
-#include <execinfo.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -52,6 +51,11 @@ peak_log(int priority, const char *message, ...)
 #define BACKTRACE_SIGNAL	3
 #define BACKTRACE_MAX		128
 
+#ifdef __OpenBSD__
+#define peak_backtrace(x)
+#else /* !__OpenBSD__ */
+#include <execinfo.h>
+
 static inline void
 peak_backtrace(const int skip)
 {
@@ -63,6 +67,7 @@ peak_backtrace(const int skip)
 	backtrace_symbols_fd(&callstack[skip], frames, 2);
 	peak_bug(LOG_EMERG, "======= stack trace end =======\n");
 }
+#endif /* __OpenBSD__ */
 
 #undef BACKTRACE_MAX
 
