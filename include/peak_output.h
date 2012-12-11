@@ -45,7 +45,9 @@ peak_log(int priority, const char *message, ...)
 	va_end(ap);
 }
 
-#define peak_logging(__p__) ((__p__) <= _peak_log_priority)
+#define peak_out(x, args...)	peak_log(LOG_EMERG, x, ##args)
+#define peak_err(x, args...)	peak_bug(LOG_EMERG, x, ##args)
+#define peak_logging(x)		((x) <= _peak_log_priority)
 
 #define BACKTRACE_NORMAL	1
 #define BACKTRACE_SIGNAL	3

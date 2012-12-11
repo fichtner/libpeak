@@ -4,10 +4,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define ALLOC_CACHEALIGN(x)	ALLOC_ALIGN(x, ALLOC_CACHELINE)
+#define ALLOC_ALIGN(x, y)	((x) + (y) - ((x) % (y) ? : (y)))
 #define ALLOC_CACHELINE		64
-
-#define ALLOC_ALIGN(x)		((x) + ALLOC_CACHELINE -		\
-    ((x) % ALLOC_CACHELINE ? : ALLOC_CACHELINE))
 
 #define ALLOC_HEALTHY		0
 #define ALLOC_UNDERFLOW		1
@@ -230,7 +229,7 @@ peak_malign(size_t size)
 	}
 
 	ptr = peak_posix_memalign(ALLOC_CACHELINE,
-	    ALLOC_ALIGN(size) + ALLOC_PAD(malign));
+	    ALLOC_CACHEALIGN(size) + ALLOC_PAD(malign));
 	if (!ptr) {
 		return (NULL);
 	}

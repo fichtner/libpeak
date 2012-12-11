@@ -105,11 +105,12 @@ test_alloc(void)
 
 	peak_free(test_str);
 
-	assert(2 * ALLOC_CACHELINE == ALLOC_ALIGN(ALLOC_CACHELINE + 1));
-	assert(ALLOC_CACHELINE == ALLOC_ALIGN(ALLOC_CACHELINE - 1));
-	assert(ALLOC_CACHELINE == ALLOC_ALIGN(ALLOC_CACHELINE));
-	assert(ALLOC_CACHELINE == ALLOC_ALIGN(1));
-	assert(0 == ALLOC_ALIGN(0));
+	assert(ALLOC_CACHEALIGN(ALLOC_CACHELINE + 1) ==
+	    2 * ALLOC_CACHELINE);
+	assert(ALLOC_CACHEALIGN(ALLOC_CACHELINE - 1) == ALLOC_CACHELINE);
+	assert(ALLOC_CACHEALIGN(ALLOC_CACHELINE) == ALLOC_CACHELINE);
+	assert(ALLOC_CACHEALIGN(1) == ALLOC_CACHELINE);
+	assert(ALLOC_CACHEALIGN(0) == 0);
 
 	peak_free(peak_malign(0));
 	peak_free(peak_malign(1));
@@ -266,7 +267,7 @@ test_hash(void)
 int
 main(void)
 {
-	peak_log(LOG_EMERG, "peak base test suite... ");
+	peak_out("peak base test suite... ");
 
 	test_type();
 	test_alloc();
@@ -274,7 +275,7 @@ main(void)
 	test_output();
 	test_hash();
 
-	peak_log(LOG_EMERG, "ok\n");
+	peak_out("ok\n");
 
 	return (0);
 }
