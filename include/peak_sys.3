@@ -45,7 +45,7 @@ produce deadlock scenarios if you don't adhere to the given
 instructions.
 .Sh SPINLOCKS
 The spinlocks are of type
-.Fa spinlock_t ,
+.Vt spinlock_t ,
 which must be provided by the caller. Invoking
 .Fn spinlock_init
 yields a usable lock, which can be operated by subsequent calls of
@@ -58,7 +58,7 @@ Operating an uninitialized or previously destroyed spinlock yields
 an undefined behavior.
 .Sh BARRIERS
 The implementation of barriers of type
-.Fa barrier_t
+.Vt barrier_t
 is a bit more complex than its POSIX equivalent. Creation via
 .Fn barrier_init
 will initialize the barrier, but the number of threads waiting on
@@ -124,5 +124,4 @@ Finally, the barrier can be destroyed by calling
 Operating an uninitialized or previously destroyed barrier
 results in undefined behavior.
 .Sh AUTHORS
-.An Franco Fichtner
-.Aq franco@lastsummer.de
+.An "Franco Fichtner" Aq franco@lastsummer.de

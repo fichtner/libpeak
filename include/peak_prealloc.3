@@ -64,7 +64,7 @@ create and destroy a dynamically allocated pool struct, while
 and
 .Fn prealloc_exit
 work on an externally provided
-.Fa prealloc_t .
+.Vt prealloc_t .
 However, the actual memory pool is always allocated dynamically.
 Either memory pool can be operated by all following functions.
 .Pp
@@ -86,17 +86,17 @@ in place.
 A family of support macros are also available.
 .Fn prealloc_valid
 checks if a supplied chunk
-.Fa P
+.Va P
 belongs to the memory pool
-.Fa SELF .
+.Va SELF .
 The macro
 .Fn prealloc_empty
 will indicate whether the memory pool
-.Fa SELF
+.Va SELF
 is depleted or not. Last but not least,
 .Fn prealloc_size
 returns the chunk size of the memory pool
-.Fa SELF ,
+.Va SELF ,
 and
 .Fn prealloc_used
 returns the number of currently claimed chunks thereof.
@@ -112,7 +112,7 @@ but the performance loss is minimal.
 Upon success,
 .Fn prealloc_initd
 returns a pointer to the initialized memory pool. Otherwise,
-.Va NULL
+.Dv NULL
 is returned.
 .Fn prealloc_init
 returns non-zero if the given memory pool could be initalized.
@@ -123,10 +123,9 @@ Similarily, upon success, both
 and
 .Fn prealloc_get
 return a pointer to the freshly claimed memory chunk. Otherwise,
-.Va NULL
+.Dv NULL
 is returned to indicate the memory pool is empty.
 .Sh SEE ALSO
 .Xr peak_sys 3
 .Sh AUTHORS
-.An Franco Fichtner
-.Aq franco@lastsummer.de
+.An "Franco Fichtner" Aq franco@lastsummer.de

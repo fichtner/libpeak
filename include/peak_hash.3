@@ -68,18 +68,18 @@ macro family needs to be used explicitely.
 A rolling hash is headed by a structure defined by the
 .Li ROLL_HEAD
 macro. A
-.Fa HEAD
+.Va HEAD
 structure is decladed as follows:
 .Bd -literal -offset indent
 ROLL_HEAD(struct_name_if_desired) head;
 .Ed
 .Pp
 The
-.Fa HEAD
+.Va HEAD
 must then be initialized by calling
 .Li ROLL_INIT .
 Here, the beginning of the buffer must be given as the
-.Fa BUF
+.Va BUF
 argument:
 .Bd -literal -offset indent
 const char *buf = "test";
@@ -93,12 +93,12 @@ or
 .Li ROLL_NEXTN .
 .Li ROLL_NEXT
 only takes
-.Fa HEAD
+.Va HEAD
 as an argument and adds the next character from the input buffer
 to the hash.
 .Li ROLL_NEXTN
 uses its sibling internally to hash
-.Fa LEN
+.Va LEN
 characters at once:
 .Bd -literal -offset indent
 ROLL_NEXT(&head);
@@ -112,7 +112,7 @@ and
 are used to shift the hash to the right, losing the first character
 and gaining the next one in the process (or the number of characters
 specified by the
-.Fa LEN
+.Va LEN
 argument):
 .Bd -literal -offset indent
 ROLL_SHIFT(&head);
@@ -128,5 +128,4 @@ uint32_t hash = ROLL_HASH(&head);
 .Sh RETURN VALUES
 All functions return the calculated hash value for the given input.
 .Sh AUTHORS
-.An Franco Fichtner
-.Aq franco@lastsummer.de
+.An "Franco Fichtner" Aq franco@lastsummer.de
