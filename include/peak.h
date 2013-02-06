@@ -39,4 +39,5 @@
 #include "peak_output.h"
 #include "peak_alloc.h"
 #include "peak_prealloc.h"
+#include "peak_exalloc.h"
 #include "peak_hash.h"

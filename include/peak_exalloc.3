@@ -1,0 +1,114 @@
+.Dd November 30, 2012
+.Dt PEAK_EXALLOC 3
+.Os
+.Sh NAME
+.Nm exalloc_init ,
+.Nm exalloc_exit ,
+.Nm exalloc_initd ,
+.Nm exalloc_exitd ,
+.Nm exalloc_get ,
+.Nm exalloc_put ,
+.Nm exalloc_swap
+.Nd extended memory pool management
+.Sh SYNOPSIS
+.Fd #include <peak.h>
+.Ft unsigned int
+.Fo exalloc_init
+.Fa "exalloc_t *self" "size_t count"
+.Fa "size_t min_size" "size_t avg_size"
+.Fa "size_t max_size"
+.Fc
+.Ft void
+.Fn exalloc_exit "exalloc_t *self"
+.Ft exalloc_t *
+.Fo exalloc_initd
+.Fa "size_t count" "size_t min_size"
+.Fa "size_t avg_size" "size_t max_size"
+.Fc
+.Ft void
+.Fn exalloc_exitd "exalloc_t *self"
+.Ft void *
+.Fn exalloc_get "exalloc_t *self"
+.Ft void
+.Fn exalloc_put "exalloc_t *self" "void *p"
+.Ft void *
+.Fn exalloc_swap "exalloc_t *self" "void *p" "size_t size"
+.Sh DESCRIPTION
+The
+.Nm peak_exalloc
+API provides a minimal implementation for extended memory
+pools. Three fixed-size
+.Xr peak_prealloc 3
+memory pools for the minimal, average, and maximum case
+allow for flexible buffer management.
+.Pp
+The function pair
+.Fn exalloc_initd
+and
+.Fn exalloc_exitd
+create and destroy a dynamically allocated pool struct, while
+.Fn exalloc_init
+and
+.Fn exalloc_exit
+work on an externally provided
+.Vt exalloc_t .
+However, the actual memory pool is always allocated dynamically.
+Either memory pool can be operated by all following functions.
+.Pp
+Upon success,
+.Fn exalloc_initd
+returns a pointer to the initialized memory pool. Otherwise,
+.Dv NULL
+is returned.
+.Fn exalloc_init
+returns non-zero if the given memory pool could be initalized.
+Otherwise, zero is returned.
+.Pp
+The memory pool is then operated on using the function
+.Fn exalloc_swap ,
+which will claim, release, or swap a memory chunk according
+to the way
+.Va p
+and
+.Va size
+have been set:
+.Bl -enum -offset indent
+.It
+Passing
+.Dv NULL
+and zero as arguments will not do anything. In this case,
+.Dv NULL
+is returned.
+.It
+Passing
+.Dv NULL
+and a non-zero
+.Va size
+will claim a new memory chunk, if a chunk of size <= chunk_size
+could be found.
+.It
+Passing a previously claimed chunk and
+.Va size
+zero will release the chunk back into the pool. In this case,
+.Dv NULL
+is returned.
+.It
+Passing non-NULL and non-zero as arguments will cause the
+chunk to be resized, if a chunk of size <= chunk_size could
+be found. The function may return the same chunk if the real
+chunk size is still big enough for the caller. If the chunk
+had to be resized, the current user data will be copied to
+the new chunk. In case the swap failed due to an empty pool,
+.Dv NULL
+is returned, yet the original chunk remains claimed.
+.El
+.Pp
+For simplicity, wrappers for the swap operation are provided to
+claim a new chunk via
+.Fn exalloc_get
+and to release a previously claimed chunk via
+.Fn exalloc_put .
+.Sh SEE ALSO
+.Xr peak_prealloc 3
+.Sh AUTHORS
+.An "Franco Fichtner" Aq franco@lastsummer.de

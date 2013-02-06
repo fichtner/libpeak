@@ -9,6 +9,7 @@
 #define UNALIGNED_64_NEW	0x23456789ABCDEF01ull
 
 #define THIS_IS_A_STRING	"Hello, world!"
+#define THIS_IS_A_SHORT_STRING	"Hello!"
 
 peak_priority_init();
 
@@ -204,6 +205,66 @@ test_prealloc(void)
 }
 
 static void
+test_exalloc(void)
+{
+	char *s1, *s2, *s3;
+	exalloc_t *mem;
+
+	assert(!exalloc_initd(0, 8, 16, 128));
+	assert(!exalloc_initd(3, 0, 16, 128));
+	assert(!exalloc_initd(3, 8, 4, 128));
+	assert(!exalloc_initd(3, 8, 16, 8));
+	assert(!exalloc_initd(3, 16, 128, 8));
+
+	mem = exalloc_initd(3, 8, 16, 128);
+
+	assert(mem);
+	assert(!exalloc_swap(mem, NULL, 0));
+
+	s1 = exalloc_get(mem, sizeof(THIS_IS_A_SHORT_STRING));
+	assert(!exalloc_swap(mem, s1, 129));
+	s2 = exalloc_get(mem, sizeof(THIS_IS_A_SHORT_STRING));
+	s3 = exalloc_get(mem, sizeof(THIS_IS_A_SHORT_STRING));
+	assert(!exalloc_swap(mem, s1, sizeof(THIS_IS_A_STRING)));
+	assert(s1);
+	assert(s2 && s1 != s2);
+	assert(s3 && s3 != s2 && s3 != s1);
+	assert(!exalloc_get(mem, sizeof(THIS_IS_A_SHORT_STRING)));
+	assert(!exalloc_get(mem, sizeof(THIS_IS_A_STRING)));
+	s2 = exalloc_put(mem, s2);
+	s3 = exalloc_put(mem, s3);
+	assert(!s2 && !s3);
+
+	s2 = s1;
+	s1 = exalloc_put(mem, s1);
+	assert(!s1);
+	s1 = exalloc_get(mem, sizeof(THIS_IS_A_SHORT_STRING));
+	assert(s1 == s2);
+	s2 = NULL;
+
+	bcopy(THIS_IS_A_SHORT_STRING, s1, sizeof(THIS_IS_A_SHORT_STRING));
+	assert(!memcmp(s1, THIS_IS_A_SHORT_STRING,
+	    sizeof(THIS_IS_A_SHORT_STRING)));
+
+	s2 = exalloc_swap(mem, s1, sizeof(THIS_IS_A_STRING));
+	assert(s2 && s2 != s1);
+	assert(!memcmp(s2, THIS_IS_A_SHORT_STRING,
+	    sizeof(THIS_IS_A_SHORT_STRING)));
+
+	s1 = exalloc_swap(mem, s2, sizeof(THIS_IS_A_SHORT_STRING));
+	assert(s1 && s1 != s2);
+	exalloc_put(mem, s1);
+
+	s1 = exalloc_get(mem, sizeof(THIS_IS_A_STRING));
+	assert(s1);
+	s2 = exalloc_swap(mem, s1, sizeof(THIS_IS_A_STRING));
+	assert(s1 == s2);
+	exalloc_put(mem, s2);
+
+	exalloc_exitd(mem);
+}
+
+static void
 test_output(void)
 {
 	peak_priority_log();
@@ -272,6 +333,7 @@ main(void)
 	test_type();
 	test_alloc();
 	test_prealloc();
+	test_exalloc();
 	test_output();
 	test_hash();
 
