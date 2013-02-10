@@ -48,12 +48,14 @@
 The
 .Nm peak_prealloc
 API provides a minimal implementation for preallocated memory pools.
-It is designed to be as fast as possible. Thus, the implementation
-can only yield memory from a fixed pool size. The functions come in
-a few different flavors mainly for performance reasons. Please be
-advised that there is no functionality to mitigate empty pool
-scenarios. While a resize functionality is feasible, there is no
-use-case at the moment.
+It is designed to be as fast as possible.
+Thus, the implementation can only yield memory from a fixed pool size.
+The functions come in a few different flavors mainly for performance
+reasons.
+Please be advised that there is no functionality to mitigate empty pool
+scenarios.
+While a resize functionality is feasible, there is no use-case at the
+moment.
 .Pp
 The function pair
 .Fn prealloc_initd
@@ -73,15 +75,16 @@ The function pair
 and
 .Fn prealloc_puts
 offer the caller a thread-safe way to claim and release a pool's
-memory chunk. The safety comes from a spinlock provided by the
+memory chunk.
+The safety comes from a spinlock provided by the
 .Xr peak_sys 3
-API. On the other hand,
+API.
+On the other hand,
 .Fn prealloc_get
 and
 .Fn prealloc_put
-operate in lockless mode, in case the calling code is
-singlethreaded or has a higher locking mechanism already
-in place.
+operate in lockless mode, in case the calling code is singlethreaded
+or has a higher locking mechanism already in place.
 .Pp
 A family of support macros are also available.
 .Fn prealloc_valid
@@ -93,7 +96,8 @@ The macro
 .Fn prealloc_empty
 will indicate whether the memory pool
 .Va SELF
-is depleted or not. Last but not least,
+is depleted or not.
+Last but not least,
 .Fn prealloc_size
 returns the chunk size of the memory pool
 .Va SELF ,
@@ -101,17 +105,20 @@ and
 .Fn prealloc_used
 returns the number of currently claimed chunks thereof.
 .Pp
-Some API calls provide inline consistency checks for buffer
-underflows, pool/chunk mismatch, double-free, as well as
-for prematurely exited memory pools. If a check fails, both
-a process-wide panic message describing the error and an
+Some API calls provide inline consistency checks for buffer underflows,
+pool/chunk mismatch, double-free, as well as for prematurely exited
+memory pools.
+If a check fails, both a process-wide panic message describing the
+error and an
 .Xr abort 3
-are issued. There is no way to disable this at the moment,
-but the performance loss is minimal.
+are issued.
+There is no way to disable this at the moment, but the performance
+loss is minimal.
 .Sh RETURN VALUES
 Upon success,
 .Fn prealloc_initd
-returns a pointer to the initialized memory pool. Otherwise,
+returns a pointer to the initialized memory pool.
+Otherwise,
 .Dv NULL
 is returned.
 .Fn prealloc_init
@@ -122,7 +129,8 @@ Similarily, upon success, both
 .Fn prealloc_gets
 and
 .Fn prealloc_get
-return a pointer to the freshly claimed memory chunk. Otherwise,
+return a pointer to the freshly claimed memory chunk.
+Otherwise,
 .Dv NULL
 is returned to indicate the memory pool is empty.
 .Sh SEE ALSO

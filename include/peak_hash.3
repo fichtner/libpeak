@@ -33,14 +33,15 @@
 These
 .Nm peak_hash
 functions and macros provide support for different types of hashing:
-Fowler-Noll-Vo, Jenkins One-At-A-Time, and a rolling hash. All
-function prototypes share the same layout so that they remain fully
+Fowler-Noll-Vo, Jenkins One-At-A-Time, and a rolling hash.
+All function prototypes share the same layout so that they remain fully
 interchangable.
 .Sh FOWLER-NOLL-VO HASH
 The FNV is a set of non-cryptographic hash functions, which suppy a
-means of creating non-zero FNV offset basis. The speed of computation
-is excellent. Avalanche characteristics are ok, especially with version
-1a, which is used internally for
+means of creating non-zero FNV offset basis.
+The speed of computation is excellent.
+Avalanche characteristics are ok, especially with version 1a, which
+is used internally for
 .Fn hash_fnv32 .
 Values of zero in the input should be avoided, which makes this a good
 and fast hash for strings.
@@ -48,26 +49,28 @@ and fast hash for strings.
 The Jenkins One-At-A-Time hash is a non-cryptographic hash function.
 In contrast to FNV, this function has (almost) spotless avalanche
 characteristics and is safe for use with binary data containing zeroes.
-On the downside, this hash function is marginally slower than FNV. The
-hash calculation is invoked by calling
+On the downside, this hash function is marginally slower than FNV.
+The hash calculation is invoked by calling
 .Fn hash_joaat .
 .Sh ROLLING HASH
 The rolling hash provided is a cyclic polynomial, non-cryptographic
-hash function which is sometimes also refered to as Buzhash. It can
-be used to compute hashes of a fixed sliding window through the
+hash function which is sometimes also refered to as Buzhash.
+It can be used to compute hashes of a fixed sliding window through the
 input data - shifing the window only needs to process the first and
 the next character in the stream as well as the current hash value.
 This provides an edge over the other hash functions described here
-in the particular use-case. The function
+in the particular use-case.
+The function
 .Fn hash_roll
-provides a compatible prototype, but can't shift a window. To shift
-or grow a window, the
+provides a compatible prototype, but can't shift a window.
+To shift or grow a window, the
 .Li ROLL_*
 macro family needs to be used explicitely.
 .Pp
 A rolling hash is headed by a structure defined by the
 .Li ROLL_HEAD
-macro. A
+macro.
+A
 .Va HEAD
 structure is decladed as follows:
 .Bd -literal -offset indent
