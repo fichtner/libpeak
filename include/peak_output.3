@@ -1,0 +1,124 @@
+.Dd February 17, 2013
+.Dt PEAK_OUTPUT 3
+.Os
+.Sh NAME
+.Nm peak_priority_init ,
+.Nm peak_priority_log ,
+.Nm peak_priority_bug ,
+.Nm peak_log ,
+.Nm peak_bug ,
+.Nm peak_out ,
+.Nm peak_err ,
+.Nm peak_backtrace ,
+.Nm peak_panic ,
+.Nm peak_alert ,
+.Nm peak_crit ,
+.Nm peak_error ,
+.Nm peak_warn ,
+.Nm peak_notice ,
+.Nm peak_info ,
+.Nm peak_debug
+.Nd message output
+.Sh SYNOPSIS
+.Fd #include <peak.h>
+.Fn peak_priority_init
+.Fn peak_priority_log
+.Fn peak_priority_bug
+.Ft void
+.Fn peak_log "int priority" "const char *message" "..."
+.Ft void
+.Fn peak_bug "int priority" "const char *message" "..."
+.Ft void
+.Fn peak_out "const char *message" "..."
+.Ft void
+.Fn peak_err "const char *message" "..."
+.Ft void
+.Fn peak_backtrace "const int skip"
+.Fn peak_panic "MESSAGE" "..."
+.Fn peak_alert "MESSAGE" "..."
+.Fn peak_crit "MESSAGE" "..."
+.Fn peak_error "MESSAGE" "..."
+.Fn peak_warn "MESSAGE" "..."
+.Fn peak_notice "MESSAGE" "..."
+.Fn peak_info "MESSAGE" "..."
+.Fn peak_debug "MESSAGE" "..."
+.Sh DESCRIPTION
+The usage of the
+.Xr printf 3
+family of functions is generally discuraged when using this library.
+Instead, the functions and macros presented hereby are meant as a
+replacement to be used throughout the reader's code.
+.Pp
+The
+.Fn peak_priority_init
+macro initialises two global variables, which keep track of the maximum
+debug level used for the process, to the lowest available logging level.
+The logging level style is that of
+.Xr syslog 3 .
+The level for standard output or error messages is increased
+by one each time
+.Fn peak_priority_log
+or
+.Fn peak_prioroty_bug
+is called.
+.Pp
+The
+.Fn peak_log
+and
+.Fn peak_bug
+functions are modelled after the
+.Xr syslog 3
+prototype, and write output to
+.Xr stdout 4
+or
+.Xr stderr 4 ,
+respectively.
+They both adhere to the process-wide logging or debugging level
+discussed earlier.
+On the other hand, the
+.Fn peak_out
+and
+.Fn peak_err
+functions provide raw access to
+.Xr stdout 4
+or
+.Xr stderr 4 ,
+respectively.
+.Pp
+The
+.Fn peak_backtrace
+function attempts to print the current backtrace.
+It is not available on
+.Ox .
+.Pp
+The following debug macros are used for the general convenience of
+not having to select an explicit log level all the time.
+The log level (from sparse to noisy) corresponds thus:
+.Bl -tag -width "LOG_WARNING"
+.It Dv LOG_EMERG
+.Fn peak_panic
+-- includes a backtrace and
+.Xr abort 3
+.It Dv LOG_ALERT
+.Fn peak_alert
+.It Dv LOG_CRIT
+.Fn peak_crit
+.It Dv LOG_ERR
+.Fn peak_error
+.It Dv LOG_WARNING
+.Fn peak_warn
+.It Dv LOG_NOTICE
+.Fn peak_notice
+.It Dv LOG_INFO
+.Fn peak_info
+.It Dv LOG_DEBUG
+.Fn peak_debug
+.El
+.Sh SEE ALSO
+.Xr abort 3 ,
+.Xr printf 3 ,
+.Xr syslog 3 ,
+.Xr stderr 4 ,
+.Xr stdout 4
+.Sh AUTHOR
+.An "Franco Fichtner" Aq franco@lastsummer.de

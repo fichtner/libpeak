@@ -76,7 +76,7 @@ peak_backtrace(const int skip)
 /* fiddle around with macros to make panics show file/line info */
 #define _STRING_HACK(x)	#x
 #define STRING_HACK(x)	_STRING_HACK(x)
-#define WHERE_HACK		__FILE__ ":" STRING_HACK(__LINE__) ": "
+#define WHERE_HACK	__FILE__ ":" STRING_HACK(__LINE__) ": "
 
 #define peak_panic(__message__, args...) do {				\
 	peak_bug(LOG_EMERG, WHERE_HACK __message__, ##args);		\
