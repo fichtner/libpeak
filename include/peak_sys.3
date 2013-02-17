@@ -12,7 +12,7 @@
 .Nm barrier_wake ,
 .Nm barrier_join ,
 .Nm barrier_leave
-.Nd synchonization wrappers
+.Nd synchonisation wrappers
 .Sh SYNOPSIS
 .Fd #include <peak.h>
 .Ft void
@@ -55,7 +55,7 @@ and
 .Fn spin_unlock .
 The lock can be destroyed by calling
 .Fn spin_exit .
-Operating an uninitialized or previously destroyed spinlock yields
+Operating an uninitialised or previously destroyed spinlock yields
 an undefined behavior.
 .Sh BARRIERS
 The implementation of barriers of type
@@ -63,7 +63,7 @@ The implementation of barriers of type
 is a bit more complex than its POSIX equivalent.
 Creation via
 .Fn barrier_init
-will initialize the barrier, but the number of threads waiting on
+will initialise the barrier, but the number of threads waiting on
 a barrier is dynamic.
 Thus, after creation, zero threads are registered by the barrier.
 Waiting on such a barrier is undefined.
@@ -86,7 +86,7 @@ while (barrier_join(&barrier)) {
 .Ed
 .Pp
 In case of leaving a barrier, care must be taken to invoke the
-internal barrier synchronization mechanism as long as the thread
+internal barrier synchronisation mechanism as long as the thread
 cannot leave the barrier:
 .Bd -literal -offset indent
 while (barrier_leave(&barrier)) {
@@ -94,17 +94,17 @@ while (barrier_leave(&barrier)) {
 }
 .Ed
 .Pp
-The acutal barrier synchronization mechanism is implemented using
+The acutal barrier synchronisation mechanism is implemented using
 .Fn barrier_wait
 and
 .Fn barrier_wake .
-This provides another API twist: the serializing thread doesn't
+This provides another API twist: the serialising thread doesn't
 block - it is in charge of calling the wake function to wake up
 all other threads.
 To indicate this behavior,
 .Fn barrier_wait
 returns non-zero.
-Otherwise, zero is returned, meaning the serialization was complete
+Otherwise, zero is returned, meaning the serialisation was complete
 and all threads have been woken up.
 The code may look like so:
 .Bd -literal -offset indent
@@ -118,7 +118,7 @@ if (needed) {
 }
 .Ed
 .Pp
-This ensures the serializing thread can do data structure manipulations
+This ensures the serialising thread can do data structure manipulations
 while no other thread is able to change or even reference it, because
 all those threads are being blocked by the barrier.
 Traditionally, this had to be implemented by invoking a second barrier
@@ -127,7 +127,7 @@ This was considered an unnecessary complication.
 .Pp
 Finally, the barrier can be destroyed by calling
 .Fn barrier_exit .
-Operating an uninitialized or previously destroyed barrier
+Operating an uninitialised or previously destroyed barrier
 results in undefined behavior.
 .Sh AUTHORS
 .An "Franco Fichtner" Aq franco@lastsummer.de

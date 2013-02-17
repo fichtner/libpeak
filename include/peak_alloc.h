@@ -65,7 +65,7 @@ struct peak_malign_head {
 };
 
 static inline void *
-_peak_finalize_malloc(const uint64_t size, struct peak_malloc_head *h)
+_peak_finalise_malloc(const uint64_t size, struct peak_malloc_head *h)
 {
 	ALLOC_INIT(malloc, h, size);
 
@@ -101,7 +101,7 @@ peak_malloc(size_t size)
 		return (NULL);
 	}
 
-	return (_peak_finalize_malloc(size, ptr));
+	return (_peak_finalise_malloc(size, ptr));
 }
 
 static inline void *
@@ -185,7 +185,7 @@ peak_strdup(const char *s1)
 }
 
 static inline void *
-_peak_finalize_malign(const uint64_t size, struct peak_malign_head *h)
+_peak_finalise_malign(const uint64_t size, struct peak_malign_head *h)
 {
 	ALLOC_INIT(malign, h, size);
 
@@ -234,7 +234,7 @@ peak_malign(size_t size)
 		return (NULL);
 	}
 
-	return (_peak_finalize_malign(size, ptr));
+	return (_peak_finalise_malign(size, ptr));
 }
 
 static inline unsigned int
