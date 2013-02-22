@@ -56,7 +56,7 @@ and
 The lock can be destroyed by calling
 .Fn spin_exit .
 Operating an uninitialised or previously destroyed spinlock yields
-an undefined behavior.
+an undefined behaviour.
 .Sh BARRIERS
 The implementation of barriers of type
 .Vt barrier_t
@@ -101,7 +101,7 @@ and
 This provides another API twist: the serialising thread doesn't
 block - it is in charge of calling the wake function to wake up
 all other threads.
-To indicate this behavior,
+To indicate this behaviour,
 .Fn barrier_wait
 returns non-zero.
 Otherwise, zero is returned, meaning the serialisation was complete
@@ -128,6 +128,6 @@ This was considered an unnecessary complication.
 Finally, the barrier can be destroyed by calling
 .Fn barrier_exit .
 Operating an uninitialised or previously destroyed barrier
-results in undefined behavior.
+results in undefined behaviour.
 .Sh AUTHORS
 .An "Franco Fichtner" Aq franco@lastsummer.de
