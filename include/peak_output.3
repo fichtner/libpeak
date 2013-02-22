@@ -52,11 +52,11 @@ replacement to be used throughout the reader's code.
 The
 .Fn peak_priority_init
 macro initialises two global variables, which keep track of the maximum
-debug level used for the process, to the lowest available logging level.
-The logging level style is that of
+output levels (logging and debugging) used for the process, to the
+lowest available level.
+The level style is that of
 .Xr syslog 3 .
-The level for standard output or error messages is increased
-by one each time
+The level for logging or debugging messages is increased by one each time
 .Fn peak_priority_log
 or
 .Fn peak_prioroty_bug
@@ -73,10 +73,10 @@ prototype, and write output to
 or
 .Xr stderr 4 ,
 respectively.
-They both adhere to the process-wide logging or debugging level
-discussed earlier and do not produce any overhead while expanding
-function parameters in unreachable log levels, because the functions
-are macro wrappers internally.
+They both adhere to the process-wide output levels discussed earlier
+and do not produce any overhead while expanding function parameters
+in unreachable log levels, because the functions are macro wrappers
+internally.
 On the other hand, the
 .Fn peak_out
 and

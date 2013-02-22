@@ -33,9 +33,9 @@ peak_print(FILE *stream, const char *message, ...)
 	}								\
 } while (0)
 
-/* fast stdout/stderr access macros */
-#define peak_out(x, args...)	peak_log(LOG_EMERG, x, ##args)
-#define peak_err(x, args...)	peak_bug(LOG_EMERG, x, ##args)
+/* fast stdout/stderr access (handle with care) */
+#define peak_out(x, args...)	peak_print(stdout, x, ##args)
+#define peak_err(x, args...)	peak_print(stderr, x, ##args)
 
 #define BACKTRACE_NORMAL	1
 #define BACKTRACE_SIGNAL	3
