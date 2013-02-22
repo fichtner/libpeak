@@ -10,44 +10,32 @@ extern int _peak_bug_priority;
 extern int _peak_log_priority;
 
 static inline void
-_peak_print(FILE *stream, const char *message, va_list ap)
+peak_print(FILE *stream, const char *message, ...)
 {
+	va_list ap;
+
+	va_start(ap, message);
 	vfprintf(stream, message, ap);
-}
-
-/* keep syslog style layout so we can switch on demand later */
-static inline void
-peak_bug(int priority, const char *message, ...)
-{
-	if (priority > _peak_bug_priority) {
-		return;
-	}
-
-	va_list ap;
-
-	va_start(ap, message);
-	_peak_print(stderr, message, ap);
 	va_end(ap);
 }
 
 /* keep syslog style layout so we can switch on demand later */
-static inline void
-peak_log(int priority, const char *message, ...)
-{
-	if (priority > _peak_log_priority) {
-		return;
-	}
+#define peak_bug(x, y, args...) do {					\
+	if ((x) <= _peak_bug_priority) {				\
+		peak_print(stderr, y, ##args);				\
+	}								\
+} while (0)
 
-	va_list ap;
+/* keep syslog style layout so we can switch on demand later */
+#define peak_log(x, y, args...) do {					\
+	if ((x) <= _peak_log_priority) {				\
+		peak_print(stdout, y, ##args);				\
+	}								\
+} while (0)
 
-	va_start(ap, message);
-	_peak_print(stdout, message, ap);
-	va_end(ap);
-}
-
+/* fast stdout/stderr access macros */
 #define peak_out(x, args...)	peak_log(LOG_EMERG, x, ##args)
 #define peak_err(x, args...)	peak_bug(LOG_EMERG, x, ##args)
-#define peak_logging(x)		((x) <= _peak_log_priority)
 
 #define BACKTRACE_NORMAL	1
 #define BACKTRACE_SIGNAL	3

@@ -1,4 +1,4 @@
-.Dd February 17, 2013
+.Dd February 22, 2013
 .Dt PEAK_OUTPUT 3
 .Os
 .Sh NAME
@@ -74,7 +74,9 @@ or
 .Xr stderr 4 ,
 respectively.
 They both adhere to the process-wide logging or debugging level
-discussed earlier.
+discussed earlier and do not produce any overhead while expanding
+function parameters in unreachable log levels, because the functions
+are macro wrappers internally.
 On the other hand, the
 .Fn peak_out
 and
