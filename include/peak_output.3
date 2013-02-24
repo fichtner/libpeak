@@ -1,4 +1,4 @@
-.Dd February 22, 2013
+.Dd February 24, 2013
 .Dt PEAK_OUTPUT 3
 .Os
 .Sh NAME
@@ -52,15 +52,14 @@ replacement to be used throughout the reader's code.
 The
 .Fn peak_priority_init
 macro initialises two global variables, which keep track of the maximum
-output levels (logging and debugging) used for the process, to the
-lowest available level.
+output levels used for the process, to the lowest available level.
 The level style is that of
-.Xr syslog 3 .
-The level for logging or debugging messages is increased by one each time
+.Xr syslog 3
+and the currently selected level is increased by one each time
 .Fn peak_priority_log
-or
+(log level) or
 .Fn peak_prioroty_bug
-is called.
+(debug level) is called.
 .Pp
 The
 .Fn peak_log
@@ -75,7 +74,7 @@ or
 respectively.
 They both adhere to the process-wide output levels discussed earlier
 and do not produce any overhead while expanding function parameters
-in unreachable log levels, because the functions are macro wrappers
+in unreachable levels, because the functions are macro wrappers
 internally.
 On the other hand, the
 .Fn peak_out
@@ -90,7 +89,15 @@ respectively.
 The
 .Fn peak_backtrace
 function attempts to print the current backtrace.
-It is not available on
+The
+.Ar skip
+argument can be either
+.Dv BACKTRACE_NORMAL
+for inline stack traces, or
+.Dv BACKTRACE_SIGNAL
+for signal handler stack traces.
+Thus neglectable stack frames are omitted from the final backtrace.
+The function is not available on
 .Ox .
 .Pp
 The following debug macros are used for the general convenience of
