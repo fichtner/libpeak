@@ -85,12 +85,14 @@ functions provide raw access to
 or
 .Xr stderr 4 ,
 respectively.
+Additionally, debug output puts file and line numbers in front of the
+message to be displayed, so it should not be used in production.
 .Pp
 The
 .Fn peak_backtrace
 function attempts to print the current backtrace.
 The
-.Ar skip
+.Fa skip
 argument can be either
 .Dv BACKTRACE_NORMAL
 for inline stack traces, or
