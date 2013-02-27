@@ -1,0 +1,69 @@
+.Dd February 10, 2013
+.Dt PEAK_TIMESLICE 3
+.Os
+.Sh NAME
+.Nm TIMESLICE_INIT ,
+.Nm TIMESLICE_NORMALIZE ,
+.Nm TIMESLICE_ADVANCE
+.Nd simple clock service
+.Sh SYNOPSIS
+.Fd #include <peak.h>
+.Fn TIMESLICE_INIT CLOCK
+.Fn TIMESLICE_NORMALIZE CLOCK TS_MS
+.Fn TIMESLICE_ADVANCE CLOCK TS_UNIX TS_MS
+.Sh DESCRIPTION
+The
+.Nm peak_timeslice
+macros provide a centralised clock to avoid system calls for
+clock operations.
+System calls are considered a bottleneck for high performance
+threads, since they will invoke the scheduler and cause a context
+switch to happen.
+.Pp
+The following structure is preloaded with the current time
+slice's clock: the current monotonic timestamp in milliseconds
+and the current unix time stamp.
+Both are needed, as most timeout functionality needs to run on a
+monotonic clock, while external functionality will need the actual
+time (and/or time zone).
+.Pp
+.Bd -literal -offset indent
+typedef struct {
+        uint64_t normal;
+        uint64_t msec;
+        uint64_t sec;
+        time_t epoch;
+        struct tm tm;
+} timeslice_t;
+.Ed
+.Pp
+.Fn TIMESLICE_INIT
+will prepare a
+.Vt timeslice_t
+for operation.
+Then,
+.Fn TIMESLICE_NORMALIZE
+is used to adjust the internal monotonic clock to start at zero,
+which is quite handy for initial timeouts in other libraries.
+To advance the clocks the caller invokes
+.Fn TIMESLICE_ADVANCE
+once per time slice.
+Of course, inside the time slice, there will be no going forward
+in time, but the time slices should be as small as possible anyway.
+A basic loop may look like this:
+.Bd -literal -offset indent
+timeslice_t clock;
+
+TIMESLICE_INIT(&clock)
+
+update_time_values_once(&unix_value, &ms_value);
+TIMESLICE_NORMALIZE(&clock, ms_value);
+
+do {
+	update_time_values_once(&unix_value, &ms_value);
+	TIMESLICE_ADVANCE(&clock, unix_value, ms_value);
+	do_time_slice_work_now(&clock);
+} while (cond);
+.Ed
+.Sh AUTHORS
+.An "Franco Fichtner" Aq franco@lastsummer.de

@@ -325,6 +325,28 @@ test_hash(void)
 	assert(backup != hash_roll("tesT", 4));
 }
 
+static void
+test_time(void)
+{
+	timeslice_t _timer;
+	timeslice_t *timer;
+
+	timer = &_timer;
+
+	TIMESLICE_INIT(timer);
+
+	TIMESLICE_NORMALIZE(timer, 42);
+	TIMESLICE_ADVANCE(timer, 1, 42);
+
+	assert(timer->normal == 42);
+	assert(timer->msec == 1000);
+
+	TIMESLICE_ADVANCE(timer, 1, 45);
+
+	assert(timer->normal = 42);
+	assert(timer->msec == 1003);
+}
+
 int
 main(void)
 {
@@ -336,6 +358,7 @@ main(void)
 	test_exalloc();
 	test_output();
 	test_hash();
+	test_time();
 
 	peak_out("ok\n");
 
