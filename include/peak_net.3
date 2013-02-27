@@ -1,0 +1,54 @@
+.Dd February 27, 2012
+.Dt PEAK_NET 3
+.Os
+.Sh NAME
+.Nm netmap4 ,
+.Nm netmap6 ,
+.Nm netcmp
+.Nd coherent network address mapping
+.Sh SYNOPSIS
+.Fd #include <peak.h>
+.Ft void
+.Fn netmap4 "struct netmap *in4" "const uint32_t ip"
+.Ft void
+.Fn netmap6 "struct netmap *in6" "const void *ip"
+.Ft int
+.Fo netcmp
+.Fa "const struct netmap *x"
+.Fa "const struct netmap *y"
+.Fc
+.Sh DESCRIPTION
+The
+.Nm peak_net
+functions provide support for coherent network address mapping
+between IP version 4 and 6.
+Regardless of its version, all of the created structures can be
+compared without the caller worrying about the implications.
+The internal mapping of IPv4 is implemented using the ::ffff:0:0/96
+network as specified in Section 2.5.5.2 of RFC 4291.
+.Pp
+Both
+.Fn netmap4
+and
+.Fn netmap6
+convert the provided IPv4 or IPv6 network address into a given
+.Vt struct netmap .
+.Fn netcmp
+then allows the caller to compare such structures against each
+other.
+.Sh RETURN VALUES
+The
+.Fn netcmp
+function returns zero if the two addresses are identical.
+If
+.Va x
+is less than
+.Va y ,
+the function returns <0.
+Otherwise,
+.Va x
+is greater than
+.Va y ,
+which is indicated by a return value of >0.
+.Sh AUTHORS
+.An "Franco Fichtner" Aq franco@lastsummer.de
