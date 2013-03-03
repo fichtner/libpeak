@@ -11,7 +11,7 @@
 #define THIS_IS_A_STRING	"Hello, world!"
 #define THIS_IS_A_SHORT_STRING	"Hello!"
 
-peak_priority_init();
+output_init();
 
 static void
 test_type(void)
@@ -297,19 +297,19 @@ test_exalloc(void)
 static void
 test_output(void)
 {
-	peak_priority_log();
-	peak_priority_bug();
+	output_log();
+	output_bug();
 
 	if (0) {
 		/* compile only */
-		peak_panic("test");
-		peak_alert("test");
-		peak_crit("test");
-		peak_error("test");
-		peak_warn("test");
-		peak_notice("test");
-		peak_info("test");
-		peak_debug("test");
+		panic("test");
+		alert("test");
+		critical("test");
+		error("test");
+		warning("test");
+		notice("test");
+		info("test");
+		debug("test");
 	}
 }
 
@@ -380,7 +380,7 @@ test_time(void)
 int
 main(void)
 {
-	peak_out("peak base test suite... ");
+	pout("peak base test suite... ");
 
 	test_type();
 	test_net();
@@ -391,7 +391,7 @@ main(void)
 	test_hash();
 	test_time();
 
-	peak_out("ok\n");
+	pout("ok\n");
 
 	return (0);
 }

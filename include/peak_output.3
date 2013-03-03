@@ -1,47 +1,47 @@
-.Dd February 24, 2013
+.Dd March 3, 2013
 .Dt PEAK_OUTPUT 3
 .Os
 .Sh NAME
-.Nm peak_priority_init ,
-.Nm peak_priority_log ,
-.Nm peak_priority_bug ,
-.Nm peak_log ,
-.Nm peak_bug ,
-.Nm peak_out ,
-.Nm peak_err ,
-.Nm peak_backtrace ,
-.Nm peak_panic ,
-.Nm peak_alert ,
-.Nm peak_crit ,
-.Nm peak_error ,
-.Nm peak_warn ,
-.Nm peak_notice ,
-.Nm peak_info ,
-.Nm peak_debug
+.Nm output_init ,
+.Nm output_log ,
+.Nm output_bug ,
+.Nm plog ,
+.Nm pbug ,
+.Nm pout ,
+.Nm perr ,
+.Nm pbacktrace ,
+.Nm panic ,
+.Nm alert ,
+.Nm critical ,
+.Nm error ,
+.Nm warning ,
+.Nm notice ,
+.Nm info ,
+.Nm debug
 .Nd message output
 .Sh SYNOPSIS
 .Fd #include <peak.h>
-.Fn peak_priority_init
-.Fn peak_priority_log
-.Fn peak_priority_bug
+.Fn output_init
+.Fn output_log
+.Fn output_bug
 .Ft void
-.Fn peak_log "int priority" "const char *message" "..."
+.Fn plog "int priority" "const char *message" "..."
 .Ft void
-.Fn peak_bug "int priority" "const char *message" "..."
+.Fn pbug "int priority" "const char *message" "..."
 .Ft void
-.Fn peak_out "const char *message" "..."
+.Fn pout "const char *message" "..."
 .Ft void
-.Fn peak_err "const char *message" "..."
+.Fn perr "const char *message" "..."
 .Ft void
-.Fn peak_backtrace "const int skip"
-.Fn peak_panic "MESSAGE" "..."
-.Fn peak_alert "MESSAGE" "..."
-.Fn peak_crit "MESSAGE" "..."
-.Fn peak_error "MESSAGE" "..."
-.Fn peak_warn "MESSAGE" "..."
-.Fn peak_notice "MESSAGE" "..."
-.Fn peak_info "MESSAGE" "..."
-.Fn peak_debug "MESSAGE" "..."
+.Fn pbacktrace "const int skip"
+.Fn panic "MESSAGE" "..."
+.Fn alert "MESSAGE" "..."
+.Fn critical "MESSAGE" "..."
+.Fn error "MESSAGE" "..."
+.Fn warning "MESSAGE" "..."
+.Fn notice "MESSAGE" "..."
+.Fn info "MESSAGE" "..."
+.Fn debug "MESSAGE" "..."
 .Sh DESCRIPTION
 The usage of the
 .Xr printf 3
@@ -50,21 +50,21 @@ Instead, the functions and macros presented hereby are meant as a
 replacement to be used throughout the reader's code.
 .Pp
 The
-.Fn peak_priority_init
+.Fn output_init
 macro initialises two global variables, which keep track of the maximum
 output levels used for the process, to the lowest available level.
 The level style is that of
 .Xr syslog 3
 and the currently selected level is increased by one each time
-.Fn peak_priority_log
+.Fn output_log
 (log level) or
-.Fn peak_prioroty_bug
+.Fn output_bug
 (debug level) is called.
 .Pp
 The
-.Fn peak_log
+.Fn plog
 and
-.Fn peak_bug
+.Fn pbug
 functions are modelled after the
 .Xr syslog 3
 prototype, and write output to
@@ -77,9 +77,9 @@ and do not produce any overhead while expanding function parameters
 in unreachable levels, because the functions are macro wrappers
 internally.
 On the other hand, the
-.Fn peak_out
+.Fn pout
 and
-.Fn peak_err
+.Fn perr
 functions provide raw access to
 .Xr stdout 4
 or
@@ -89,7 +89,7 @@ Additionally, debug output puts file and line numbers in front of the
 message to be displayed, so it should not be used in production.
 .Pp
 The
-.Fn peak_backtrace
+.Fn pbacktrace
 function attempts to print the current backtrace.
 The
 .Fa skip
@@ -107,23 +107,23 @@ not having to select an explicit log level all the time.
 The log level (from sparse to noisy) corresponds thus:
 .Bl -tag -width "LOG_WARNING"
 .It Dv LOG_EMERG
-.Fn peak_panic
+.Fn panic
 -- includes a backtrace and
 .Xr abort 3
 .It Dv LOG_ALERT
-.Fn peak_alert
+.Fn alert
 .It Dv LOG_CRIT
-.Fn peak_crit
+.Fn critical
 .It Dv LOG_ERR
-.Fn peak_error
+.Fn error
 .It Dv LOG_WARNING
-.Fn peak_warn
+.Fn warning
 .It Dv LOG_NOTICE
-.Fn peak_notice
+.Fn notice
 .It Dv LOG_INFO
-.Fn peak_info
+.Fn info
 .It Dv LOG_DEBUG
-.Fn peak_debug
+.Fn debug
 .El
 .Sh SEE ALSO
 .Xr abort 3 ,

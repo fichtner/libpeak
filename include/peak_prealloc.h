@@ -95,13 +95,13 @@ _prealloc_put(prealloc_t *self, void *p)
 	case PREALLOC_HEALTHY:						\
 		break;							\
 	case PREALLOC_UNDERFLOW:					\
-		peak_panic("buffer underflow detected\n");		\
+		panic("buffer underflow detected\n");			\
 		/* NOTREACHED */					\
 	case PREALLOC_DOUBLE_FREE:					\
-		peak_panic("double free detected\n");			\
+		panic("double free detected\n");			\
 		/* NOTREACHED */					\
 	case PREALLOC_POOL_MISMATCH:					\
-		peak_panic("pool mismatch detected\n");			\
+		panic("pool mismatch detected\n");			\
 		/* NOTREACHED */					\
 	}								\
 } while (0)
@@ -205,7 +205,7 @@ _prealloc_exit(prealloc_t *self)
 	case PREALLOC_HEALTHY:						\
 		break;							\
 	case PREALLOC_MISSING_CHUNKS:					\
-		peak_panic("missing chunks detected\n");		\
+		panic("missing chunks detected\n");			\
 		/* NOTREACHED */					\
 	}								\
 } while (0)

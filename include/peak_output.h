@@ -10,7 +10,7 @@ extern int _peak_bug_priority;
 extern int _peak_log_priority;
 
 static inline void
-peak_print(FILE *stream, const char *message, ...)
+_peak_print(FILE *stream, const char *message, ...)
 {
 	va_list ap;
 
@@ -20,88 +20,95 @@ peak_print(FILE *stream, const char *message, ...)
 }
 
 /* keep syslog style layout so we can switch on demand later */
-#define peak_bug(x, y, args...) do {					\
+#define _peak_bug(x, y, args...) do {					\
 	if ((x) <= _peak_bug_priority) {				\
-		peak_print(stderr, y, ##args);				\
+		_peak_print(stderr, y, ##args);				\
 	}								\
 } while (0)
 
 /* keep syslog style layout so we can switch on demand later */
-#define peak_log(x, y, args...) do {					\
+#define _peak_log(x, y, args...) do {					\
 	if ((x) <= _peak_log_priority) {				\
-		peak_print(stdout, y, ##args);				\
+		_peak_print(stdout, y, ##args);				\
 	}								\
 } while (0)
 
 /* fast stdout/stderr access (handle with care) */
-#define peak_out(x, args...)	peak_print(stdout, x, ##args)
-#define peak_err(x, args...)	peak_print(stderr, x, ##args)
+#define _peak_out(x, args...)	_peak_print(stdout, x, ##args)
+#define _peak_err(x, args...)	_peak_print(stderr, x, ##args)
 
 #define BACKTRACE_NORMAL	1
 #define BACKTRACE_SIGNAL	3
 #define BACKTRACE_MAX		128
 
 #ifdef __OpenBSD__
-#define peak_backtrace(x)
+#define _peak_backtrace(x)
 #else /* !__OpenBSD__ */
 #include <execinfo.h>
 
 static inline void
-peak_backtrace(const int skip)
+_peak_backtrace(const int skip)
 {
 	void *callstack[BACKTRACE_MAX];
 	int frames;
 
-	peak_bug(LOG_EMERG, "====== stack trace begin ======\n");
+	_peak_bug(LOG_EMERG, "====== stack trace begin ======\n");
 	frames = backtrace(callstack, BACKTRACE_MAX) - skip;
 	backtrace_symbols_fd(&callstack[skip], frames, 2);
-	peak_bug(LOG_EMERG, "======= stack trace end =======\n");
+	_peak_bug(LOG_EMERG, "======= stack trace end =======\n");
 }
 #endif /* __OpenBSD__ */
 
 #undef BACKTRACE_MAX
+
+/* shorter is always better */
+#define pbacktrace	_peak_backtrace
+#define pbug		_peak_bug
+#define plog		_peak_log
+#define perr		_peak_err
+#define pout		_peak_out
 
 /* fiddle around with macros to make panics show file/line info */
 #define _STRING_HACK(x)	#x
 #define STRING_HACK(x)	_STRING_HACK(x)
 #define WHERE_HACK	__FILE__ ":" STRING_HACK(__LINE__) ": "
 
-#define peak_panic(__message__, args...) do {				\
-	peak_bug(LOG_EMERG, WHERE_HACK __message__, ##args);		\
-	peak_backtrace(BACKTRACE_NORMAL);				\
+#define panic(msg, args...) do {					\
+	_peak_bug(LOG_EMERG, WHERE_HACK msg, ##args);			\
+	_peak_backtrace(BACKTRACE_NORMAL);				\
 	abort();							\
 } while (0)
 
-#define peak_alert(__message__, args...) do {				\
-	peak_bug(LOG_ALERT, WHERE_HACK __message__, ##args);		\
+#define alert(msg, args...) do {					\
+	_peak_bug(LOG_ALERT, WHERE_HACK msg, ##args);			\
 } while (0)
 
-#define peak_crit(__message__, args...) do {				\
-	peak_bug(LOG_CRIT, WHERE_HACK __message__, ##args);		\
+#define critical(msg, args...) do {					\
+	_peak_bug(LOG_CRIT, WHERE_HACK msg, ##args);			\
 } while (0)
 
-#define peak_error(__message__, args...) do {				\
-	peak_bug(LOG_ERR, WHERE_HACK __message__, ##args);		\
+#define error(msg, args...) do {					\
+	_peak_bug(LOG_ERR, WHERE_HACK msg, ##args);			\
 } while (0)
 
-#define peak_warn(__message__, args...) do {				\
-	peak_bug(LOG_WARNING, WHERE_HACK __message__, ##args);		\
+#define warning(msg, args...) do {					\
+	_peak_bug(LOG_WARNING, WHERE_HACK msg, ##args);			\
 } while (0)
 
-#define peak_notice(__message__, args...) do {				\
-	peak_bug(LOG_NOTICE, WHERE_HACK __message__, ##args);		\
+#define notice(msg, args...) do {					\
+	_peak_bug(LOG_NOTICE, WHERE_HACK msg, ##args);			\
 } while (0)
 
-#define peak_info(__message__, args...) do {				\
-	peak_bug(LOG_INFO, WHERE_HACK __message__, ##args);		\
+#define info(msg, args...) do {						\
+	_peak_bug(LOG_INFO, WHERE_HACK msg, ##args);			\
 } while (0)
 
-#define peak_debug(__message__, args...) do {				\
-	peak_bug(LOG_DEBUG, WHERE_HACK __message__, ##args);		\
+#define debug(msg, args...) do {					\
+	_peak_bug(LOG_DEBUG, WHERE_HACK msg, ##args);			\
 } while (0)
 
-#define peak_priority_bump(__priority__) do {				\
-	switch (__priority__) {						\
+#define output_bump(priority) do {					\
+	switch (priority) {						\
 	case LOG_EMERG:							\
 		/* FALLTHROUGH */					\
 	case LOG_ALERT:							\
@@ -115,20 +122,20 @@ peak_backtrace(const int skip)
 	case LOG_NOTICE:						\
 		/* FALLTHROUGH */					\
 	case LOG_INFO:							\
-		++(__priority__);					\
+		++(priority);						\
 	case LOG_DEBUG:							\
 		break;							\
 	default:							\
-		peak_panic("impossible priority: %d\n", __priority__);	\
+		panic("impossible priority: %d\n", priority);		\
 		/* NOTREACHED */					\
 	}								\
 } while (0)
 
-#define peak_priority_init()						\
+#define output_init()							\
 	int _peak_bug_priority = LOG_EMERG;				\
 	int _peak_log_priority = LOG_EMERG
 
-#define peak_priority_log() peak_priority_bump(_peak_log_priority)
-#define peak_priority_bug() peak_priority_bump(_peak_bug_priority)
+#define output_log()	output_bump(_peak_log_priority)
+#define output_bug()	output_bump(_peak_bug_priority)
 
 #endif /* !PEAK_OUTPUT_H */

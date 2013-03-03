@@ -17,10 +17,10 @@
 	case ALLOC_HEALTHY:						\
 		break;							\
 	case ALLOC_UNDERFLOW:						\
-		peak_panic("buffer underflow detected\n");		\
+		panic("buffer underflow detected\n");			\
 		/* NOTREACHED */					\
 	case ALLOC_OVERFLOW:						\
-		peak_panic("buffer overflow detected\n");		\
+		panic("buffer overflow detected\n");			\
 		/* NOTREACHED */					\
 	}								\
 } while (0)
