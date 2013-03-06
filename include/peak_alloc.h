@@ -44,7 +44,7 @@ struct peak_alloc_magic {
 	(x)->magic = ALLOC_VALUE(name);					\
 	ALLOC_SIZE(x) = y;						\
 	ALLOC_TAIL(x)->magic = ALLOC_VALUE(name);			\
-} while (0);
+} while (0)
 
 #define ALLOC_TAIL_OK(name, x)	(ALLOC_VALUE(name) == ALLOC_TAIL(x)->magic)
 

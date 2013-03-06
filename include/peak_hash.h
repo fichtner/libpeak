@@ -120,14 +120,14 @@ struct name {								\
         (head)->rhh_hash = _ROLL_SHIFT((head)->rhh_hash) ^		\
 	    _ROLL_SHIFTN(_val, _len) ^					\
 	    hash_roll_values[*((head)->rhh_next++)];			\
-} while (0);
+} while (0)
 
 #define ROLL_SHIFTN(head, len) do {					\
 	unsigned int _i;						\
 	for (_i = 0; _i < (len); ++_i) {				\
 		ROLL_SHIFT(head);					\
 	}								\
-} while (0);
+} while (0)
 
 static inline uint32_t
 hash_roll(const void *buf, const unsigned int len)
