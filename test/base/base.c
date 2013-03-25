@@ -73,6 +73,46 @@ test_net(void)
 	assert(!netcmp(&ip, &ip6_ref));
 }
 
+struct interval {
+	int left;
+	int right;
+};
+
+static void
+test_stash(void)
+{
+	struct interval test[2] = { { 2, 1 }, { 1, 2 } };
+	STASH_DECLARE(stash, struct interval, 2);
+	struct interval *p;
+	unsigned int i = 0;
+
+	assert(STASH_EMPTY(stash));
+
+	STASH_PUSH(&test[0], stash);
+	STASH_PUSH(&test[1], stash);
+
+	assert(STASH_FULL(stash));
+
+	STASH_FOREACH(p, stash) {
+		assert(p->left == test[i].left &&
+		    p->right == test[i].right);
+		++i;
+	}
+
+	assert(STASH_COUNT(stash) == i);
+
+	STASH_FOREACH_REVERSE(p, stash) {
+		--i;
+		assert(p->left == test[i].left &&
+		    p->right == test[i].right);
+	}
+
+	STASH_POP(stash);
+	STASH_POP(stash);
+
+	assert(STASH_EMPTY(stash));
+}
+
 static void
 test_alloc(void)
 {
@@ -384,6 +424,7 @@ main(void)
 
 	test_type();
 	test_net();
+	test_stash();
 	test_alloc();
 	test_prealloc();
 	test_exalloc();
