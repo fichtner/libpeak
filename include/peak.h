@@ -41,5 +41,6 @@
 #include "peak_prealloc.h"
 #include "peak_exalloc.h"
 #include "peak_timeslice.h"
+#include "peak_stash.h"
 #include "peak_net.h"
 #include "peak_hash.h"
