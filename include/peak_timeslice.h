@@ -10,7 +10,8 @@ typedef struct {
 	/* hrm, Ubuntu doesn't build with the name "unix"
 	 * and complains in a very cryptic way... */
 	time_t epoch;
-	struct tm tm;
+	struct tm local;
+	struct tm gmt;
 } timeslice_t;
 
 #define TIMESLICE_ADVANCE(clock, ts_unix, ts_ms) do {			\
@@ -18,7 +19,8 @@ typedef struct {
 	(clock)->sec = (clock)->msec / 1000;				\
 	if (unlikely((ts_unix) != (clock)->epoch)) {			\
 		(clock)->epoch = (ts_unix);				\
-		localtime_r(&(clock)->epoch, &(clock)->tm);		\
+		localtime_r(&(clock)->epoch, &(clock)->local);		\
+		gmtime_r(&(clock)->epoch, &(clock)->gmt);		\
 	}								\
 } while (0)
 

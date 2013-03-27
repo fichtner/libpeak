@@ -1,4 +1,4 @@
-.Dd February 10, 2013
+.Dd March 26, 2013
 .Dt PEAK_TIMESLICE 3
 .Os
 .Sh NAME
@@ -29,11 +29,12 @@ time (and/or time zone).
 .Pp
 .Bd -literal -offset indent
 typedef struct {
-        uint64_t normal;
-        uint64_t msec;
-        uint64_t sec;
-        time_t epoch;
-        struct tm tm;
+	uint64_t normal;
+	uint64_t msec;
+	uint64_t sec;
+	time_t epoch;
+	struct tm local;
+	struct tm gmt;
 } timeslice_t;
 .Ed
 .Pp
