@@ -1,4 +1,4 @@
-.Dd November 27, 2012
+.Dd April 15, 2013
 .Dt PEAK_HASH 3
 .Os
 .Sh NAME
@@ -14,7 +14,7 @@
 .Nm ROLL_HASH
 .Nd assorted hash functions
 .Sh SYNOPSIS
-.Fd #include <peak.h>
+.In peak.h
 .Ft uint32_t
 .Fn hash_fnv32 "const void *buf" "const unsigned int len"
 .Ft uint32_t
@@ -65,7 +65,7 @@ The function
 provides a compatible prototype, but can't shift a window.
 To shift or grow a window, the
 .Li ROLL_*
-macro family needs to be used explicitely.
+macro family needs to be used explicitly.
 .Pp
 A rolling hash is headed by a structure defined by the
 .Li ROLL_HEAD
@@ -108,7 +108,7 @@ ROLL_NEXT(&head);
 ROLL_NEXT(&head, 4);
 .Ed
 .Pp
-Similarily,
+Similarly,
 .Li ROLL_SHIFT
 and
 .Li ROLL_SHIFTN

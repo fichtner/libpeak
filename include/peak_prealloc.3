@@ -1,4 +1,4 @@
-.Dd November 27, 2012
+.Dd April 15, 2013
 .Dt PEAK_PREALLOC 3
 .Os
 .Sh NAME
@@ -16,7 +16,7 @@
 .Nm prealloc_size
 .Nd preallocated memory pool management
 .Sh SYNOPSIS
-.Fd #include <peak.h>
+.In peak.h
 .Ft unsigned int
 .Fo prealloc_init
 .Fa "prealloc_t *self"
@@ -125,7 +125,7 @@ is returned.
 returns non-zero if the given memory pool could be initalised.
 Otherwise, zero is returned.
 .Pp
-Similarily, upon success, both
+Similarly, upon success, both
 .Fn prealloc_gets
 and
 .Fn prealloc_get
