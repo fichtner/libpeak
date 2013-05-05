@@ -1,1 +1,1 @@
-SUBDIR=	base
+SUBDIR=	base load

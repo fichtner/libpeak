@@ -33,6 +33,10 @@
 #define MAX(a,b)	(((a)>(b))?(a):(b))
 #endif /* !MAX */
 
+#ifndef XOR
+#define XOR(a,b)	(!!(a)+!!(b)==1)
+#endif /* !XOR */
+
 #ifdef __linux__
 #define strlcpy(x,y,z)	strcpy(x,y)
 #define strlcat(x,y,z)	strcat(x,y)
@@ -49,3 +53,6 @@
 #include "peak_stash.h"
 #include "peak_net.h"
 #include "peak_hash.h"
+
+/* library headers */
+#include "peak_load.h"

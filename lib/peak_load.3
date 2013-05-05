@@ -1,0 +1,76 @@
+.Dd May 5, 2013
+.Dt PEAK_LOAD 3
+.Os
+.Sh NAME
+.Nm peak_load_init ,
+.Nm peak_load_next ,
+.Nm peak_load_exit
+.Nd open and read a trace file
+.Sh SYNOPSIS
+.In peak.h
+.Ft struct peak_load *
+.Fn peak_load_init "const char *file"
+.Ft unsigned int
+.Fn peak_load_next "struct peak_load *self"
+.Ft void
+.Fn peak_load_exit "stuct peak_load *self"
+.Sh DESCRIPTION
+The
+.Nm peak_load
+API provides a mechanism to open PCAP and ERF captures (network trace
+files).
+Each packet is being provided sequentially.
+The library can automatically detect a PCAP file, or will fall back to
+ERF mode.
+However, input given via
+.Xr stdin 4
+is always considered an ERF file.
+.Pp
+Specifications have been taken from
+.Lk http://wiki.wireshark.org/Development/LibpcapFileFormat/
+for the PCAP file structure, as well as from
+.Lk http://wiki.wireshark.org/ERF
+for the ERF file structure.
+.Pp
+Both formats are viable, but PCAP is considered more popular.
+And
+.Xr pcap 3
+is not just a format -- it is also a full packet capture and
+injection engine.
+However, ERF allows for marking packets with their respective capture
+interface, while PCAP always only listens on one interface.
+Another advantage of ERF is that it doesn't implement a global file
+header, which allows files to be concatenated in the following way:
+.Pp
+.Dl $ cat file1.erf file2.erf > merged.erf
+.Pp
+The
+.Nm peak_load
+API needs to be initialised with
+.Fn peak_load_init
+before it can be used.
+The function returns a
+.Vt struct peak_load *
+reference, which is an argument for all other API calls.
+.Pp
+In order to load the next available packet, an application needs to call
+.Fn peak_load_next .
+The packet resides in the
+.Vt struct peak_load *
+for examination, until
+.Fn peak_load_next
+is called again.
+Upon successful completion
+.Fn peak_load_next
+returns the size of the next packet.
+Otherwise, 0 is returned.
+.Pp
+A call to
+.Fn peak_load_exit
+releases the reference to
+.Vt struct peak_load *
+and closes the trace file.
+.Sh SEE ALSO
+.Xr pcap 3
+.Sh AUTHORS
+.An "Franco Fichtner" Aq franco@lastsummer.de
