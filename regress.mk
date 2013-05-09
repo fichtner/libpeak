@@ -5,4 +5,4 @@ all: $(REGRESS_TARGET)
 .in:
 	@$(FILE) $(FLAGS) $*.in | \
 		diff -u $*.out - || \
-		(echo "XXX $* failed" && false)
+		(echo "$* failed" && false)

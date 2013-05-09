@@ -3,4 +3,5 @@
 *.po
 *.dSYM
 *.manlint
+*.gz
 .depend

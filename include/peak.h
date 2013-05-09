@@ -4,6 +4,7 @@
 
 #include <sys/cdefs.h>
 #include <sys/queue.h>
+#include <sys/types.h>
 
 #define lengthof(x)	(sizeof(x)/sizeof((x)[0]))
 #define segv()		*((volatile int *)0)
