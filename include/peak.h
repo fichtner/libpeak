@@ -54,6 +54,7 @@
 #include "peak_stash.h"
 #include "peak_net.h"
 #include "peak_hash.h"
+#include "tree.h"
 
 /* library headers */
 #include "peak_load.h"
