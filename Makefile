@@ -1,2 +1,2 @@
-include makefile.mk
+include makefile.inc
 include subdir.mk

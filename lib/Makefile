@@ -1,3 +1,4 @@
-include makefile.mk
-include ../lib.mk
-include ../check.mk
+BASEDIR=..
+include makefile.inc
+include $(BASEDIR)/lib.mk
+include $(BASEDIR)/check.mk
