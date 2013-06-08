@@ -58,3 +58,4 @@
 
 /* library headers */
 #include "peak_load.h"
+#include "peak_track.h"

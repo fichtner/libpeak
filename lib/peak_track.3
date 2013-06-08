@@ -1,0 +1,68 @@
+.Dd June 8, 2013
+.Dt PEAK_TRACK 3
+.Os
+.Sh NAME
+.Nm peak_track_init ,
+.Nm peak_track_acquire ,
+.Nm peak_track_exit
+.Nd flow tracker
+.Sh SYNOPSIS
+.In peak.h
+.Ft struct peak_tracks *
+.Fn peak_track_init "const size_t max_flows"
+.Ft struct peak_track *
+.Fo peak_track_acquire
+.Fa "struct peak_tracks *self"
+.Fa "const struct peak_track *ref"
+.Fc
+.Ft void
+.Fn peak_track_exit "stuct peak_tracks *self"
+.Sh DESCRIPTION
+The
+.Nm peak_track
+API provides a mechanism to retrieve private memory locations for unique
+network flows.
+Memory obtained in this way can be used to create a context for a packet
+stream to operate on.
+This is needed for a vast number of transport and application layer related
+functionality.
+.Pp
+Instead of using a flat hash table, the flow key is explicitly constructed
+and thus avoids collisions by remaining unique.
+This makes the lookup slower, but the library less prone to targeted attacks.
+The design of the library is thread-safe and one instance of
+.Vt struct peak_tracks *
+per thread is recommended.
+The flow id mechanism is global and atomic, so each id is unique even when
+working with multiple instances.
+.Pp
+The
+.Nm peak_track
+API needs to be initialised with
+.Fn peak_track_init
+before it can be used.
+Upon successful completion the function returns a pointer to an initialised
+flow tracker structure.
+Otherwise,
+.Dv NULL
+is returned.
+.Pp
+Retrieving a flow memory location is done by calling
+.Fn peak_track_acquire .
+The function requires a lookup key
+.Va ref ,
+which can be prepared using the macro
+.Fn TRACK_KEY .
+Upon completion the function returns a pointer to a private memory location
+to be used as desired.
+When
+.Va max_flows
+is reached, the oldest flow in the structure will be removed so that the
+acquire may never fail.
+.Pp
+A call to
+.Fn peak_track_exit
+releases a previously initialised
+.Vt struct peak_tracks * .
+.Sh AUTHORS
+.An "Franco Fichtner" Aq franco@lastsummer.de
