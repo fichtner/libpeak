@@ -1,5 +1,24 @@
-  PEAK utilities
+libpeak -- network-related library glue
+=======================================
 
-These few source files offer basic debugging and development
-tools for C projects in general. A unit test is provided. Use
-it at your own risk.
+This library consists of several modules and generic base headers
+designed around the daily needs of network-related userland tools.
+Currently, the available modules are:
+
+peak_load:	PCAP/ERF file reader
+peak_track:	simple flow tracker
+
+This code builds fine on MacOS, OpenBSD, FreeBSD and Linux (Ubuntu).
+You break it, you fix it.
+
+Building the code:
+
+ # make
+
+Running the tests:
+
+ # cd regress && make
+
+Having fun:
+
+ # priceless ;)
