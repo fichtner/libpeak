@@ -421,7 +421,7 @@ test_time(void)
 
 	TIMESLICE_INIT(timer);
 
-	TIMESLICE_NORMALIZE(timer, 42);
+	TIMESLICE_NORMALISE(timer, 42);
 	TIMESLICE_ADVANCE(timer, 1, 42);
 
 	assert(timer->normal == 42);

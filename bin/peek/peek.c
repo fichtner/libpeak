@@ -127,7 +127,7 @@ main(int argc, char **argv)
 	TIMESLICE_INIT(&timer);
 
 	if (peak_load_next(trace)) {
-		TIMESLICE_NORMALIZE(&timer, trace->ts_ms);
+		TIMESLICE_NORMALISE(&timer, trace->ts_ms);
 
 		do {
 			TIMESLICE_ADVANCE(&timer, trace->ts_unix,

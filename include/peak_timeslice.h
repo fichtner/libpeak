@@ -40,7 +40,7 @@ typedef struct {
 	}								\
 } while (0)
 
-#define TIMESLICE_NORMALIZE(clock, ts_ms) do {				\
+#define TIMESLICE_NORMALISE(clock, ts_ms) do {				\
 	(clock)->normal = (clock)->normal ? : (ts_ms);			\
 } while (0)
 

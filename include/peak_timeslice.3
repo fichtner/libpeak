@@ -13,18 +13,18 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd March 26, 2013
+.Dd June 10, 2013
 .Dt PEAK_TIMESLICE 3
 .Os
 .Sh NAME
 .Nm TIMESLICE_INIT ,
-.Nm TIMESLICE_NORMALIZE ,
+.Nm TIMESLICE_NORMALISE ,
 .Nm TIMESLICE_ADVANCE
 .Nd simple clock service
 .Sh SYNOPSIS
 .In peak.h
 .Fn TIMESLICE_INIT CLOCK
-.Fn TIMESLICE_NORMALIZE CLOCK TS_MS
+.Fn TIMESLICE_NORMALISE CLOCK TS_MS
 .Fn TIMESLICE_ADVANCE CLOCK TS_UNIX TS_MS
 .Sh DESCRIPTION
 The
@@ -58,7 +58,7 @@ will prepare a
 .Vt timeslice_t
 for operation.
 Then,
-.Fn TIMESLICE_NORMALIZE
+.Fn TIMESLICE_NORMALISE
 is used to adjust the internal monotonic clock to start at zero,
 which is quite handy for initial timeouts in other libraries.
 To advance the clocks the caller invokes
@@ -73,7 +73,7 @@ timeslice_t clock;
 TIMESLICE_INIT(&clock)
 
 update_time_values_once(&unix_value, &ms_value);
-TIMESLICE_NORMALIZE(&clock, ms_value);
+TIMESLICE_NORMALISE(&clock, ms_value);
 
 do {
 	update_time_values_once(&unix_value, &ms_value);
