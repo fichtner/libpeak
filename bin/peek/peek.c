@@ -88,9 +88,8 @@ peek_packet(struct peak_tracks *peek, const timeslice_t *timer,
 		panic("tracker should never be empty\n");
 	}
 
-	pout("flow: %zu, eth_type: ip, eth_len: %u, "
-	    "ip_type: %hhu, ip_len: %u, time: %s\n",
-	    flow->id, len, packet.net_type, packet.net_len, strftime(tsbuf,
+	pout("flow: %zu, ip_type: %hhu, ip_len: %u, time: %s\n",
+	    flow->id, packet.net_type, packet.net_len, strftime(tsbuf,
 	    sizeof(tsbuf), "%a %F %T", &timer->gmt) ? tsbuf : "???");
 }
 
