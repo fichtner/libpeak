@@ -45,7 +45,7 @@ static inline void
 netmap6(struct netmap *in6, const void *ip)
 {
 	/* IPv6 is native, but don't tell anyone */
-	bcopy(ip, in6, sizeof(*in6));
+	memcpy(in6, ip, sizeof(*in6));
 }
 
 static inline int

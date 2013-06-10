@@ -72,6 +72,10 @@
 #include "peak_hash.h"
 #include "tree.h"
 
+/* forward declarations */
+struct peak_packet;
+
 /* library headers */
 #include "peak_load.h"
 #include "peak_track.h"
+#include "peak_packet.h"
