@@ -20,6 +20,7 @@
 struct peak_load {
 	unsigned int fmt;
 	unsigned int len;
+	unsigned int ll;
 	int fd;
 
 	uint32_t ts_off;

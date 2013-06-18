@@ -29,6 +29,44 @@
 #define IPPROTO_IPEIP	94
 #endif /* !IPPROTO_IPEIP */
 
+#ifndef LINKTYPE_ETHERNET
+#define LINKTYPE_ETHERNET	1
+#endif /* !LINKTYPE_ETHERNET */
+
+#ifndef LINKTYPE_LINUX_SLL
+#define LINKTYPE_LINUX_SLL	113
+#endif /* !LINKTYPE_LINUX_SLL */
+
+struct sll_header {
+	uint16_t sll_pkttype;	/* packet type */
+	uint16_t sll_hatype;	/* link-layer address type */
+	uint16_t ssl_halen;	/* link-layer address length */
+	uint8_t ssl_addr[8];	/* link-layer address */
+	uint16_t sll_protocol;	/* protocol */
+};
+
+#define PACKET_LINK(pkt, buf, len, type) do {				\
+	bzero(pkt, sizeof(*(pkt)));					\
+	(pkt)->mac.raw = buf;						\
+	(pkt)->mac_len = len;						\
+	switch (type) {							\
+	case LINKTYPE_ETHERNET:						\
+		(pkt)->mac_type = be16dec(&(pkt)->mac.eth->ether_type);	\
+		(pkt)->net.raw = (pkt)->mac.raw +			\
+		    sizeof(*(pkt)->mac.eth);				\
+		break;							\
+	case LINKTYPE_LINUX_SLL:					\
+		(pkt)->mac_type =					\
+		    be16dec(&(pkt)->mac.sll->sll_protocol);		\
+		(pkt)->net.raw = (pkt)->mac.raw +			\
+		    sizeof(*(pkt)->mac.sll);				\
+		break;							\
+	default:							\
+		panic("unknown link type %u\n", type);			\
+		/* NOTREACHED */					\
+	}								\
+} while (0)
+
 #define SRC(x, y)	((x) + !!(y))
 #define DST(x, y)	((x) + !(y))
 #define LOWER		0
@@ -37,6 +75,7 @@
 struct peak_packet {
 	union {
 		struct ether_header *eth;
+		struct sll_header *sll;
 		unsigned char *raw;
 	} mac;
 	union {

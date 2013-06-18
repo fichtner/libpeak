@@ -32,7 +32,7 @@ output_init();
 
 static void
 peek_packet(struct peak_tracks *peek, const timeslice_t *timer,
-    void *buf, unsigned int len)
+    void *buf, unsigned int len, unsigned int type)
 {
 	struct peak_packet packet;
 	struct peak_track *flow;
@@ -40,15 +40,10 @@ peek_packet(struct peak_tracks *peek, const timeslice_t *timer,
 	struct netmap src, dst;
 	char tsbuf[40];
 
-	bzero(&packet, sizeof(packet));
-
-	packet.mac.eth = buf;
-	packet.mac_len = len;
-
-	packet.net.raw = packet.mac.raw + sizeof(struct ether_header);
-	packet.mac_type = be16dec(&packet.mac.eth->ether_type);
+	PACKET_LINK(&packet, buf, len, type);
 
 	if (packet.mac_type != ETHERTYPE_IP) {
+		/* XXX handle IPv6 */
 		return;
 	}
 
@@ -74,6 +69,7 @@ peek_packet(struct peak_tracks *peek, const timeslice_t *timer,
 		packet.flow_dport = be16dec(&packet.flow.uh->uh_dport);
 		break;
 	default:
+		/* XXX handle other transport stuff */
 		return;
 	}
 
@@ -131,7 +127,8 @@ main(int argc, char **argv)
 		do {
 			TIMESLICE_ADVANCE(&timer, trace->ts_unix,
 			    trace->ts_ms);
-			peek_packet(peek, &timer, trace->buf, trace->len);
+			peek_packet(peek, &timer, trace->buf, trace->len,
+			    trace->ll);
 		} while (peak_load_next(trace));
 	}
 

@@ -142,6 +142,7 @@ peak_load_next(struct peak_load *self)
 struct peak_load *
 peak_load_init(const char *file)
 {
+	unsigned int ll = LINKTYPE_ETHERNET;
 	struct peak_load *self = NULL;
 	unsigned int fmt = ERF_FMT;
 	int fd = STDIN_FILENO;
@@ -160,6 +161,7 @@ peak_load_init(const char *file)
 		}
 
 		if (hdr.magic_number == PCAP_MAGIC) {
+			ll = hdr.network;
 			fmt = PCAP_FMT;
 		} else {
 			/* rewind & pretend nothing happened */
@@ -174,6 +176,7 @@ peak_load_init(const char *file)
 
 	self->fmt = fmt;
 	self->fd = fd;
+	self->ll = ll;
 
 	return (self);
 
