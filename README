@@ -2,11 +2,36 @@ libpeak -- network-related library glue
 =======================================
 
 This library consists of several modules and generic base headers
-designed around the daily needs of network-related userland tools.
-Currently, the available modules are:
+designed around the daily needs of network packet-related userland
+tools written in C.  Currently, the available modules are:
 
 peak_load:	PCAP/ERF file reader
 peak_track:	simple flow tracker
+
+There's also a bunch of arch-independent base headers, which offer
+simple memory pools, runtime allocation wrappers, network address
+mapping, simple hashes, output macros, spinlock/barrier wrappers,
+and so forth.
+
+A good introduction to the code would be its man pages.  The first of
+them being peek(1).
+
+Licensing and contributions
+===========================
+
+The library has been developed by Packetwerk and is released under the
+ISC license (see COPYING for details).  Its main contributors are:
+
+Franco Fichtner <franco@lastsummer.de>
+Victor Pereira <v.pereira@packetwerk.de>
+
+Feel free to fork or contribute back.  To do so, use GitHub or send
+your patches to us via email.  Contributions can also be made in the
+form of supplying trace files or hard to come by documentation to help
+maintain a reliable and free library.
+
+Building and running the code
+=============================
 
 This code builds fine on MacOS, OpenBSD, FreeBSD and Linux (Ubuntu).
 You break it, you fix it.
