@@ -7,12 +7,12 @@ tools written in C.  Currently, the available modules are:
 
 peak_load:	PCAP/ERF file reader
 peak_tcp:	shallow TCP engine
-peak_track:	simple flow tracker
+peak_track:	rudimentary flow tracker
 peak_udp:	shallow UDP engine
 
 There's also a bunch of arch-independent base headers, which offer
 simple memory pools, runtime allocation wrappers, network address
-mapping, simple hashes, output macros, spinlock/barrier wrappers,
+mapping, some hashes, output macros, spinlock/barrier wrappers,
 and so forth.
 
 A good introduction to the code would be its man pages.  The first of
@@ -32,6 +32,16 @@ your patches to us via email.  Contributions can also be made in the
 form of supplying trace files or hard to come by documentation to help
 maintain a reliable and free library.
 
+Basic directory layout
+======================
+
+bin/		project binaries
+include/	base headers
+lib/		specific modules
+regress/	test framework
+sample/		trace files
+test/		test binaries
+
 Building and running the code
 =============================
 
@@ -40,12 +50,12 @@ You break it, you fix it.
 
 Building the code:
 
- # make
+    make
 
 Running the tests:
 
- # cd regress && make
+    cd regress && make
 
 Having fun:
 
- # priceless ;)
+    priceless ;)
