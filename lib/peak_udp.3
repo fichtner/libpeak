@@ -1,0 +1,55 @@
+.\"
+.\" Copyright (c) 2012 Franco Fichtner <franco@lastsummer.de>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd May 3, 2013
+.Dt PEAK_UDP 3
+.Os
+.Sh NAME
+.Nm peak_udp_prepare
+.Nd UDP engine
+.Sh SYNOPSIS
+.In peak.h
+.Ft unsigned int
+.Fn peak_udp_prepare "struct peak_packet *packet"
+.Sh DESCRIPTION
+The
+.Nm peak_udp
+API provides a mechanism to verify and \(dqreassemble\(dq UDP
+datagrams for application data analysis.
+Since UDP is stateless, the actual application data is simply
+being extracted from the packet as is.
+The API was introduced to mimic the behaviour of its sibling
+.Xr peak_tcp 3 .
+.Pp
+The abstraction layer is quite thin, but is required to keep
+UDP-specific operations hidden from upper processing layers.
+At some point, we want to run DTLS decryption on top of this
+library.
+.Pp
+Each
+.Vt struct peak_packet *
+must be prepared by calling
+.Fn peak_udp_prepare .
+This ensures the raw header parsing and sanity checking is done.
+.Sh RETURN VALUES
+Upon successful completion
+.Fn peak_udp_prepare
+returns zero.
+Otherwise, a non-zero value is returned, indicating the packet needs
+to be discarded.
+.Sh SEE ALSO
+.Xr peak_tcp 3
+.Sh AUTHORS
+.An "Franco Fichtner" Aq franco@lastsummer.de

@@ -25,8 +25,6 @@
 #include <net/ethernet.h>
 #endif /* __OpenBSD__ || __FreeBSD__ */
 #include <netinet/ip.h>
-#include <netinet/udp.h>
-#include <netinet/tcp.h>
 
 output_init();
 
@@ -59,22 +57,19 @@ peek_packet(struct peak_tracks *peek, const timeslice_t *timer,
 
 	switch (packet.net_type) {
 	case IPPROTO_TCP:
-		packet.flow_hlen = packet.flow.th->th_off << 2;
-		packet.flow_sport = be16dec(&packet.flow.th->th_sport);
-		packet.flow_dport = be16dec(&packet.flow.th->th_dport);
+		if (peak_tcp_prepare(&packet)) {
+			return;
+		}
 		break;
 	case IPPROTO_UDP:
-		packet.flow_hlen = sizeof(*packet.flow.uh);
-		packet.flow_sport = be16dec(&packet.flow.uh->uh_sport);
-		packet.flow_dport = be16dec(&packet.flow.uh->uh_dport);
+		if (peak_udp_prepare(&packet)) {
+			return;
+		}
 		break;
 	default:
 		/* XXX handle other transport stuff */
 		return;
 	}
-
-	packet.app.raw = packet.flow.raw + packet.flow_hlen;
-	packet.app_len = packet.flow_len - packet.flow_hlen;
 
 	TRACK_KEY(&_flow, src, dst, packet.flow_sport, packet.flow_dport,
 	   packet.net_type);

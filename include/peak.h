@@ -77,5 +77,7 @@ struct peak_packet;
 
 /* library headers */
 #include "peak_load.h"
+#include "peak_udp.h"
+#include "peak_tcp.h"
 #include "peak_track.h"
 #include "peak_packet.h"

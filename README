@@ -6,7 +6,9 @@ designed around the daily needs of network packet-related userland
 tools written in C.  Currently, the available modules are:
 
 peak_load:	PCAP/ERF file reader
+peak_tcp:	shallow TCP engine
 peak_track:	simple flow tracker
+peak_udp:	shallow UDP engine
 
 There's also a bunch of arch-independent base headers, which offer
 simple memory pools, runtime allocation wrappers, network address
