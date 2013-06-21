@@ -17,6 +17,10 @@
 #include <peak.h>
 #include <netinet/tcp.h>
 
+#ifndef TCP_MAXHLEN
+#define TCP_MAXHLEN	(0xf<<2)	/* max length of header in bytes */
+#endif /* !TCP_MAXHLEN */
+
 unsigned int
 peak_tcp_prepare(struct peak_packet *packet)
 {
