@@ -1,0 +1,10 @@
+before_install:
+  - sudo apt-get install -qq build-essential pmake
+install: true
+script: make
+after_install: cd regress && make
+language: c
+compiler: gcc
+branches:
+  only:
+    - master
