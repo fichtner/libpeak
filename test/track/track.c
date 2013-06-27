@@ -34,7 +34,9 @@ test_track(void)
 	assert(tracker);
 
 	TRACK_KEY(&_flow, usr1, usr2, 80, 51000, 0);
-	assert(flow = peak_track_acquire(tracker, &_flow));
+	flow = peak_track_acquire(tracker, &_flow);
+
+	assert(flow);
 	assert(flow == peak_track_acquire(tracker, &_flow));
 	assert(flow == peak_track_acquire(tracker, flow));
 

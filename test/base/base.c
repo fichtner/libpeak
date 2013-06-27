@@ -51,11 +51,16 @@ test_type(void)
 	be64enc(&test_val_64, bswap64(UNALIGNED_64_ORIG));
 	assert(UNALIGNED_64_ORIG == test_val_64);
 
-	assert(!wrap16(test_val_16 = 0));
+	test_val_16 = 0;
+	assert(!wrap16(test_val_16));
 	assert(wrap16(test_val_16 - 1));
-	assert(!wrap32(test_val_32 = 0));
+
+	test_val_32 = 0;
+	assert(!wrap32(test_val_32));
 	assert(wrap32(test_val_32 - 1));
-	assert(!wrap64(test_val_64 = 0));
+
+	test_val_64 = 0;
+	assert(!wrap64(test_val_64));
 	assert(wrap64(test_val_64 - 1));
 }
 
@@ -326,7 +331,6 @@ test_exalloc(void)
 	assert(!s1);
 	s1 = exalloc_get(mem, sizeof(THIS_IS_A_SHORT_STRING));
 	assert(s1 == s2);
-	s2 = NULL;
 
 	bcopy(THIS_IS_A_SHORT_STRING, s1, sizeof(THIS_IS_A_SHORT_STRING));
 	assert(!memcmp(s1, THIS_IS_A_SHORT_STRING,
@@ -429,7 +433,7 @@ test_time(void)
 
 	TIMESLICE_ADVANCE(timer, 1, 45);
 
-	assert(timer->normal = 42);
+	assert(timer->normal == 42);
 	assert(timer->msec == 1003);
 }
 

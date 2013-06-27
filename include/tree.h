@@ -620,9 +620,8 @@ attr struct type *							\
 name##_RB_FIND(struct name *head, const struct type *elm)		\
 {									\
 	struct type *tmp = RB_ROOT(head);				\
-	int comp;							\
 	while (tmp) {							\
-		comp = cmp(elm, tmp);					\
+		int comp = cmp(elm, tmp);				\
 		if (comp < 0)						\
 			tmp = RB_LEFT(tmp, field);			\
 		else if (comp > 0)					\
@@ -639,9 +638,8 @@ name##_RB_NFIND(struct name *head, const struct type *elm)		\
 {									\
 	struct type *tmp = RB_ROOT(head);				\
 	struct type *res = NULL;					\
-	int comp;							\
 	while (tmp) {							\
-		comp = cmp(elm, tmp);					\
+		int comp = cmp(elm, tmp);				\
 		if (comp < 0) {						\
 			res = tmp;					\
 			tmp = RB_LEFT(tmp, field);			\
