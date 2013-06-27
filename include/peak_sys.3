@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd November 25, 2012
+.Dd June 27, 2013
 .Dt PEAK_SYS 3
 .Os
 .Sh NAME
@@ -113,9 +113,8 @@ The acutal barrier synchronisation mechanism is implemented using
 .Fn barrier_wait
 and
 .Fn barrier_wake .
-This provides another API twist: the serialising thread doesn't
-block - it is in charge of calling the wake function to wake up
-all other threads.
+This provides another API twist: the serialising thread is in charge of
+calling the wake function to wake up all other threads.
 To indicate this behaviour,
 .Fn barrier_wait
 returns non-zero.
