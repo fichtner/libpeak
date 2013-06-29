@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd May 5, 2013
+.Dd June 29, 2013
 .Dt PEAK_LOAD 3
 .Os
 .Sh NAME
@@ -32,10 +32,10 @@
 .Sh DESCRIPTION
 The
 .Nm peak_load
-API provides a mechanism to open PCAP and ERF captures (network trace
+API provides a mechanism to open PCAP(NG) and ERF captures (network trace
 files).
 Each packet is being provided sequentially.
-The library can automatically detect a PCAP file, or will fall back to
+The library can automatically detect a PCAP(NG) file, or will fall back to
 ERF mode.
 However, input given via
 .Xr stdin 4
@@ -43,11 +43,13 @@ is always considered an ERF file.
 .Pp
 Specifications have been taken from
 .Lk http://wiki.wireshark.org/Development/LibpcapFileFormat/
-for the PCAP file structure, as well as from
+for the PCAP file structure, from
+.Lk http://www.winpcap.org/ntar/draft/PCAP-DumpFileFormat.html
+for the PCAPNG file structure, as well as from
 .Lk http://wiki.wireshark.org/ERF
 for the ERF file structure.
 .Pp
-Both formats are viable, but PCAP is considered more popular.
+All formats are viable, but PCAP is considered the most compatible.
 And
 .Xr pcap 3
 is not just a format -- it is also a full packet capture and
