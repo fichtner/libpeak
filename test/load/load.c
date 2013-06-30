@@ -59,6 +59,32 @@ test_pcap(void)
 	peak_load_exit(pcap);
 }
 
+static const unsigned int test_pcapng_len[] = {
+	78,
+};
+
+static void
+test_pcapng(void)
+{
+	struct peak_load *pcap = peak_load_init("../../sample/test.pcapng");
+	struct ether_header *eth;
+	unsigned int i;
+
+	assert(pcap);
+
+	eth = (struct ether_header *) pcap->buf;
+
+	for (i = 0; i < lengthof(test_pcapng_len); ++i) {
+		assert(peak_load_next(pcap) == test_pcapng_len[i]);
+		assert(be16dec(&eth->ether_type) == ETHERTYPE_IP);
+	}
+
+	assert(!peak_load_next(pcap));
+	assert(!peak_load_next(pcap));
+
+	peak_load_exit(pcap);
+}
+
 static const unsigned int test_erf_len[] = {
 	78, 64, 64, 711, 64, 1470, 64, 1470, 64, 393,
 	64, 711, 64, 1470, 262, 64, 64, 64, 64,
@@ -92,6 +118,7 @@ main(void)
 	pout("peak load test suite... ");
 
 	test_pcap();
+	test_pcapng();
 	test_erf();
 
 	pout("ok\n");

@@ -23,7 +23,11 @@ flow: 1, ip_type: 6, ip_len: 1500, time: Mon 2009-10-05 06:06:10
 flow: 1, ip_type: 6, ip_len: 1500, time: Mon 2009-10-05 06:06:10
 flow: 1, ip_type: 6, ip_len: 1500, time: Mon 2009-10-05 06:06:10
 flow: 1, ip_type: 6, ip_len: 1500, time: Mon 2009-10-05 06:06:10
+flow: 2, ip_type: 1, ip_len: 576, time: Mon 2009-10-05 06:06:10
 flow: 1, ip_type: 6, ip_len: 1492, time: Mon 2009-10-05 06:06:10
+flow: 2, ip_type: 1, ip_len: 576, time: Mon 2009-10-05 06:06:10
+flow: 2, ip_type: 1, ip_len: 576, time: Mon 2009-10-05 06:06:10
+flow: 2, ip_type: 1, ip_len: 576, time: Mon 2009-10-05 06:06:10
 flow: 1, ip_type: 6, ip_len: 40, time: Mon 2009-10-05 06:06:11
 flow: 1, ip_type: 6, ip_len: 1492, time: Mon 2009-10-05 06:06:11
 flow: 1, ip_type: 6, ip_len: 1492, time: Mon 2009-10-05 06:06:11
@@ -53,4 +57,4 @@ flow: 1, ip_type: 6, ip_len: 88, time: Mon 2009-10-05 06:06:15
 flow: 1, ip_type: 6, ip_len: 40, time: Mon 2009-10-05 06:06:15
 flow: 1, ip_type: 6, ip_len: 40, time: Mon 2009-10-05 06:06:15
 flow: 1, ip_type: 6, ip_len: 40, time: Mon 2009-10-05 06:06:15
-flow: 2, ip_type: 17, ip_len: 229, time: Mon 2009-10-05 06:06:16
+flow: 3, ip_type: 17, ip_len: 229, time: Mon 2009-10-05 06:06:16

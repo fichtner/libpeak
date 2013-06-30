@@ -58,14 +58,6 @@ struct pcapng_block_header {
 	uint32_t length;
 };
 
-struct pcapng_section_header {
-	struct pcapng_block_header hdr;
-	uint32_t byteorder;
-	uint16_t major;
-	uint16_t minor;
-	uint64_t length;
-};
-
 struct pcapng_iface_desc_header {
 	uint16_t linktype;
 	uint16_t reserved;
@@ -173,7 +165,8 @@ _peak_load_pcapng_again:
 	}
 
 	switch (hdr.type) {
-	case 6:	/* enhanced packet block */
+	case 2: /* packet block (obsolete) */
+	case 6:	/* enchanged packet block */
 		ret = read(self->fd, &pkt, sizeof(pkt));
 		if (ret != sizeof(pkt)) {
 			return;
@@ -205,13 +198,14 @@ _peak_load_pcapng_again:
 		self->ll = iface.linktype;
 
 		goto _peak_load_pcapng_again;
-	case 3:	/* simple packet block */
-	case 5:	/* interface statistics block */
+	default:
+		/*
+		 * The blocks we don't know we don't look at more
+		 * closely. A new section may begin here as well,
+		 * but we mop up the link type change above anyway.
+		 */
 		lseek(self->fd, hdr.length - sizeof(hdr), SEEK_CUR);
 		goto _peak_load_pcapng_again;
-	default:
-		/* unknown block type :( */
-		break;
 	}
 }
 
@@ -274,16 +268,14 @@ peak_load_init(const char *file)
 			break;
 		}
 		case PCAPNG_MAGIC: {
-			struct pcapng_section_header section;
+			struct pcapng_block_header hdr;
 
-			if (read(fd, &section, sizeof(section)) !=
-			    sizeof(section)) {
+			if (read(fd, &hdr, sizeof(hdr)) != sizeof(hdr)) {
 				goto peak_load_init_close;
 			}
 
 			/* skip over section header block */
-			lseek(fd, section.hdr.length - sizeof(section),
-			    SEEK_CUR);
+			lseek(fd, hdr.length - sizeof(hdr), SEEK_CUR);
 
 			/* change link type on the fly later */
 			fmt = PCAPNG_FMT;

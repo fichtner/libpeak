@@ -66,6 +66,8 @@ peek_packet(struct peak_tracks *peek, const timeslice_t *timer,
 			return;
 		}
 		break;
+	case IPPROTO_ICMP:
+		break;
 	default:
 		/* XXX handle other transport stuff */
 		return;
