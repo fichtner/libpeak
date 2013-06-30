@@ -166,7 +166,7 @@ _peak_load_pcapng_again:
 
 	switch (hdr.type) {
 	case 2: /* packet block (obsolete) */
-	case 6:	/* enchanged packet block */
+	case 6:	/* enhanced packet block */
 		ret = read(self->fd, &pkt, sizeof(pkt));
 		if (ret != sizeof(pkt)) {
 			return;

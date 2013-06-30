@@ -66,11 +66,8 @@ peek_packet(struct peak_tracks *peek, const timeslice_t *timer,
 			return;
 		}
 		break;
-	case IPPROTO_ICMP:
-		break;
 	default:
-		/* XXX handle other transport stuff */
-		return;
+		break;
 	}
 
 	TRACK_KEY(&_flow, src, dst, packet.flow_sport, packet.flow_dport,
