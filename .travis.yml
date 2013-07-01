@@ -1,8 +1,11 @@
-before_install:
-  - sudo apt-get install -qq build-essential pmake cppcheck rats
-install: true
+install:
+  - sudo apt-get install -qq build-essential pmake cppcheck rats sparse
 script: make
-after_install: cd regress && make && cd .. && cppcheck --enable=all -q --std=c99 -Iinclude -Ilib `git ls-files *.c` && rats -l c `git ls-files *.c`
+after_success:
+  - cd regress && make && cd ..
+  - make check
+  - cppcheck --enable=all -q --std=c99 -Iinclude -Ilib `git ls-files *.c`
+  - rats -l c `git ls-files *.c`
 language: c
 compiler: gcc
 branches:
