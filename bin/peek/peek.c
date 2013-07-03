@@ -103,7 +103,7 @@ peek_packet(struct peak_tracks *peek, const timeslice_t *timer,
 		peek_packet_ipv6(&packet);
 		break;
 	default:
-		/* ain't nobody got time for that */
+		/* here be dragons */
 		return;
 	}
 
