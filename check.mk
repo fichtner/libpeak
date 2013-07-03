@@ -1,5 +1,5 @@
 SPARSE=		sparse
-SFLAGS=		-ftabstop=4 -Wsparse-all -Wno-transparent-union
+SFLAGS=		-ftabstop=4 -Wsparse-all -Wno-transparent-union -std=gnu99
 SFLAGS+=	-Wno-declaration-after-statement -Wno-cast-truncate
 SFLAGS+=	-D__CHECKER__
 # Ubuntu 12.04 needs this...
