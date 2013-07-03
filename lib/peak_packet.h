@@ -79,6 +79,7 @@ struct peak_packet {
 		unsigned char *raw;
 	} mac;
 	union {
+		struct ip6_hdr *ip6h;
 		unsigned char *raw;
 		struct ip *iph;
 	} net;
