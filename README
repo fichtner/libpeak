@@ -24,13 +24,15 @@ Licensing and contributions
 The library has been developed by Packetwerk and is released under the
 ISC license (see COPYING for details).  Its main contributors are:
 
-Franco Fichtner <franco@lastsummer.de>
-Victor Pereira <v.pereira@packetwerk.de>
+Franco Fichtner <franco@packetwerk.com>
+Victor Pereira <victor@packetwerk.com>
 
 Feel free to fork or contribute back.  To do so, use GitHub or send
 your patches to us via email.  Contributions can also be made in the
 form of supplying trace files or hard to come by documentation to help
 maintain a reliable and free library.
+
+For further info check us out at http://packetwerk.com
 
 Basic directory layout
 ======================
