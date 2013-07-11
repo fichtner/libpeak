@@ -133,9 +133,19 @@ peek_packet(struct peak_tracks *peek, const timeslice_t *timer,
 		panic("tracker should never be empty\n");
 	}
 
-	pout("flow: %zu, ip_type: %hhu, ip_len: %u, time: %s\n",
-	    flow->id, packet.net_type, packet.net_len, strftime(tsbuf,
-	    sizeof(tsbuf), "%a %F %T", &timer->gmt) ? tsbuf : "???");
+	{
+		const unsigned int dir = !!netcmp(&src, &flow->user[LOWER]);
+
+		if (!flow->li[dir]) {
+			flow->li[dir] = peak_li_get(&packet);
+		}
+	}
+
+	pout("flow: %zu, ip_type: %hhu, ip_len: %u, app: %s"", time: %s\n",
+	    flow->id, packet.net_type, packet.net_len,
+	    peak_li_name(LI_MERGE(flow->li)),
+	    strftime(tsbuf, sizeof(tsbuf),
+	    "%a %F %T", &timer->gmt) ? tsbuf : "???");
 }
 
 static void

@@ -1,0 +1,282 @@
+.\"
+.\" Copyright (c) 2013 Franco Fichtner <franco@packetwerk.com>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd July 4, 2013
+.Dt PEAK_LI 3
+.Os
+.Sh NAME
+.Nm LI_MERGE ,
+.Nm peak_li_get ,
+.Nm peak_li_name ,
+.Nm peak_li_number
+.Nd lightweight inspection
+.Sh SYNOPSIS
+.In peak.h
+.Fn LI_MERGE ARRAY
+.Ft unsigned int
+.Fn peak_li_get "const struct peak_packet *packet"
+.Ft const char *
+.Fn peak_li_name "const unsigned int number"
+.Ft unsigned int
+.Fn peak_li_number "const char *name"
+.Sh DESCRIPTION
+The
+.Nm peak_li
+API provides a mechanism to run a passive deep packet inspection based on
+the first bytes of a packet's payload.
+The advantage of this library is the insane lack of code and data
+manipulation.
+The main goal is to match the application in the first packet on
+each side of a flow with about 99% certainty.
+If the application can't be identified, then the application must be set
+to undefined to prevent further leakage into other subsystems.
+The use of network addresses or port numbers in the matching is possible,
+but heavily discouraged.
+.Pp
+The main areas of application are:
+.Pp
+.Bl -enum -compact -offset indent
+.It
+Traffic shaping and policing
+.It
+Flow prioritisation
+.It
+Diagnostic monitoring
+.El
+.Pp
+The concept of lightweight packet inspection has been expanded to
+be pseudo-stream-based instead of packet-based.
+This approach is best described as \(dqlightweight inspection\(dq.
+This means as few bytes as possible of the beginning of a flow are going
+to be inspected for know protocol patterns.
+Text protocols are mainly matched by their unique keywords, while binary
+protocols check magic values, version numbers, paddings, and general
+header consistency.
+Also, inspection was designed asymmetrically: both directions of the
+flow are inspected independently.
+The accuracy is then improved by combining the results of both directions.
+That's especially useful with applications that may look alike in
+one direction, but can still be distinguished in the bigger picture
+(FTP and SMTP are a particularly annoying example).
+More on the internal workings and design decisions can be found in the
+.Sx ADDING APPLICATIONS
+section.
+.Pp
+The
+.Fn peak_li_get
+function runs all applicable application patterns against the packet
+given as an argument.
+Upon successful completion the most likely application is returned (see
+.Sx SUPPORTED APPLICATIONS ) .
+Otherwise,
+.Dv LI_UNKNOWN
+is returned to indicate that further examination is needed.
+Please note that a return value of
+.Dv LI_UNDEFINED
+is not a failed attempt, but rather a necessary observation.
+.Pp
+The
+.Fn LI_MERGE
+macro takes an array of two previously acquired return values and returns
+its joined application.
+Thus
+.Fn peak_li_name
+can be invoked to return a human-readable identifier string descibing
+the actual application.
+Similarly, the
+.Fn peak_li_number
+function translates an application string into the respective application
+number.
+.Sh SUPPORTED APPLICATIONS
+A list of all the supported applications and their elaborate names are
+presented hereby:
+.Pp
+.Bl -tag -compact -offset indent -width "LI_BITTORRENT"
+.It Dv LI_BGP
+-- Boarder Gateway Protocol
+.It Dv LI_BITTORRENT
+-- BitTorrent
+.It Dv LI_CVS
+-- Concurrent Versions System
+.It Dv LI_DHCP
+-- Dynamic Host Configuration Protocol
+.It Dv LI_DNS
+-- Domain Name System
+.It Dv LI_DTLS
+-- Datagram Transport Layer Security
+.It Dv LI_FTP
+-- File Transfer Protocol
+.It Dv LI_GNUTELLA
+-- Gnutella
+.It Dv LI_HTTP
+-- Hypertext Transfer Protocol
+.It Dv LI_IKE
+-- Internet Key Exchange
+.It Dv LI_IMAP
+-- Internet Message Access Protocol
+.It Dv LI_IMPP
+-- Instant Messaging and Presence Protocol
+.It Dv LI_IRC
+-- Internet Relay Chat
+.It Dv LI_LDAP
+-- Lightweight Directory Access Protocol
+.It Dv LI_NETBIOS
+-- Network Basic Input Output System
+.It Dv LI_OPENVPN
+-- OpenVPN
+.It Dv LI_POP3
+-- Post Office Protocol (Version 3)
+.It Dv LI_PPTP
+-- Point-to-Point Tunneling Protocol
+.It Dv LI_RIP
+-- Routing Information Protocol
+.It Dv LI_RTCP
+-- Real-time Transport Control Protocol
+.It Dv LI_RTP
+-- Real-time Transport Protocol
+.It Dv LI_SIP
+-- Session Initiation Protocol
+.It Dv LI_SMTP
+-- Simple Mail Transfer Protocol
+.It Dv LI_SNMP
+-- Simple Network Management Protocol
+.It Dv LI_SSH
+-- Secure Shell
+.It Dv LI_STUN
+-- Session Traversal Utilities for NAT
+.It Dv LI_SYSLOG
+-- Syslog Protocol
+.It Dv LI_TELNET
+-- Telecommunication Network
+.It Dv LI_TFTP
+-- Trivial File Transfer Protocol
+.It Dv LI_TLS
+-- Transport Layer Security
+.It Dv LI_XMPP
+-- Extensible Messaging and Presence Protocol
+.El
+.Pp
+Also known are the following protocols according to their respective IP
+type:
+.Pp
+.Bl -tag -compact -offset indent -width "LI_BITTORRENT"
+.It Dv LI_ICMP
+-- Internet Control Message Protocol
+.It Dv LI_IGMP
+-- Internet Group Management Protocol
+.It Dv LI_OSPF
+-- Open Shortest Path First
+.El
+.Sh ADDING APPLICATIONS
+First of all, make sure that you thoroughly research the protocol you
+are going to add.
+Which transport protocol does it use?
+Some use both!
+Is the protocol text-based?
+If so, which keywords happen to be communicated in the initial
+packet on each side?
+If not, are there binary structures that can be parsed and validated?
+Do you have a trace file ready to test your implementation against?
+.Pp
+If all of this is out of the way, you can start by writing the
+actual matching function.
+Let's assume you want to implement matching for an application called
+\(dqABC\(dq.
+First, add
+.Dv LI_ABC
+to the file
+.Pa lib/peak_li.h
+as an enumeration.
+Next, the actual function belongs to
+.Pa lib/peak_li.c
+and looks as follows:
+.Bd -literal -offset indent
+LI_DESCRIBE_APP(abc)
+{
+	/*
+	 * There's a macro-generated header
+	 * to cope with upcoming API changes.
+	 */
+
+	return (1);
+}
+.Ed
+.Pp
+From within this function you can access the packet's payload.
+Returning zero means the application doesn't match, and non-zero means
+it does.
+.Pp
+The general design decision went in favour of not having to deal with
+the direction of the packet as other libraries tend to do.
+Instead, this library tries to be as blunt as possible in matching
+both sides equally.
+Thus both sides of the flow can be inspected separately without any
+conditional matching (and bloating the code in the process).
+The information can later be joined to produce a coherent picture
+(see
+.Fn LI_MERGE
+for details).
+.Pp
+Matching UDP-based applications is generally easier, because it's a
+stateless protocol.
+It means that each packet can be treated as a separate entity that will
+trigger the code.
+Packet length is never truncated (well, never say never, but let's just
+assume it is) and the internal structures are a good candidate for
+consistency checking.
+.Pp
+Poking at TCP is not as easy.
+However, concentrate your efforts on the first couple of bytes in the
+stream on each side -- most text protocols are quite distinctive.
+Remember to not force continuous verifcation of the data.
+The goal is to get a reliable reading for a simple protocol tagging.
+.Pp
+Please refrain from using port checks.
+The only time this might be a good idea is when you want to make sure
+to not produce false-positives on other protocols.
+In this case it's safe to exclude the offending port to make the
+matching more reliable.
+It's almost always impossible to be 100% accurate, but excluding a port
+is way less restrictive than checking for known ports.
+With this in mind, the user can actually restrict port usage of well
+known protocols and will get the proper log output when someone tries
+to circumvent these restrictions.
+.Pp
+Eventually, you want to make sure that your implementation is as simple
+and powerful as possible.
+If in doubt, consult other people for second opinions or similar
+implementations in
+.Nm peak_li
+or elsewhere (OpenDPI, libprotoident, nDPI, etc.).
+The last step is to hook up the function in the
+.Va apps
+list:
+.Bd -literal -offset indent
+static const struct peak_lis apps[] = {
+	/* other apps reside here */
+	LI_LIST_APP(LI_ABC, abc, IPPROTO_TCP, IPPROTO_MAX),
+}
+.Ed
+.Pp
+The two IP type arguments can be used to decide which transport protocol
+the match function will run on.
+Possible values are any of the
+.Dv IPRPOTO_*
+family. Using the reserved value of
+.Dv IPPROTO_MAX
+indicates that no further IP type must be checked.
+.Sh AUTHORS
+.An "Franco Fichtner" Aq franco@packetwerk.com
+.An "Victor Pereira" Aq victor@packetwerk.com

@@ -5,6 +5,7 @@ This library consists of several modules and generic base headers
 designed around the daily needs of network packet-related userland
 tools written in C.  Currently, the available modules are:
 
+peak_li:	lightweight inspection (DPI)
 peak_load:	PCAP/ERF file reader
 peak_tcp:	shallow TCP engine
 peak_track:	rudimentary flow tracker

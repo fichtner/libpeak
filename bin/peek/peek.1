@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd June 20, 2013
+.Dd June 26, 2013
 .Dt PEEK 1
 .Os
 .Sh NAME
@@ -34,12 +34,17 @@ The supplied file is loaded via the
 .Xr peak_load 3
 module.
 All packets of the file are supplied to the main thread, which does
-simple packet header parsing to extract all needed information to
-build the flow tuple.
+simple packet header parsing (see
+.Xr peak_tcp 3
+and
+.Xr peak_udp 3
+for more details) to extract all needed information to construct the
+flow tuple (network addresses, ports, and transport protocol).
 Next, this flow tuple is converted into a unique storage slot in
 .Xr peak_track 3 .
-.Pp
-For now, the application layer analysis parts are missing.
+Finally, the flow's application layer protocol is detected using the
+.Xr peak_li 3
+API and remembered for all subsequent packets of the same flow.
 .Sh EXIT STATUS
 The
 .Nm
@@ -48,6 +53,7 @@ utility exits 0 on success, and !0 if an error occured.
 There is no IP defragmentation or TCP reordering available, which may
 cause unreliable output for application layer magic.
 .Sh SEE ALSO
+.Xr peak_li 3 ,
 .Xr peak_load 3 ,
 .Xr peak_tcp 3 ,
 .Xr peak_track 3 ,
