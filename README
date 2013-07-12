@@ -43,6 +43,7 @@ include/	base headers
 lib/		specific modules
 regress/	test framework
 sample/		trace files
+scripts/	auxiliary stuff
 test/		test binaries
 
 Building and running the code

@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd June 26, 2013
+.Dd July 12, 2013
 .Dt PEEK 1
 .Os
 .Sh NAME
@@ -21,14 +21,31 @@
 .Nd trace file tool
 .Sh SYNOPSIS
 .Nm
+.Op Fl aflpt
 .Ar file
 .Sh DESCRIPTION
 The
 .Nm
 utility offers the user a way to run application layer analysis on
 network capture (trace) files in PCAP or ERF format.
-The output of the utility is one line per packet with general information,
-flow id, and matching application name.
+The output of the utility is one line per packet and can be customised
+using the command line options.
+The default is
+.Fl fplat .
+.Pp
+The options are as follows:
+.Bl -tag -width "-a" -offset indent
+.It Fl a
+displays the detected application
+.It Fl f
+displays the unique flow number
+.It Fl l
+displays the IP length
+.It Fl p
+displays the IP type
+.It Fl t
+displays the timestamp
+.El
 .Pp
 The supplied file is loaded via the
 .Xr peak_load 3
@@ -49,6 +66,15 @@ API and remembered for all subsequent packets of the same flow.
 The
 .Nm
 utility exits 0 on success, and !0 if an error occured.
+.Sh FILES
+.Bl -tag -width "scripts/peek_to_csv.py" -compact
+.It Pa scripts/peek_to_csv.py
+A Python script converting
+.Nm
+output to CSV.
+It is used mainly for preparing the output for statistical analysis
+in external tools.
+.El
 .Sh CAVEATS
 There is no IP defragmentation or TCP reordering available, which may
 cause unreliable output for application layer magic.

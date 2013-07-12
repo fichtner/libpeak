@@ -26,8 +26,21 @@
 #endif /* __OpenBSD__ || __FreeBSD__ */
 #include <netinet/ip.h>
 #include <netinet/ip6.h>
+#include <unistd.h>
 
 output_init();
+
+enum {
+	USE_APP,
+	USE_FLOW,
+	USE_IP_LEN,
+	USE_IP_TYPE,
+	USE_TIME,
+	USE_MAX		/* last element */
+};
+
+static unsigned int use_print[USE_MAX];
+static unsigned int use_count = 0;
 
 static void
 peek_packet_ipv6(struct peak_packet *packet)
@@ -78,6 +91,44 @@ peek_packet_ipv6(struct peak_packet *packet)
 }
 
 static void
+peek_report(const struct peak_packet *packet, const struct peak_track *flow,
+    const timeslice_t *timer)
+{
+	unsigned int i;
+
+	for (i = 0; i < use_count; ++i) {
+		if (i) {
+			pout(", ");
+		}
+
+		switch (use_print[i]) {
+		case USE_APP:
+			pout("app: %s", peak_li_name(LI_MERGE(flow->li)));
+			break;
+		case USE_FLOW:
+			pout("flow: %zu", flow->id);
+			break;
+		case USE_IP_LEN:
+			pout("ip_len: %u", packet->net_len);
+			break;
+		case USE_IP_TYPE:
+			pout("ip_type: %hhu", packet->net_type);
+			break;
+		case USE_TIME: {
+			char tsbuf[40];
+			pout("time: %s", strftime(tsbuf, sizeof(tsbuf),
+			    "%a %F %T", &timer->gmt) ? tsbuf : "???");
+			break;
+		}
+		default:
+			break;
+		}
+	}
+
+	pout("\n");
+}
+
+static void
 peek_packet(struct peak_tracks *peek, const timeslice_t *timer,
     void *buf, unsigned int len, unsigned int type)
 {
@@ -85,7 +136,6 @@ peek_packet(struct peak_tracks *peek, const timeslice_t *timer,
 	struct peak_track *flow;
 	struct peak_track _flow;
 	struct netmap src, dst;
-	char tsbuf[40];
 
 	PACKET_LINK(&packet, buf, len, type);
 
@@ -141,11 +191,7 @@ peek_packet(struct peak_tracks *peek, const timeslice_t *timer,
 		}
 	}
 
-	pout("flow: %zu, ip_type: %hhu, ip_len: %u, app: %s"", time: %s\n",
-	    flow->id, packet.net_type, packet.net_len,
-	    peak_li_name(LI_MERGE(flow->li)),
-	    strftime(tsbuf, sizeof(tsbuf),
-	    "%a %F %T", &timer->gmt) ? tsbuf : "???");
+	peek_report(&packet, flow, timer);
 }
 
 static void
@@ -153,7 +199,7 @@ usage(void)
 {
 	extern char *__progname;
 
-	fprintf(stderr, "usage: %s file\n", __progname);
+	fprintf(stderr, "usage: %s [-aflpt] file\n", __progname);
 	exit(EXIT_FAILURE);
 }
 
@@ -163,12 +209,54 @@ main(int argc, char **argv)
 	struct peak_tracks *peek;
 	struct peak_load *trace;
 	timeslice_t timer;
+	int c;
 
-	if (argc < 2) {
-		usage();
+	while ((c = getopt(argc, argv, "aflpt")) != -1) {
+		switch (c) {
+		case 'a':
+			use_print[use_count++] = USE_APP;
+			break;
+		case 'f':
+			use_print[use_count++] = USE_FLOW;
+			break;
+		case 'l':
+			use_print[use_count++] = USE_IP_LEN;
+			break;
+		case 'p':
+			use_print[use_count++] = USE_IP_TYPE;
+			break;
+		case 't':
+			use_print[use_count++] = USE_TIME;
+			break;
+		default:
+			usage();
+			/* NOTREACHED */
+		}
+
+		if (use_count > USE_MAX) {
+			usage();
+			/* NOTREACHED */
+		}
 	}
 
-	trace = peak_load_init(argv[1]);
+	argc -= optind;
+	argv += optind;
+
+	if (argc < 1) {
+		usage();
+		/* NOTREACHED */
+	}
+
+	if (!use_count) {
+		/* set the default output (as used by tests) */
+		use_print[use_count++] = USE_FLOW;
+		use_print[use_count++] = USE_IP_TYPE;
+		use_print[use_count++] = USE_IP_LEN;
+		use_print[use_count++] = USE_APP;
+		use_print[use_count++] = USE_TIME;
+	}
+
+	trace = peak_load_init(argv[0]);
 	if (!trace) {
 		panic("cannot init file loader\n");
 	}
