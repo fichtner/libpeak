@@ -49,8 +49,8 @@ test/		test binaries
 Building and running the code
 =============================
 
-This code builds fine on MacOS, OpenBSD, FreeBSD and Linux (Ubuntu).
-You break it, you fix it.
+This code builds fine on MacOS, OpenBSD, FreeBSD, DragonFly BSD and
+Linux (Ubuntu).  You break it, you fix it.
 
 Building the code:
 

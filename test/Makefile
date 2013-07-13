@@ -1,2 +1,2 @@
-include makefile.inc
-include ../subdir.mk
+.include "makefile.inc"
+.include <bsd.subdir.mk>
