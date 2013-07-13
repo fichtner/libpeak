@@ -64,8 +64,8 @@ struct peak_alloc_magic {
 
 #define ALLOC_TAIL_OK(name, x)	(ALLOC_VALUE(name) == ALLOC_TAIL(x)->magic)
 
-#define malign_VALUE		0x8897A6B5C4D3E2F1ull
-#define malloc_VALUE		0x1F2E3D4C5B6A7988ull
+#define malign_VALUE		0x9B97A6B5C4D3E2F1ull
+#define malloc_VALUE		0xD12E3D4C5B6A7989ull
 
 struct peak_malloc_head {
 	uint64_t size;
