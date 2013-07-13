@@ -57,9 +57,7 @@ _peak_print(FILE *stream, const char *message, ...)
 #define BACKTRACE_SIGNAL	3
 #define BACKTRACE_MAX		128
 
-#if defined(__OpenBSD__) || defined(__FreeBSD__)
-#define _peak_backtrace(x)
-#else /* !__OpenBSD__ && !__FreeBSD__ */
+#if defined(__APPLE__) || defined(__linux__)
 #include <execinfo.h>
 
 static inline void
@@ -73,7 +71,9 @@ _peak_backtrace(const int skip)
 	backtrace_symbols_fd(&callstack[skip], frames, 2);
 	_peak_bug(LOG_EMERG, "======= stack trace end =======\n");
 }
-#endif /* __OpenBSD__ || __FreeBSD__ */
+#else /* !__APPLE__ && !__linux__ */
+#define _peak_backtrace(x)
+#endif /* __APPLE__ || __linux__ */
 
 #undef BACKTRACE_MAX
 
