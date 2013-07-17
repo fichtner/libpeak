@@ -1478,6 +1478,26 @@ static const struct peak_lis apps[] = {
 };
 
 unsigned int
+peak_li_test(const struct peak_packet *packet, const unsigned int number)
+{
+	unsigned int i;
+
+	/*
+	 * Caution: All safeguards are off!
+	 */
+
+	for (i = 0; i < lengthof(apps); ++i) {
+		if (apps[i].number == number &&
+		    (apps[i].proto[0] == packet->net_type ||
+		     apps[i].proto[1] == packet->net_type)) {
+			return (apps[i].function(packet));
+		}
+	}
+
+	return (0);
+}
+
+unsigned int
 peak_li_get(const struct peak_packet *packet)
 {
 	unsigned int i;

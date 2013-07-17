@@ -79,6 +79,8 @@ enum {
 	LI_IGMP,
 };
 
+unsigned int	 peak_li_test(const struct peak_packet *,
+		     const unsigned int);
 unsigned int	 peak_li_get(const struct peak_packet *);
 const char	*peak_li_name(const unsigned int);
 unsigned int	 peak_li_number(const char *);

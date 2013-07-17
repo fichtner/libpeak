@@ -13,14 +13,15 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd July 4, 2013
+.Dd July 15, 2013
 .Dt PEAK_LI 3
 .Os
 .Sh NAME
 .Nm LI_MERGE ,
 .Nm peak_li_get ,
 .Nm peak_li_name ,
-.Nm peak_li_number
+.Nm peak_li_number ,
+.Nm peak_li_test
 .Nd lightweight inspection
 .Sh SYNOPSIS
 .In peak.h
@@ -31,6 +32,11 @@
 .Fn peak_li_name "const unsigned int number"
 .Ft unsigned int
 .Fn peak_li_number "const char *name"
+.Ft unsigned int
+.Fo peak_li_test
+.Fa "const struct peak_packet *packet"
+.Fa "const unsigned int number"
+.Fc
 .Sh DESCRIPTION
 The
 .Nm peak_li
@@ -99,6 +105,15 @@ Similarly, the
 .Fn peak_li_number
 function translates an application string into the respective application
 number.
+.Pp
+The
+.Fn peak_li_test
+function is provided to invoke a single application matching function
+via the additional
+.Va number
+argument.
+The function will return non-zero if the selected application matches.
+Otherwise, zero is returned.
 .Sh SUPPORTED APPLICATIONS
 A list of all the supported applications and their elaborate names are
 presented hereby:
@@ -278,5 +293,5 @@ family. Using the reserved value of
 .Dv IPPROTO_MAX
 indicates that no further IP type must be checked.
 .Sh AUTHORS
-.An "Franco Fichtner" Aq Mt franco@packetwerk.com
-.An "Victor Pereira" Aq Mt victor@packetwerk.com
+.An Franco Fichtner Aq Mt franco@packetwerk.com
+.An Victor Pereira Aq Mt victor@packetwerk.com
