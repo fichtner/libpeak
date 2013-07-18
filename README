@@ -49,14 +49,13 @@ test/		test binaries
 Building and running the code
 =============================
 
-This code builds fine on MacOS, OpenBSD, FreeBSD, DragonFly BSD and
-Linux (Ubuntu with pmake installed).  You break it, you fix it.
+Either make(1) or scons(1) can be used as the build tool.  The code
+builds fine on MacOS, OpenBSD, FreeBSD, DragonFly BSD and Linux
+(Ubuntu with pmake installed).  You break it, you fix it.
 
 Building the code:
 
-  There are two options. One using make, the other using scons.Depending on your choice:
     make
-  or
     scons
 
 Running the tests:
