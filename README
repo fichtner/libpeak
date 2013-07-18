@@ -50,15 +50,19 @@ Building and running the code
 =============================
 
 This code builds fine on MacOS, OpenBSD, FreeBSD, DragonFly BSD and
-Linux (Ubuntu).  You break it, you fix it.
+Linux (Ubuntu with pmake installed).  You break it, you fix it.
 
 Building the code:
 
+  There are two options. One using make, the other using scons.Depending on your choice:
     make
+  or
+    scons
 
 Running the tests:
 
     cd regress && make
+    cd regresss && scons
 
 Having fun:
 
