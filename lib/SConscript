@@ -1,0 +1,2 @@
+Import('env')
+env.StaticLibrary(target='libpeak',source=Glob('peak_*.c'),LIBS=env['LIBS'] + ['m'],CFLAGS=env['CFLAGS']+['-fPIC'])
