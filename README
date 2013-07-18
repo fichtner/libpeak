@@ -62,7 +62,7 @@ Building the code:
 Running the tests:
 
     cd regress && make
-    cd regresss && scons
+    cd regress && scons
 
 Having fun:
 
