@@ -1,4 +1,4 @@
 import os
 
-for f in ['user','base','flow','jar','load','locate','rule','track','peek','peak']:
+for f in ['base','load','track','peek']:
 	SConscript(os.path.join(f,'SConscript'))
