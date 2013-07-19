@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd July 12, 2013
+.Dd July 19, 2013
 .Dt PEEK 1
 .Os
 .Sh NAME
@@ -36,15 +36,21 @@ The default is
 The options are as follows:
 .Bl -tag -width "-a" -offset indent
 .It Fl a
-displays the detected application
+Display the detected application.
+See
+.Xr peak_li 3
+for more details.
 .It Fl f
-displays the unique flow number
+Display the unique flow number.
+See
+.Xr peak_track 3
+for more details.
 .It Fl l
-displays the IP length
+Display the IP length.
 .It Fl p
-displays the IP type
+Display the IP type.
 .It Fl t
-displays the timestamp
+Display the timestamp.
 .El
 .Pp
 The supplied file is loaded via the
@@ -85,4 +91,4 @@ cause unreliable output for application layer magic.
 .Xr peak_track 3 ,
 .Xr peak_udp 3
 .Sh AUTHORS
-.An "Franco Fichtner" Aq franco@packetwerk.com
+.An Franco Fichtner Aq Mt franco@packetwerk.com
