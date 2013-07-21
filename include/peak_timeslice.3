@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd June 10, 2013
+.Dd July 21, 2013
 .Dt PEAK_TIMESLICE 3
 .Os
 .Sh NAME
@@ -35,12 +35,19 @@ System calls are considered a bottleneck for high performance
 threads, since they will invoke the scheduler and cause a context
 switch to happen.
 .Pp
-The following structure is preloaded with the current time
-slice's clock: the current monotonic timestamp in milliseconds
-and the current unix time stamp.
-Both are needed, as most timeout functionality needs to run on a
+The
+.Vt timeslice_t
+structure is preloaded with the current time slice's clock using
+several monotonic timestamps and an
+.Ux
+timestamp.
+Both types are needed, as most timeout functionality needs to run on a
 monotonic clock, while external functionality will need the actual
-time (and/or time zone).
+time.
+A
+.Vt struct tm
+for GMT and the local time zone are also provided.
+The structure's layout is as follows:
 .Pp
 .Bd -literal -offset indent
 typedef struct {
@@ -82,4 +89,4 @@ do {
 } while (cond);
 .Ed
 .Sh AUTHORS
-.An "Franco Fichtner" Aq Mt franco@packetwerk.com
+.An Franco Fichtner Aq Mt franco@packetwerk.com

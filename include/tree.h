@@ -122,7 +122,7 @@ static __inline struct type *						\
 name##_SPLAY_FIND(struct name *head, struct type *elm)			\
 {									\
 	if (SPLAY_EMPTY(head))						\
-		return(NULL);						\
+		return (NULL);						\
 	name##_SPLAY(head, elm);					\
 	if (cmp(elm, (head)->sph_root) == 0)				\
 		return (head->sph_root);				\
@@ -163,7 +163,7 @@ name##_SPLAY_INSERT(struct name *head, struct type *elm)		\
 	    int __comp;							\
 	    name##_SPLAY(head, elm);					\
 	    __comp = cmp(elm, (head)->sph_root);			\
-	    if(__comp < 0) {						\
+	    if (__comp < 0) {						\
 		    SPLAY_LEFT(elm, field) = SPLAY_LEFT((head)->sph_root, field);\
 		    SPLAY_RIGHT(elm, field) = (head)->sph_root;		\
 		    SPLAY_LEFT((head)->sph_root, field) = NULL;		\
