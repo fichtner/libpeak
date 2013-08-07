@@ -901,7 +901,7 @@ LI_DESCRIBE_APP(tftp)
 		return (0);
 	}
 
-	return(1);
+	return (1);
 }
 LI_DESCRIBE_APP(netbios_session_service)
 {

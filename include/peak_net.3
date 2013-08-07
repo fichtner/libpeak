@@ -13,24 +13,24 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd February 27, 2013
+.Dd August 5, 2013
 .Dt PEAK_NET 3
 .Os
 .Sh NAME
-.Nm netmap4 ,
-.Nm netmap6 ,
+.Nm netaddr4 ,
+.Nm netaddr6 ,
 .Nm netcmp
 .Nd coherent network address mapping
 .Sh SYNOPSIS
 .In peak.h
 .Ft void
-.Fn netmap4 "struct netmap *in4" "const uint32_t ip"
+.Fn netaddr4 "struct netaddr *in4" "const uint32_t ip"
 .Ft void
-.Fn netmap6 "struct netmap *in6" "const void *ip"
+.Fn netaddr6 "struct netaddr *in6" "const void *ip"
 .Ft int
 .Fo netcmp
-.Fa "const struct netmap *x"
-.Fa "const struct netmap *y"
+.Fa "const struct netaddr *x"
+.Fa "const struct netaddr *y"
 .Fc
 .Sh DESCRIPTION
 The
@@ -43,11 +43,11 @@ The internal mapping of IPv4 is implemented using the ::ffff:0:0/96
 network as specified in Section 2.5.5.2 of RFC 4291.
 .Pp
 Both
-.Fn netmap4
+.Fn netaddr4
 and
-.Fn netmap6
+.Fn netaddr6
 convert the provided IPv4 or IPv6 network address into a given
-.Vt struct netmap .
+.Vt struct netaddr .
 .Fn netcmp
 then allows the caller to compare such structures against each
 other.

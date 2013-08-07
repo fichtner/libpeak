@@ -67,7 +67,7 @@ test_type(void)
 static void
 test_net(void)
 {
-	const struct netmap ip4_ref = {
+	const struct netaddr ip4_ref = {
 		.u.byte = {
 			0x00, 0x00, 0x00, 0x00,
 			0x00, 0x00, 0x00, 0x00,
@@ -75,7 +75,7 @@ test_net(void)
 			0x11, 0x22, 0x33, 0x44,
 		},
 	};
-	const struct netmap ip6_ref = {
+	const struct netaddr ip6_ref = {
 		.u.byte = {
 			0xfe, 0x80, 0x00, 0x00,
 			0x00, 0x00, 0x00, 0x00,
@@ -84,13 +84,13 @@ test_net(void)
 		},
 	};
 	uint32_t ipv4_addr;
-	struct netmap ip;
+	struct netaddr ip;
 
 	be32enc(&ipv4_addr, 0x11223344);
-	netmap4(&ip, ipv4_addr);
+	netaddr4(&ip, ipv4_addr);
 	assert(!netcmp(&ip, &ip4_ref));
 
-	netmap6(&ip, &ip6_ref);
+	netaddr6(&ip, &ip6_ref);
 	assert(!netcmp(&ip, &ip6_ref));
 }
 

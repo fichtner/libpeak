@@ -23,12 +23,12 @@ static void
 test_track(void)
 {
 	struct peak_tracks *tracker;
-	struct netmap usr1, usr2;
+	struct netaddr usr1, usr2;
 	struct peak_track _flow;
 	struct peak_track *flow;
 
-	netmap4(&usr1, 0);
-	netmap4(&usr2, 1);
+	netaddr4(&usr1, 0);
+	netaddr4(&usr2, 1);
 
 	tracker = peak_track_init(2);
 	assert(tracker);

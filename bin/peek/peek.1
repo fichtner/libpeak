@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd July 19, 2013
+.Dd July 22, 2013
 .Dt PEEK 1
 .Os
 .Sh NAME
@@ -21,7 +21,7 @@
 .Nd trace file tool
 .Sh SYNOPSIS
 .Nm
-.Op Fl aflpt
+.Op Fl AafNnt
 .Ar file
 .Sh DESCRIPTION
 The
@@ -31,10 +31,12 @@ network capture (trace) files in PCAP or ERF format.
 The output of the utility is one line per packet and can be customised
 using the command line options.
 The default is
-.Fl fplat .
+.Sq Fl fNnat .
 .Pp
 The options are as follows:
 .Bl -tag -width "-a" -offset indent
+.It Fl A
+Display the application payload length.
 .It Fl a
 Display the detected application.
 See
@@ -45,9 +47,9 @@ Display the unique flow number.
 See
 .Xr peak_track 3
 for more details.
-.It Fl l
+.It Fl N
 Display the IP length.
-.It Fl p
+.It Fl n
 Display the IP type.
 .It Fl t
 Display the timestamp.

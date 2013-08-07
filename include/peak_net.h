@@ -17,7 +17,7 @@
 #ifndef PEAK_NET_H
 #define PEAK_NET_H
 
-struct netmap {
+struct netaddr {
 	union {
 		uint8_t byte[16];
 		uint16_t word[8];
@@ -27,9 +27,9 @@ struct netmap {
 };
 
 static inline void
-netmap4(struct netmap *in4, const uint32_t ip)
+netaddr4(struct netaddr *in4, const uint32_t ip)
 {
-	static const struct netmap _in6 = {
+	static const struct netaddr _in6 = {
 		/* IPv4-mapped IPv6 address via ::ffff:0:0/96 */
 		.u.word = {
 			0x0, 0x0, 0x0, 0x0, 0x0, 0xffff, 0x0, 0x0,
@@ -42,14 +42,14 @@ netmap4(struct netmap *in4, const uint32_t ip)
 }
 
 static inline void
-netmap6(struct netmap *in6, const void *ip)
+netaddr6(struct netaddr *in6, const void *ip)
 {
 	/* IPv6 is native, but don't tell anyone */
 	memcpy(in6, ip, sizeof(*in6));
 }
 
 static inline int
-netcmp(const struct netmap *x, const struct netmap *y)
+netcmp(const struct netaddr *x, const struct netaddr *y)
 {
 	return (memcmp(x, y, sizeof(*x)));
 }

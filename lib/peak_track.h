@@ -18,7 +18,7 @@
 #define PEAK_TRACK_H
 
 struct peak_track {
-	struct netmap user[2];
+	struct netaddr user[2];
 	uint16_t port[2];
 	uint8_t type;
 	uint8_t padding[3];

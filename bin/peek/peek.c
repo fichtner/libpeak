@@ -32,6 +32,7 @@ output_init();
 
 enum {
 	USE_APP,
+	USE_APP_LEN,
 	USE_FLOW,
 	USE_IP_LEN,
 	USE_IP_TYPE,
@@ -105,11 +106,14 @@ peek_report(const struct peak_packet *packet, const struct peak_track *flow,
 		case USE_APP:
 			pout("app: %s", peak_li_name(LI_MERGE(flow->li)));
 			break;
+		case USE_APP_LEN:
+			pout("app_len: %hu", packet->app_len);
+			break;
 		case USE_FLOW:
 			pout("flow: %zu", flow->id);
 			break;
 		case USE_IP_LEN:
-			pout("ip_len: %u", packet->net_len);
+			pout("ip_len: %hu", packet->net_len);
 			break;
 		case USE_IP_TYPE:
 			pout("ip_type: %hhu", packet->net_type);
@@ -135,21 +139,21 @@ peek_packet(struct peak_tracks *peek, const timeslice_t *timer,
 	struct peak_packet packet;
 	struct peak_track *flow;
 	struct peak_track _flow;
-	struct netmap src, dst;
+	struct netaddr src, dst;
 
 	PACKET_LINK(&packet, buf, len, type);
 
 	switch (packet.mac_type) {
 	case ETHERTYPE_IP:
-		netmap4(&src, packet.net.iph->ip_src.s_addr);
-		netmap4(&dst, packet.net.iph->ip_dst.s_addr);
+		netaddr4(&src, packet.net.iph->ip_src.s_addr);
+		netaddr4(&dst, packet.net.iph->ip_dst.s_addr);
 		packet.net_len = be16dec(&packet.net.iph->ip_len);
 		packet.net_hlen = packet.net.iph->ip_hl << 2;
 		packet.net_type = packet.net.iph->ip_p;
 		break;
 	case ETHERTYPE_IPV6:
-		netmap6(&src, &packet.net.ip6h->ip6_src);
-		netmap6(&dst, &packet.net.ip6h->ip6_dst);
+		netaddr6(&src, &packet.net.ip6h->ip6_src);
+		netaddr6(&dst, &packet.net.ip6h->ip6_dst);
 		peek_packet_ipv6(&packet);
 		break;
 	default:
@@ -199,7 +203,7 @@ usage(void)
 {
 	extern char *__progname;
 
-	fprintf(stderr, "usage: %s [-aflpt] file\n", __progname);
+	fprintf(stderr, "usage: %s [-AafNnt] file\n", __progname);
 	exit(EXIT_FAILURE);
 }
 
@@ -211,18 +215,21 @@ main(int argc, char **argv)
 	timeslice_t timer;
 	int c;
 
-	while ((c = getopt(argc, argv, "aflpt")) != -1) {
+	while ((c = getopt(argc, argv, "AafNnt")) != -1) {
 		switch (c) {
+		case 'A':
+			use_print[use_count++] = USE_APP_LEN;
+			break;
 		case 'a':
 			use_print[use_count++] = USE_APP;
 			break;
 		case 'f':
 			use_print[use_count++] = USE_FLOW;
 			break;
-		case 'l':
+		case 'N':
 			use_print[use_count++] = USE_IP_LEN;
 			break;
-		case 'p':
+		case 'n':
 			use_print[use_count++] = USE_IP_TYPE;
 			break;
 		case 't':
