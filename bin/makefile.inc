@@ -1,1 +1,1 @@
-SUBDIR=	peek
+SUBDIR=	peek shared

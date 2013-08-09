@@ -1,2 +1,2 @@
 Import('env')
-env.StaticLibrary(target='libpeak',source=Glob('peak_*.c'),LIBS=env['LIBS'],CFLAGS=env['CFLAGS']+['-fPIC'])
+env.StaticLibrary(target='libpeak',source=Glob('peak_*.c'),LIBS=env['LIBS'],CFLAGS=env['CFLAGS'])
