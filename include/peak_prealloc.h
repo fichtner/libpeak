@@ -35,7 +35,7 @@ typedef struct {
 } prealloc_t;
 
 #define PREALLOC_FROM_USER(x)	(((struct peak_prealloc *)(x)) - 1)
-#define PREALLOC_TO_USER(x)	&(x)->user
+#define PREALLOC_TO_USER(x)	(x)->user
 
 #define PREALLOC_HEALTHY	0
 #define PREALLOC_UNDERFLOW	1

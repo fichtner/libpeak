@@ -29,7 +29,7 @@ struct peak_exalloc {
 };
 
 #define EXALLOC_FROM_USER(x)	(((struct peak_exalloc *)(x)) - 1)
-#define EXALLOC_TO_USER(x)	&(x)->user
+#define EXALLOC_TO_USER(x)	(x)->user
 
 static inline void *
 _exalloc_get(prealloc_t *mem)

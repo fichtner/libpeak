@@ -203,7 +203,7 @@ usage(void)
 {
 	extern char *__progname;
 
-	fprintf(stderr, "usage: %s [-AafNnt] file\n", __progname);
+	perr("usage: %s [-AafNnt] file\n", __progname);
 	exit(EXIT_FAILURE);
 }
 
