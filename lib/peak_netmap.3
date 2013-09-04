@@ -1,0 +1,125 @@
+.\"
+.\" Copyright (c) 2013 Franco Fichtner <franco@packetwerk.com>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd September 4, 2013
+.Dt PEAK_NETMAP 3
+.Os
+.Sh NAME
+.Nm peak_netmap_attach ,
+.Nm peak_netmap_claim ,
+.Nm peak_netmap_detach ,
+.Nm peak_netmap_forward ,
+.Nm peak_netmap_lock ,
+.Nm peak_netmap_unlock
+.Nd the convenient netmap wrapper
+.Sh SYNOPSIS
+.In peak.h
+.Ft unsigned int
+.Fn peak_netmap_attach "const char *ifname"
+.Ft struct peak_netmap *
+.Fn peak_netmap_claim void
+.Ft unsigned int
+.Fn peak_netmap_detach "const char *ifname"
+.Ft unsigned int
+.Fn peak_netmap_forward "struct peak_netmap *packet" "const char *ifname"
+.Ft void
+.Fn peak_netmap_lock void
+.Ft void
+.Fn peak_netmap_unlock void
+.Sh DESCRIPTION
+.Xr netmap 4
+is a framework that gives userspace applications a very fast
+channel to exchange raw packets with supported network adapters on
+.Fx .
+The
+.Nm peak_netmap
+API provides a simple wrapper around it, so that higher layers do not have
+to fiddle with its magic at all.
+.Pp
+The dynamic interface management is handled via the
+.Fn peak_netmap_attach
+and
+.Fn peak_netmap_detach
+function pair.
+The
+.Va ifname
+parameter must be a string holding the interface name.
+Both functions return zero, if the operation was successful.
+Otherwise, a non-zero value is returned.
+.Pp
+The
+.Fn peak_netmap_lock
+and
+.Fn peak_netmap_unlock
+functions pairs can be used to guard the API against premature
+interface attach and detach.
+It's recommended to provide glitch-free operation of claim and
+friends \(em especially when separate threads handle interface
+configuration and receive/transmit.
+.Pp
+The
+.Fn peak_netmap_claim
+function claims ownership of a packet internally bound to
+.Xr netmap 4 .
+The function may sleep for 200 ms using
+.Xr poll 3
+if no packets are available on the attached adapters.
+The packet still resides in the mapped slot, and is safe for
+modification.
+Generally, all of packet processing can now ensue on the packet.
+The function returns zero on errors or an expired timeout.
+Otherwise, the length of the claimed packet is returned.
+.Pp
+In theory, claiming multiple packets at once is possible
+as long as all the internal pools have the capacity.
+However, it is wise not to stress this part of the implementation.
+Externally,
+.Vt struct peak_netmap
+is used to provide the caller with all the information regarding
+the claimed packet.
+The structure is defined as follows:
+.Bd -literal -offset indent
+struct peak_netmap {
+	const char *ifname;
+	unsigned int len;
+	unsigned int ll;
+	time_t ts;
+	void *buf;
+};
+.Ed
+.Pp
+The
+.Fn peak_netmap_forward
+function releases the reference to a previously claimed packet.
+Specifying
+.Va ifname
+will invoke transmission on that particular interface using a
+zero-copy technique.
+.Dv NULL
+or unattached devices will cause the packet to be dropped instead.
+Upon success, the function returns zero.
+Otherwise, non-zero is returned indicating that the packet could not
+be transmitted via the specified interface.
+The user must call the function again later or drop the packet.
+.Sh CAVEATS
+The current version of
+.Nm peak_netmap
+is only capable of single-threaded claim and forward operations.
+.Sh SEE ALSO
+.Xr fuse 1 ,
+.Xr poll 3 ,
+.Xr netmap 4
+.Sh AUTHORS
+.An Franco Fichtner Aq Mt franco@packetwerk.com

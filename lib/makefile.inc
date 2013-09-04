@@ -1,5 +1,6 @@
 LIB=		peak
-SRCS=		peak_li.c peak_load.c peak_tcp.c peak_track.c peak_udp.c
+SRCS=		peak_li.c peak_load.c peak_tcp.c peak_track.c peak_udp.c \
+		peak_netmap.c
 
 CFLAGS=		-g -m64 -std=gnu99
 CFLAGS+=	-Wall -Wextra -Werror

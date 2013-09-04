@@ -1,1 +1,1 @@
-SUBDIR=	lib test bin
+SUBDIR=	lib contrib test bin
