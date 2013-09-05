@@ -34,7 +34,7 @@ The default is
 .Sq Fl fNnat .
 .Pp
 The options are as follows:
-.Bl -tag -width "-a" -offset indent
+.Bl -tag -width ".Fl A" -offset indent
 .It Fl A
 Display the application payload length.
 .It Fl a
@@ -71,9 +71,7 @@ Finally, the flow's application layer protocol is detected using the
 .Xr peak_li 3
 API and remembered for all subsequent packets of the same flow.
 .Sh EXIT STATUS
-The
-.Nm
-utility exits 0 on success, and !0 if an error occured.
+.Ex -std
 .Sh FILES
 .Bl -tag -width "scripts/peek_to_csv.py" -compact
 .It Pa scripts/peek_to_csv.py

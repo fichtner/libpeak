@@ -79,7 +79,7 @@ peak_netmap_find(const char *ifname)
 	return (i);
 }
 
-struct peak_netmap *
+static struct peak_netmap *
 _peak_netmap_claim(void)
 {
 	struct _peak_netmap *packet;
@@ -310,6 +310,7 @@ peak_netmap_attach(const char *ifname)
 	slot->ifname = strdup(ifname);
 
 	if (netmap_open(slot, 0, 1)) {
+		free(slot->ifname);
 		NETMAP_PUT(slot);
 		NETMAP_UNLOCK();
 		alert("could not open netmap device %s\n", ifname);
@@ -347,7 +348,7 @@ peak_netmap_detach(const char *ifname)
 
 	slot = *me;
 
-	free((void *)slot->ifname);
+	free(slot->ifname);
 	netmap_close(slot);
 
 	NETMAP_PUT(slot);

@@ -299,8 +299,8 @@ __peak_free(void *ptr, const unsigned int really_free)
 #define _peak_mcheck(x)	__peak_free(x, 0)
 #define _peak_free(x)	__peak_free(x, 1)
 
-#define peak_mcheck(x)	ALLOC_ERROR(_peak_mcheck(x))
-#define peak_free(x)	ALLOC_ERROR(_peak_free(x))
+#define peak_mcheck(x)	ALLOC_ERROR(_peak_mcheck((void *)(x)))
+#define peak_free(x)	ALLOC_ERROR(_peak_free((void *)(x)))
 
 /* pave over all standard functions */
 #define reallocf	peak_reallocf
