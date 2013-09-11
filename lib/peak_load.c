@@ -29,7 +29,7 @@ struct erf_packet_header {
 } __packed;
 
 #define ERF_MS(x)	((((x) >> 32) * 1000) +				\
-    ((((uint32_t)(x)) * 1000ull) >> 32))
+    ((((x) & 0xFFFFFFFF) * 1000) >> 32))
 #define ERF_FMT		0
 
 struct pcap_file_header {
@@ -49,7 +49,7 @@ struct pcap_packet_header {
 	uint32_t orig_len;
 } __packed;
 
-#define PCAP_MS(x, y)	((x) * 1000 + (y) / 1000)
+#define PCAP_MS(x, y)	((uint64_t)(x) * 1000 + (uint64_t)(y) / 1000)
 #define PCAP_MAGIC	0xA1B2C3D4
 #define PCAP_FMT	1
 
@@ -76,7 +76,7 @@ struct pcapng_enhanced_pkt_header {
 #define PCAPNG_FMT	2
 
 static inline uint32_t
-peak_load_normalise(struct peak_load *self, uint32_t ts_ms)
+peak_load_normalise(struct peak_load *self, uint64_t ts_ms)
 {
 	ts_ms += self->ts_off;
 

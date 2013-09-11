@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd June 29, 2013
+.Dd September 10, 2013
 .Dt PEAK_LOAD 3
 .Os
 .Sh NAME
@@ -87,6 +87,16 @@ A call to
 releases the reference to
 .Vt struct peak_load *
 and closes the trace file.
+.Sh CAVEATS
+Millisecond timestamps are normalised to make it possible to run
+numerous traces from different eras in immediate succession.
+Thus the time always runs forward, even when the next trace
+is older than the previous one.
+In this case, time
+.Sq stops
+when the backwards jump occurs and afterwards continues as usual.
+Thus the millisecond timestamp may be used like a monotonic clock.
+The unix timestamp, however, always reflects the correct time.
 .Sh SEE ALSO
 .Xr pcap 3
 .Sh AUTHORS

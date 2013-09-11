@@ -23,8 +23,8 @@ struct peak_load {
 	unsigned int ll;
 	int fd;
 
-	uint32_t ts_off;
-	uint32_t ts_ms;
+	uint64_t ts_off;
+	uint64_t ts_ms;
 	time_t ts_unix;
 
 	uint8_t buf[32 * 1024];
