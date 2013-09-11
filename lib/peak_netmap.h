@@ -21,7 +21,8 @@ struct peak_netmap {
 	const char *ifname;
 	unsigned int len;
 	unsigned int ll;
-	time_t ts;
+	uint64_t ts_ms;
+	time_t ts_unix;
 	void *buf;
 };
 
@@ -29,8 +30,8 @@ unsigned int		 peak_netmap_forward(struct peak_netmap *,
 			     const char *);
 unsigned int		 peak_netmap_attach(const char *);
 unsigned int		 peak_netmap_detach(const char *);
-struct peak_netmap	*peak_netmap_claim(void);
 void			 peak_netmap_unlock(void);
 void			 peak_netmap_lock(void);
+struct peak_netmap	*peak_netmap_claim(int);
 
 #endif /* !PEAK_NETMAP_H */

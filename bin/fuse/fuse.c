@@ -70,12 +70,12 @@ main(int argc, char **argv)
 	peak_netmap_lock();
 
 	while (loop) {
-		pkt = peak_netmap_claim();
+		pkt = peak_netmap_claim(200);
 		if (pkt) {
 			if (peak_netmap_forward(pkt,
 			    !strcmp(dev0, pkt->ifname) ? dev1 : dev0)) {
 				perr("%lld: dropping packet of size %u\n",
-				    pkt->ts, pkt->len);
+				    pkt->ts_unix, pkt->len);
 				peak_netmap_forward(pkt, NULL);
 			}
 		}

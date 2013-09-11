@@ -86,6 +86,7 @@ _peak_netmap_claim(void)
 	struct netmap_ring *ring;
 	struct my_ring *me;
 	unsigned int j, si;
+	struct timeval ts;
 
 	for (j = 0; j < NETMAP_COUNT(); ++j) {
 		me = self->me[j];
@@ -117,11 +118,26 @@ _peak_netmap_claim(void)
 			packet->ring = ring;
 			packet->i = i;
 
+			/*
+			 * Atomically extract timestamp.  We need
+			 * more accurate timestamps from netmap(4),
+			 * so we need to do lockless atomic swaps.
+			 * If we do this here we can keep userland
+			 * consistent with the ABI, but can do more
+			 * aggressive (still atomic) updates on the
+			 * kernel side (for each new packet being
+			 * put into the ring ideally).
+			 */
+			*(uint64_t *)&ts = __sync_fetch_and_or(
+			    (uint64_t *)&ring->ts, 0);
+
 			/* external stuff */
 			packet->data.buf = NETMAP_BUF(ring, idx);
 			packet->data.len = ring->slot[i].len;
 			packet->data.ll = LINKTYPE_ETHERNET;
-			packet->data.ts = ring->ts.tv_sec;
+			packet->data.ts_ms = (uint64_t)ts.tv_sec *
+			    1000 + (uint64_t)ts.tv_usec / 1000;
+			packet->data.ts_unix = ts.tv_sec;
 			packet->data.ifname = me->ifname;
 
 			return (NETPKT_TO_USER(packet));
@@ -132,7 +148,7 @@ _peak_netmap_claim(void)
 }
 
 struct peak_netmap *
-peak_netmap_claim(void)
+peak_netmap_claim(int timeout)
 {
 	struct peak_netmap *packet;
 	struct my_ring *me;
@@ -152,10 +168,8 @@ peak_netmap_claim(void)
 
 	/*
 	 * Call poll() to relax the CPU while adapters are idle.
-	 * We use a relatively low poll timeout of 200 ms to give
-	 * the caller a sense of system responsiveness in order
-	 * to do some work on its own (it may require
-	 * synchronisation of threads or something likewise).
+	 * The caller is in charge of providing an appropriate
+	 * timeout value (see poll(3)'s timeout parameter).
 	 */
 
 	for (i = 0; i < NETMAP_COUNT(); ++i) {
@@ -165,7 +179,7 @@ peak_netmap_claim(void)
 		fd->revents = 0;
 	}
 
-	ret = poll(self->fd, NETMAP_COUNT(), 200);
+	ret = poll(self->fd, NETMAP_COUNT(), timeout);
 	if (ret <= 0) {
 		/* error or timeout */
 		return (NULL);

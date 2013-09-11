@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd September 4, 2013
+.Dd September 11, 2013
 .Dt PEAK_NETMAP 3
 .Os
 .Sh NAME
@@ -29,7 +29,7 @@
 .Ft unsigned int
 .Fn peak_netmap_attach "const char *ifname"
 .Ft struct peak_netmap *
-.Fn peak_netmap_claim void
+.Fn peak_netmap_claim "int timeout"
 .Ft unsigned int
 .Fn peak_netmap_detach "const char *ifname"
 .Ft unsigned int
@@ -73,14 +73,24 @@ The
 .Fn peak_netmap_claim
 function claims ownership of a packet internally bound to
 .Xr netmap 4 .
-The function may sleep for 200 ms using
-.Xr poll 3
-if no packets are available on the attached adapters.
-The packet still resides in the mapped slot, and is safe for
-modification.
-Generally, all of packet processing can now ensue on the packet.
-The function returns zero on errors or an expired timeout.
-Otherwise, the length of the claimed packet is returned.
+If
+.Va timeout
+is greater than zero, it specifies a maximum interval
+(in milliseconds) to wait for incoming packets.
+If
+.Va timeout
+is zero, then
+.Fn peak_netmap_claim
+will return without blocking.
+If the value of
+.Va timeout
+is \-1, the call blocks indefinitely.
+The returned packet remains in the mapped kernel slot,
+but can be modified safely in userland.
+The function returns
+.Dv NULL
+on errors or an expired timeout.
+Otherwise, a pointer to the claimed packet reference is returned.
 .Pp
 In theory, claiming multiple packets at once is possible
 as long as all the internal pools have the capacity.
@@ -95,7 +105,8 @@ struct peak_netmap {
 	const char *ifname;
 	unsigned int len;
 	unsigned int ll;
-	time_t ts;
+	uint64_t ts_ms;
+	time_t ts_unix;
 	void *buf;
 };
 .Ed
@@ -119,7 +130,6 @@ The current version of
 is only capable of single-threaded claim and forward operations.
 .Sh SEE ALSO
 .Xr fuse 1 ,
-.Xr poll 3 ,
 .Xr netmap 4
 .Sh AUTHORS
 .An Franco Fichtner Aq Mt franco@packetwerk.com
