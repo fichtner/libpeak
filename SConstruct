@@ -23,18 +23,22 @@ SetOption('num_jobs',GetProcessorCount()+1)
 Decider('MD5-timestamp')
 
 
-env = Environment(CPPPATH=[os.getcwd()]+[ "{0}/{1}".format(os.getcwd(),p) for p in ["include","lib"]] )
-env.Append(LIBPATH = [os.getcwd()]+[ "{0}/{1}".format(os.getcwd(),p) for p in ["lib"]])
+env = Environment(CPPPATH=[os.getcwd()]+[ "{0}/{1}".format(os.getcwd(),p) for p in ["include","lib","contrib/libnetmap"]] )
+env.Append(LIBPATH = [os.getcwd()]+[ "{0}/{1}".format(os.getcwd(),p) for p in ["lib","contrib/libnetmap"]])
 env.Append(CCFLAGS = ['-g','-Wall','-m64','-Wextra', '-Werror','-std=gnu99','-pthread'], YACCFLAGS = "-d")
 
-#variable with libpeak static lib path
+#variable with libpeak and libnetmap static lib path
 env.Append(LIBPEAK = os.getcwd() + '/lib/libpeak.a')
+env.Append(LIBNETMAP = os.getcwd() + '/contrib/libnetmap/libnetmap.a')
 
 #libs to be linked with
-env.Append(LIBS=['peak','pthread'])
+env.Append(LIBS=['peak','netmap','pthread'])
 
 #Build libpeak static
 SConscript('lib/SConscript', exports='env')
+
+#Build netmap static
+SConscript('contrib/libnetmap/SConscript', exports='env')
 
 #Build Test programs. Each one has your own SConscript
 for test in ['base','load','track']: SConscript("test/{0}/SConscript".format(test),exports='env')
