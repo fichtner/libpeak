@@ -18,10 +18,8 @@
 #define PEAK_LOAD_H
 
 struct peak_load {
-	unsigned int fmt;
 	unsigned int len;
 	unsigned int ll;
-	int fd;
 
 	uint64_t ts_off;
 	uint64_t ts_ms;

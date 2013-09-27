@@ -18,6 +18,19 @@
 #include <peak.h>
 #include <unistd.h>
 
+#define LOAD_FROM_USER(x)	(((struct _peak_load *)((x) + 1)) - 1)
+#define LOAD_TO_USER(x)		&(x)->data
+
+struct _peak_load {
+	uint32_t *netmon_table;
+	uint32_t netmon_count;
+	uint32_t netmon_pos;
+	time_t netmon_time;
+	unsigned int fmt;
+	int fd;
+	struct peak_load data;
+};
+
 struct erf_packet_header {
 	uint64_t ts;
 	uint8_t type;
@@ -40,14 +53,14 @@ struct pcap_file_header {
 	uint32_t sigfigs;
 	uint32_t snaplen;
 	uint32_t network;
-} __packed;
+};
 
 struct pcap_packet_header {
 	uint32_t ts_sec;
 	uint32_t ts_usec;
 	uint32_t incl_len;
 	uint32_t orig_len;
-} __packed;
+};
 
 #define PCAP_MS(x, y)	((uint64_t)(x) * 1000 + (uint64_t)(y) / 1000)
 #define PCAP_MAGIC	0xA1B2C3D4
@@ -75,6 +88,41 @@ struct pcapng_enhanced_pkt_header {
 #define PCAPNG_MAGIC	0x0A0D0D0A
 #define PCAPNG_FMT	2
 
+struct netmon_file_header {
+	uint32_t magic;
+	uint8_t version_minor;
+	uint8_t version_major;
+	uint16_t network;
+	uint16_t start_year;
+	uint16_t start_month;
+	uint16_t start_dow;
+	uint16_t start_day;
+	uint16_t start_hour;
+	uint16_t start_min;
+	uint16_t start_sec;
+	uint16_t start_msec;
+	uint32_t frame_table_offset;
+	uint32_t frame_table_length;
+	uint32_t user_data_offset;
+	uint32_t user_data_length;
+	uint32_t comment_data_offset;
+	uint32_t comment_data_length;
+	uint32_t statistics_offset;
+	uint32_t statistics_length;
+	uint32_t network_info_offset;
+	uint32_t network_info_length;
+};
+
+struct netmon_record_header {
+	uint64_t time_stamp_data;
+	uint32_t original_length;
+	uint32_t include_length;
+};
+
+#define NETMON_MS(x)	(((x) * 10) / 10000)
+#define NETMON_MAGIC	0x55424D47
+#define NETMON_FMT 	3
+
 static inline uint32_t
 peak_load_normalise(struct peak_load *self, uint64_t ts_ms)
 {
@@ -91,7 +139,7 @@ peak_load_normalise(struct peak_load *self, uint64_t ts_ms)
 }
 
 static void
-_peak_load_erf(struct peak_load *self)
+_peak_load_erf(struct _peak_load *self)
 {
 	struct erf_packet_header hdr;
 	ssize_t ret;
@@ -104,22 +152,23 @@ _peak_load_erf(struct peak_load *self)
 	hdr.rlen = be16dec(&hdr.rlen) - sizeof(hdr);
 	hdr.wlen = be16dec(&hdr.wlen);
 
-	if (sizeof(self->buf) < hdr.rlen) {
+	if (sizeof(self->data.buf) < hdr.rlen) {
 		return;
 	}
 
-	ret = read(self->fd, self->buf, hdr.rlen);
+	ret = read(self->fd, self->data.buf, hdr.rlen);
 	if (ret != hdr.rlen) {
 		return;
 	}
 
-	self->ts_ms = peak_load_normalise(self, ERF_MS(hdr.ts));
-	self->ts_unix = hdr.ts >> 32;
-	self->len = hdr.wlen;
+	self->data.ts_ms = peak_load_normalise(LOAD_TO_USER(self),
+	    ERF_MS(hdr.ts));
+	self->data.ts_unix = hdr.ts >> 32;
+	self->data.len = hdr.wlen;
 }
 
 static void
-_peak_load_pcap(struct peak_load *self)
+_peak_load_pcap(struct _peak_load *self)
 {
 	struct pcap_packet_header hdr;
 	ssize_t ret;
@@ -129,23 +178,23 @@ _peak_load_pcap(struct peak_load *self)
 		return;
 	}
 
-	if (sizeof(self->buf) < hdr.incl_len) {
+	if (sizeof(self->data.buf) < hdr.incl_len) {
 		return;
 	}
 
-	ret = read(self->fd, self->buf, hdr.incl_len);
+	ret = read(self->fd, self->data.buf, hdr.incl_len);
 	if (ret != hdr.incl_len) {
 		return;
 	}
 
-	self->ts_ms = peak_load_normalise(self,
+	self->data.ts_ms = peak_load_normalise(LOAD_TO_USER(self),
 	    PCAP_MS(hdr.ts_sec, hdr.ts_usec));
-	self->ts_unix = hdr.ts_sec;
-	self->len = hdr.incl_len;
+	self->data.ts_unix = hdr.ts_sec;
+	self->data.len = hdr.incl_len;
 }
 
 static void
-_peak_load_pcapng(struct peak_load *self)
+_peak_load_pcapng(struct _peak_load *self)
 {
 	struct pcapng_enhanced_pkt_header pkt;
 	struct pcapng_iface_desc_header iface;
@@ -160,7 +209,7 @@ _peak_load_pcapng_again:
 		return;
 	}
 
-	if (sizeof(self->buf) < hdr.length) {
+	if (sizeof(self->data.buf) < hdr.length) {
 		return;
 	}
 
@@ -172,7 +221,7 @@ _peak_load_pcapng_again:
 			return;
 		}
 
-		ret = read(self->fd, self->buf, hdr.length -
+		ret = read(self->fd, self->data.buf, hdr.length -
 		    sizeof(hdr) - sizeof(pkt));
 		if (ret != (ssize_t)(hdr.length -
 		    sizeof(hdr) - sizeof(pkt))) {
@@ -181,9 +230,9 @@ _peak_load_pcapng_again:
 
 		ts = (uint64_t)pkt.ts_high << 32 | (uint64_t)pkt.ts_low;
 
-		self->ts_ms = ts / 1000ull;
-		self->ts_unix = ts / 1000ull / 1000ull;
-		self->len = pkt.packetlen;
+		self->data.ts_ms = ts / 1000ull;
+		self->data.ts_unix = ts / 1000ull / 1000ull;
+		self->data.len = pkt.packetlen;
 
 		break;
 	case 1:	/* interface description block */
@@ -195,7 +244,7 @@ _peak_load_pcapng_again:
 		lseek(self->fd, hdr.length - sizeof(hdr) - sizeof(iface),
 		    SEEK_CUR);
 
-		self->ll = iface.linktype;
+		self->data.ll = iface.linktype;
 
 		goto _peak_load_pcapng_again;
 	default:
@@ -209,10 +258,46 @@ _peak_load_pcapng_again:
 	}
 }
 
-unsigned int
-peak_load_next(struct peak_load *self)
+static void
+_peak_load_netmon(struct _peak_load *self)
 {
-	self->len = 0;
+	struct netmon_record_header hdr;
+	ssize_t ret;
+
+	if (self->netmon_pos == self->netmon_count) {
+		/* all packets are read */
+		return;
+	}
+
+	lseek(self->fd, self->netmon_table[self->netmon_pos++], SEEK_SET);
+
+	ret = read(self->fd, &hdr, sizeof(hdr));
+	if (ret != sizeof(hdr)) {
+		return;
+	}
+
+	if (sizeof(self->data.buf) < hdr.include_length) {
+		return;
+	}
+
+	ret = read(self->fd, self->data.buf, hdr.include_length);
+	if (ret != hdr.include_length) {
+		return;
+	}
+
+	self->data.ts_ms = peak_load_normalise(LOAD_TO_USER(self),
+	    NETMON_MS(hdr.time_stamp_data));
+	self->data.ts_unix = NETMON_MS(hdr.time_stamp_data) / 1000 +
+	    self->netmon_time;
+	self->data.len = hdr.original_length;
+}
+
+unsigned int
+peak_load_next(struct peak_load *self_user)
+{
+	struct _peak_load *self = LOAD_FROM_USER(self_user);
+
+	self->data.len = 0;
 
 	switch (self->fmt) {
 	case ERF_FMT:
@@ -224,17 +309,23 @@ peak_load_next(struct peak_load *self)
 	case PCAPNG_FMT:
 		_peak_load_pcapng(self);
 		break;
+	case NETMON_FMT:
+		_peak_load_netmon(self);
+		break;
 	}
 
-	return (self->len);
+	return (self->data.len);
 }
 
 struct peak_load *
 peak_load_init(const char *file)
 {
 	unsigned int ll = LINKTYPE_ETHERNET;
-	struct peak_load *self = NULL;
+	struct _peak_load *self = NULL;
+	uint32_t *netmon_table = NULL;
+	uint32_t netmon_length = 0;
 	unsigned int fmt = ERF_FMT;
+	time_t netmon_time = 0;
 	int fd = STDIN_FILENO;
 
 	if (file) {
@@ -267,6 +358,59 @@ peak_load_init(const char *file)
 
 			break;
 		}
+		case NETMON_MAGIC: {
+			struct netmon_file_header hdr;
+			struct tm base;
+
+			if (read(fd, &hdr, sizeof(hdr)) != sizeof(hdr)) {
+				goto peak_load_init_close;
+			}
+
+			if (hdr.version_minor != 0 ||
+			    hdr.version_major != 2) {
+				/* can only support version 2.0 for now */
+				goto peak_load_init_close;
+			}
+
+			if (hdr.network > 1) {
+				/*
+				 * Sorry for magic constant.  Both 0 and 1
+				 * are Ethernet packets.  The value is set
+				 * automatically.  Other link layers are
+				 * not supported.
+				 */
+				goto peak_load_init_close;
+			}
+
+			netmon_length = hdr.frame_table_length;
+			netmon_table = malloc(netmon_length);
+			if (!netmon_table) {
+				goto peak_load_init_close;
+			}
+
+			bzero(&base, sizeof(base));
+
+			/* convert to time_t */
+			base.tm_year = hdr.start_year - 1900;
+			base.tm_mon = hdr.start_month - 1;
+			base.tm_mday = hdr.start_day;
+			base.tm_hour = hdr.start_hour;
+			base.tm_min = hdr.start_min;
+			base.tm_sec = hdr.start_sec;
+
+			netmon_time = timegm(&base);
+
+			lseek(fd, hdr.frame_table_offset, SEEK_SET);
+
+			if (read(fd, netmon_table, netmon_length) !=
+			    netmon_length) {
+				goto peak_load_init_close;
+			}
+
+			fmt = NETMON_FMT;
+
+			break;
+		}
 		case PCAPNG_MAGIC: {
 			struct pcapng_block_header hdr;
 
@@ -294,11 +438,15 @@ peak_load_init(const char *file)
 		goto peak_load_init_close;
 	}
 
+	self->netmon_count = netmon_length / sizeof(*netmon_table);
+	self->netmon_table = netmon_table;
+	self->netmon_time = netmon_time;
 	self->fmt = fmt;
 	self->fd = fd;
-	self->ll = ll;
 
-	return (self);
+	self->data.ll = ll;
+
+	return (LOAD_TO_USER(self));
 
   peak_load_init_close:
 
@@ -306,18 +454,22 @@ peak_load_init(const char *file)
 		close(fd);
 	}
 
+	free(netmon_table);
+
   peak_load_init_out:
 
 	return (NULL);
 }
 
 void
-peak_load_exit(struct peak_load *self)
+peak_load_exit(struct peak_load *self_user)
 {
-	if (self) {
+	if (self_user) {
+		struct _peak_load *self = LOAD_FROM_USER(self_user);
 		if (self->fd != STDIN_FILENO) {
 			close(self->fd);
 		}
+		free(self->netmon_table);
 		free(self);
 	}
 }

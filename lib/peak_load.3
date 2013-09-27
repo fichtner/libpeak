@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd September 10, 2013
+.Dd September 24, 2013
 .Dt PEAK_LOAD 3
 .Os
 .Sh NAME
@@ -32,11 +32,10 @@
 .Sh DESCRIPTION
 The
 .Nm peak_load
-API provides a mechanism to open PCAP(NG) and ERF captures (network trace
-files).
+API provides a mechanism to open network captures (trace files).
 Each packet is being provided sequentially.
-The library can automatically detect a PCAP(NG) file, or will fall back to
-ERF mode.
+The library can automatically detect the file format,
+or will fall back to ERF mode.
 However, input given via
 .Xr stdin 4
 is always considered an ERF file.
@@ -97,7 +96,5 @@ In this case, time
 when the backwards jump occurs and afterwards continues as usual.
 Thus the millisecond timestamp may be used like a monotonic clock.
 The unix timestamp, however, always reflects the correct time.
-.Sh SEE ALSO
-.Xr pcap 3
 .Sh AUTHORS
 .An Franco Fichtner Aq Mt franco@packetwerk.com
