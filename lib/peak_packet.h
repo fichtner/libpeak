@@ -17,6 +17,10 @@
 #ifndef PEAK_PACKET_H
 #define PEAK_PACKET_H
 
+#ifndef IFNAMSIZ
+#define IFNAMSIZ	16
+#endif /* !IFNAMSIZ */
+
 #ifndef IPPROTO_IPV4
 #define IPPROTO_IPV4	IPPROTO_IPIP
 #endif /* !IPPROTO_IPV4 */
@@ -28,6 +32,10 @@
 #ifndef IPPROTO_IPEIP
 #define IPPROTO_IPEIP	94
 #endif /* !IPPROTO_IPEIP */
+
+#ifndef IPPROTO_L2TP
+#define IPPROTO_L2TP	115
+#endif /* !IPPROTO_L2TP */
 
 #ifndef LINKTYPE_ETHERNET
 #define LINKTYPE_ETHERNET	1
