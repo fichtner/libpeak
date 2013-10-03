@@ -1,2 +1,3 @@
+BASEDIR=..
 include makefile.inc
-include ../subdir.mk
+include $(BASEDIR)/share/mk/gnu.subdir.mk

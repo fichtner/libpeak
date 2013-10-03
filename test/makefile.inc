@@ -1,1 +1,3 @@
-SUBDIR=	base load track
+SUBDIR+=	base
+SUBDIR+=	load
+SUBDIR+=	track

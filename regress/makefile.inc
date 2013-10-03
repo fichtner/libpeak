@@ -1,1 +1,4 @@
-SUBDIR=	base load track peek
+SUBDIR+=	base
+SUBDIR+=	load
+SUBDIR+=	track
+SUBDIR+=	peek

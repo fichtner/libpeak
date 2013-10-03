@@ -13,5 +13,8 @@ all: libpeak.so
 libpeak.so:
 	gcc -shared $(CFLAGS) -o $@ $(SRCS) shared.c -pthread
 
+install:
+check:
+
 clean:
 	@rm -rf libpeak.so*

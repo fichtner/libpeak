@@ -1,6 +1,6 @@
-FILE=	../../bin/peek/peek
-FLAGS=
+BASEDIR=../..
+FILE=	$(BASEDIR)/bin/peek/peek
 
 REGRESS_TARGET=	test_pcap test_pcapng test_erf
 
-include ../../regress.mk
+include $(BASEDIR)/share/mk/all.regress.mk

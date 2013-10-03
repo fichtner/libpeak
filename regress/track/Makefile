@@ -1,5 +1,6 @@
-FILE=	../../test/track/track
+BASEDIR=../..
+FILE=	$(BASEDIR)/test/track/track
 
 REGRESS_TARGET= run
 
-include ../../regress.mk
+include $(BASEDIR)/share/mk/all.regress.mk

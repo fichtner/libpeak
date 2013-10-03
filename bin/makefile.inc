@@ -1,1 +1,3 @@
-SUBDIR=	fuse peek shared
+SUBDIR+=	fuse
+SUBDIR+=	peek
+SUBDIR+=	shared

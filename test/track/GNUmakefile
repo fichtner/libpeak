@@ -1,4 +1,4 @@
 BASEDIR=../..
 include makefile.inc
-include $(BASEDIR)/prog.mk
-include $(BASEDIR)/check.mk
+include $(BASEDIR)/share/mk/gnu.prog.mk
+include $(BASEDIR)/share/mk/gnu.check.mk

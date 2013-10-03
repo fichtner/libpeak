@@ -1,1 +1,1 @@
-SUBDIR=	libnetmap
+SUBDIR+=	libnetmap
