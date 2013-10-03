@@ -6,7 +6,7 @@ designed around the daily needs of network packet-related userland
 tools written in C.  Currently, the available modules are:
 
 peak_li:	lightweight inspection (DPI)
-peak_load:	PCAP/ERF file reader
+peak_load:	PCAP/PCAPNG/ERF/NETMON file reader
 peak_netmap:	simplified netmap(4) bindings
 peak_tcp:	shallow TCP engine
 peak_track:	rudimentary flow tracker
