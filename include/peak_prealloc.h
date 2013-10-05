@@ -21,8 +21,8 @@
 
 struct peak_prealloc {
 	SLIST_ENTRY(peak_prealloc) next;
-	unsigned long long magic;
-	unsigned char user[];
+	uint64_t magic;
+	uint8_t user[];
 };
 
 typedef struct {

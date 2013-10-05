@@ -41,10 +41,6 @@
 	}								\
 } while (0)
 
-struct peak_alloc_magic {
-	uint64_t magic;
-};
-
 #define ALLOC_PAD(name)		(sizeof(struct peak_##name##_head) +	\
     sizeof(struct peak_alloc_magic))
 #define ALLOC_MAGIC(x)							\
@@ -57,7 +53,7 @@ struct peak_alloc_magic {
 #define ALLOC_VALUE(name)	name##_VALUE
 
 #define ALLOC_INIT(name, x, y) do {					\
-	(x)->magic = ALLOC_VALUE(name);					\
+	(x)->m.magic = ALLOC_VALUE(name);				\
 	ALLOC_SIZE(x) = y;						\
 	ALLOC_TAIL(x)->magic = ALLOC_VALUE(name);			\
 } while (0)
@@ -67,17 +63,21 @@ struct peak_alloc_magic {
 #define malign_VALUE		0x9B97A6B5C4D3E2F1ull
 #define malloc_VALUE		0xD12E3D4C5B6A7989ull
 
+struct peak_alloc_magic {
+	uint64_t magic;
+};
+
 struct peak_malloc_head {
 	uint64_t size;
-	uint64_t magic;
-	unsigned char user[];
+	struct peak_alloc_magic m;
+	uint8_t user[];
 };
 
 struct peak_malign_head {
 	uint64_t size;
 	uint64_t _0[6];
-	uint64_t magic;
-	unsigned char user[];
+	struct peak_alloc_magic m;
+	uint8_t user[];
 };
 
 static inline void *

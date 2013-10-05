@@ -14,7 +14,10 @@ libpeak.so:
 	gcc -shared $(CFLAGS) -o $@ $(SRCS) shared.c -pthread
 
 install:
+manlint:
 check:
 
 clean:
 	@rm -rf libpeak.so*
+
+.PHONY: clean

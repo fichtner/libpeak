@@ -86,6 +86,8 @@ A call to
 releases the reference to
 .Vt struct peak_load *
 and closes the trace file.
+.Sh AUTHORS
+.An Franco Fichtner Aq Mt franco@packetwerk.com
 .Sh CAVEATS
 Millisecond timestamps are normalised to make it possible to run
 numerous traces from different eras in immediate succession.
@@ -96,5 +98,3 @@ In this case, time
 when the backwards jump occurs and afterwards continues as usual.
 Thus the millisecond timestamp may be used like a monotonic clock.
 The unix timestamp, however, always reflects the correct time.
-.Sh AUTHORS
-.An Franco Fichtner Aq Mt franco@packetwerk.com

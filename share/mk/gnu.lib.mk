@@ -5,12 +5,20 @@ AR=	ar
 _LIBS=	lib$(LIB).a
 OBJS=	$(SRCS:.c=.o)
 
+ifdef LIB
 all: .depend $(_LIBS)
+else
+all:
+endif
 
 -include .depend
 
 .depend:
+ifdef SRC
 	@$(MKDEP) $(CFLAGS) $(SRCS)
+else
+	@touch $@
+endif
 
 %.o: %.c
 	$(CC) $(CFLAGS) $< -c -o $@
@@ -21,5 +29,7 @@ all: .depend $(_LIBS)
 clean:
 	@$(RM) $(OBJS) $(_LIBS) .depend
 	@$(RM) -r *.dSYM
+
+install:
 
 .PHONY: clean

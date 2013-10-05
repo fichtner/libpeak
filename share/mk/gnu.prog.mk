@@ -17,7 +17,7 @@ all: .depend $(PROG)
 ifdef _SRCS
 	@$(MKDEP) $(CFLAGS) $(_SRCS)
 else
-	@touch .depend
+	@touch $@
 endif
 
 %.c: %.l
@@ -35,5 +35,7 @@ clean:
 	@$(RM) $(PROG) $(_YACCINTM) $(_LEXINTM)
 	@$(RM) .depend y.tab.h
 	@$(RM) -r *.dSYM
+
+install:
 
 .PHONY: clean

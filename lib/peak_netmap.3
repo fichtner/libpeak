@@ -124,12 +124,12 @@ Upon success, the function returns zero.
 Otherwise, non-zero is returned indicating that the packet could not
 be transmitted via the specified interface.
 The user must call the function again later or drop the packet.
-.Sh CAVEATS
-The current version of
-.Nm peak_netmap
-is only capable of single-threaded claim and forward operations.
 .Sh SEE ALSO
 .Xr fuse 1 ,
 .Xr netmap 4
 .Sh AUTHORS
 .An Franco Fichtner Aq Mt franco@packetwerk.com
+.Sh CAVEATS
+The current version of
+.Nm peak_netmap
+is only capable of single-threaded claim and forward operations.
