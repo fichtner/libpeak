@@ -39,6 +39,7 @@ enum {
 	 * sience involved here -- it's only best practise.
 	 */
 	LI_HTTP,
+	LI_RTSP,
 	LI_POP3,
 	LI_IMAP,
 	LI_SMTP,
@@ -69,6 +70,10 @@ enum {
 	LI_IMPP,
 	LI_OPENVPN,
 	LI_SYSLOG,
+	LI_L2TP,
+	LI_NTP,
+	LI_NETFLOW,
+	LI_RADIUS,
 	/*
 	 * Shallow applications are only detected by their
 	 * respective IP type, but we want to make sure they

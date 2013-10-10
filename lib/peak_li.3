@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd July 19, 2013
+.Dd October 10, 2013
 .Dt PEAK_LI 3
 .Os
 .Sh NAME
@@ -145,22 +145,32 @@ presented hereby:
 \(em Instant Messaging and Presence Protocol
 .It Dv LI_IRC
 \(em Internet Relay Chat
+.It Dv LI_L2TP
+\(em Layer 2 Tunneling Protocol
 .It Dv LI_LDAP
 \(em Lightweight Directory Access Protocol
 .It Dv LI_NETBIOS
 \(em Network Basic Input Output System
+.It Dv LI_NETFLOW
+\(em NetFlow
+.It Dv LI_NTP
+\(em Network Time Protocol
 .It Dv LI_OPENVPN
 \(em OpenVPN
 .It Dv LI_POP3
 \(em Post Office Protocol (Version 3)
 .It Dv LI_PPTP
 \(em Point-to-Point Tunneling Protocol
+.It Dv LI_RADIUS
+\(em Remote Authentication Dial-In User Service
 .It Dv LI_RIP
 \(em Routing Information Protocol
 .It Dv LI_RTCP
-\(em Real-time Transport Control Protocol
+\(em Real Time Transport Control Protocol
 .It Dv LI_RTP
-\(em Real-time Transport Protocol
+\(em Real Time Transport Protocol
+.It Dv LI_RTSP
+\(em Real Time Streaming Protocol
 .It Dv LI_SIP
 \(em Session Initiation Protocol
 .It Dv LI_SMTP
@@ -297,6 +307,8 @@ indicates that no further IP type must be checked.
 The
 .Nm peak_li
 module was written by
-.An Franco Fichtner Aq Mt franco@packetwerk.com
+.An Franco Fichtner Aq Mt franco@packetwerk.com .
+Additional application matching functions have been kindly supplied by
+.An Victor Pereira Aq Mt victor@packetwerk.com
 and
-.An Victor Pereira Aq Mt victor@packetwerk.com .
+.An Masoud Chelongar Aq Mt masoud@packetwerk.com .

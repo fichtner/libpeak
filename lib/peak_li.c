@@ -381,10 +381,12 @@ LI_DESCRIBE_APP(ftp)
 		"USER",
 	};
 
-	/* exclude similar smtp/pop3 syntax */
-	LI_EXCLUDE_PORT(110);
-	LI_EXCLUDE_PORT(25);
-	LI_EXCLUDE_PORT(587);
+	LI_EXCLUDE_PORT(110);	/* pop3 */
+	LI_EXCLUDE_PORT(25);	/* smtp */
+	LI_EXCLUDE_PORT(465);	/* smtp */
+	LI_EXCLUDE_PORT(587);	/* smtp */
+	LI_EXCLUDE_PORT(194);	/* irc */
+	LI_EXCLUDE_PORT(6667);	/* irc */
 
 	LI_MATCH_PAYLOAD(strings, 4, 1);
 
@@ -424,8 +426,7 @@ LI_DESCRIBE_APP(smtp)
 		"EHLO",
 	};
 
-	/* exclude stupid ftp */
-	LI_EXCLUDE_PORT(21);
+	LI_EXCLUDE_PORT(21);	/* ftp */
 
 	LI_MATCH_PAYLOAD(strings, 4, 1);
 
@@ -443,8 +444,9 @@ LI_DESCRIBE_APP(pop3)
 		"AUTH",
 	};
 
-	/* exclude stupid ftp */
-	LI_EXCLUDE_PORT(21);
+	LI_EXCLUDE_PORT(21); 	/* ftp */
+	LI_EXCLUDE_PORT(194);	/* irc */
+	LI_EXCLUDE_PORT(6667);	/* irc */
 
 	LI_MATCH_PAYLOAD(strings, 4, 1);
 
@@ -732,6 +734,228 @@ LI_DESCRIBE_APP(http)
 	LI_MATCH_PAYLOAD(strings, 4, 1);
 
 	return (0);
+}
+
+LI_DESCRIBE_APP(rtsp)
+{
+	static const char *strings[] = {
+		/* RFC 2326 */
+		"RTSP",
+		"DESC",
+		"ANNO",
+		"GET_",
+		"OPTI",
+		"PAUS",
+		"PLAY",
+		"RECO",
+		"REDI",
+		"SETU",
+		"SET_",
+		"TEAR",
+	};
+
+	LI_MATCH_PAYLOAD(strings, 4, 1);
+
+	return (0);
+}
+
+LI_DESCRIBE_APP(netflow_v1)
+{
+	struct netflow_v1_record {
+		uint32_t src_addr;
+		uint32_t dst_addr;
+		uint32_t next_hop;
+		uint16_t input;
+		uint16_t output;
+		uint32_t d_packets;
+		uint32_t d_octet;
+		uint32_t first;
+		uint32_t last;
+		uint16_t src_port;
+		uint16_t dst_port;
+		uint16_t pad1;
+		uint8_t port;
+		uint8_t tos;
+		uint8_t flags;
+		uint8_t pad2[3];
+		uint32_t reserved;
+	} __packed;
+	struct netflow_v1_header {
+		uint16_t version;
+		uint16_t count;
+		uint32_t sys_uptime;
+		uint32_t unix_secs;
+		uint32_t unix_nsecs;
+		struct netflow_v1_record fl_rec[];
+	} __packed *ptr = (void *)packet->app.raw;
+	uint16_t decoded;
+
+	if (packet->app_len < sizeof(struct netflow_v1_header) +
+	    sizeof(struct netflow_v1_record)) {
+		/* at least a header and one record */
+		return (0);
+	}
+	decoded = be16dec(&ptr->count);
+	if (!decoded || decoded > 24) {
+		/* count is between 1 and 24 */
+		return (0);
+	}
+
+	if (ptr->fl_rec[0].pad1) {
+		/* must be zero */
+		return (0);
+	}
+
+	if (memcmp(ptr->fl_rec[0].pad2, "\0\0\0",
+	    sizeof(ptr->fl_rec[0].pad2))) {
+		/* must be zero */
+		return (0);
+	}
+
+	if (!ptr->fl_rec[0].src_addr || !ptr->fl_rec[0].dst_addr) {
+		/* IP addresses can't be zero */
+		return (0);
+	}
+
+	if (packet->app_len != sizeof(struct netflow_v1_header) +
+	    decoded * sizeof(struct netflow_v1_record)) {
+		/* in UDP packet length corresponds to actual length */
+		return (0);
+	}
+
+	return (1);
+}
+
+LI_DESCRIBE_APP(netflow_v5)
+{
+	struct netflow_v5_record {
+		uint32_t src_addr;
+		uint32_t dst_addr;
+		uint32_t next_hop;
+		uint16_t input;
+		uint16_t output;
+		uint32_t d_packets;
+		uint32_t d_octet;
+		uint32_t first;
+		uint32_t last;
+		uint16_t src_port;
+		uint16_t dst_port;
+		uint8_t pad1;
+		uint8_t tcp_flag;
+		uint8_t port;
+		uint8_t tos;
+		uint16_t src_as;
+		uint16_t dst_as;
+		uint8_t src_mask;
+		uint8_t dst_mask;
+		uint16_t pad2;
+	} __packed;
+	struct netflow_v5_header {
+		uint16_t version;
+		uint16_t count;
+		uint32_t sys_uptime;
+		uint32_t unix_secs;
+		uint32_t unix_nsecs;
+		uint32_t flow_sequence;
+		uint8_t engine_type;
+		uint8_t engine_id;
+		uint16_t sampling_interval;
+		struct netflow_v5_record fl_rec[];
+	} __packed *ptr = (void *)packet->app.raw;
+	uint16_t decoded;
+
+	if (packet->app_len < sizeof(struct netflow_v5_header) +
+	    sizeof(struct netflow_v5_record)) {
+		/* at least a header and one record */
+		return (0);
+	}
+
+	decoded = be16dec(&ptr->count);
+	if (!decoded || decoded > 30) {
+		/* only between 1 and 30 records */
+		return (0);
+	}
+
+	if (ptr->fl_rec[0].pad1 || ptr->fl_rec[0].pad2) {
+		/* must be zero */
+		return (0);
+	}
+
+	if (!ptr->fl_rec[0].src_addr || !ptr->fl_rec[0].dst_addr) {
+		/* IP addresses can't be zero */
+		return (0);
+	}
+
+	if (packet->app_len != sizeof(struct netflow_v5_header) +
+	    decoded * sizeof(struct netflow_v5_record)) {
+		/* UDP length must match */
+		return (0);
+	}
+
+	return (1);
+}
+
+LI_DESCRIBE_APP(netflow)
+{
+	uint16_t *version = (void *)packet->app.raw;
+
+	if (packet->app_len < sizeof(*version)) {
+		return (0);
+	}
+
+	switch (be16dec(version)) {
+	case 1:
+		return (LI_CALL_APP(netflow_v1));
+	case 5:
+		return (LI_CALL_APP(netflow_v5));
+	default:
+		break;
+	}
+
+	return (0);
+}
+
+LI_DESCRIBE_APP(radius)
+{
+	/* RFC 2865 */
+	struct radius {
+		uint8_t code;
+		uint8_t identifier;
+		uint16_t length;
+		uint8_t authenticator[16];
+	} __packed *ptr = (void *)packet->app.raw;
+	uint16_t decoded;
+
+	if (packet->app_len < sizeof(struct radius)) {
+		return (0);
+	}
+
+	decoded = be16dec(&ptr->length);
+	if (decoded < 20  || decoded > 4096) {
+		/* size of packet should be between 20 and 4096 */
+		return (0);
+	}
+
+	if (packet->app_len != decoded) {
+		return (0);
+	}
+
+	switch (ptr->code) {
+	case 1: 	/* Access-Request */
+	case 2: 	/* Accept-Request */
+	case 3: 	/* Reject-Request */
+	case 4:		/* Accounting-Requst */
+	case 5:		/* Accounting-Response */
+	case 11:	/* Access-Challenge */
+	case 12:	/* Status-Server (experimental) */
+	case 13:	/* Status-Client (experimental) */
+	case 255:	/* Reserved */
+		break;
+	default:
+		return (0);
+	}
+
+	return (1);
 }
 
 LI_DESCRIBE_APP(bittorrent)
@@ -1045,6 +1269,133 @@ LI_DESCRIBE_APP(pptp_raw)
 	 * an interesting opportunity to verify more bytes
 	 * into the payload. However, we don't really care.
 	 */
+
+	return (1);
+}
+
+LI_DESCRIBE_APP(l2tp)
+{
+	struct l2tp {
+		uint8_t flags;
+		uint8_t version;
+		uint16_t length;
+		uint16_t tunnel_id;
+		uint16_t session_id;
+		uint16_t ns;
+		uint16_t nr;
+	} __packed *ptr = (void *)packet->app.raw;
+
+	if ((packet->app_len) < (sizeof(struct l2tp))) {
+		return (0);
+	}
+
+	switch (ptr->version) {
+	case 2:		/* RFC 2661 */
+	case 3:		/* RFC 3931 */
+		break;
+	default:
+		return (0);
+	}
+
+	if (!(ptr->flags & 0x80)) {
+		/*
+		 * RFC 3931 doesn't mention a type bit,
+		 * so it's safe to assume the detection
+		 * of data messages is next to impossible.
+		 * Instead, we keep the matching consistent
+		 * by not even detecting data messages as
+		 * per RFC 2661.
+		 */
+		return (0);
+	}
+
+	if (!(ptr->flags & 0x78)) {
+		/* length and sequence bit must be set */
+		return (0);
+	}
+
+	if (ptr->flags & 0x37) {
+		/* must always be zero */
+		return (0);
+	}
+
+	if (packet->app_len != be16dec(&ptr->length)) {
+		return (0);
+	}
+
+	return (1);
+}
+
+LI_DESCRIBE_APP(ntp)
+{
+	struct ntp {
+		uint8_t flags;
+		uint8_t stratum;
+		int8_t poll_interval;
+		int8_t precision;
+		int32_t root_delay;
+		int32_t root_dispersion;
+		int32_t reference_clock_id;
+		uint64_t reference_timestamp;
+		uint64_t originate_timestamp;
+		uint64_t receive_timestamp;
+		uint64_t transmit_timestamp;
+	} __packed *ptr = (void *)packet->app.raw;
+	struct ntp_v2 {
+		struct ntp ntp;
+		uint8_t auth[12];
+	} __packed;
+	struct ntp_v4 {
+		struct ntp ntp;
+		uint32_t key_id;
+		uint8_t dgst[16];
+	} __packed;
+
+	if (packet->app_len < sizeof(struct ntp)) {
+		return (0);
+	}
+
+	switch (ptr->flags & 0x38) {
+	case (1 << 3):  /* RFC 1059 */
+		if ((packet->app_len) != sizeof(struct ntp)) {
+			/* fixed header length */
+			return (0);
+		}
+		if (ptr->flags & 0x05) {
+			/* reserved and zeroed */
+			return (0);
+		}
+		break;
+	case (2 << 3):  /* RFC 1119 */
+	case (3 << 3):  /* RFC 1305 */
+		switch (packet->app_len) {
+		case sizeof(struct ntp):
+		case sizeof(struct ntp_v2):
+			break;
+		default:
+			return (0);
+		}
+		if (!(ptr->flags & 0x05)) {
+			/* zero is reserved */
+			return (0);
+		}
+		break;
+	case (4 << 3):	/* RFC 5905 */
+		switch (packet->app_len) {
+		case sizeof(struct ntp):
+		case sizeof(struct ntp_v4):
+			break;
+		default:
+			return (0);
+		}
+		if (!(ptr->flags & 0x05)) {
+			/* zero is reserved */
+			return (0);
+		}
+		break;
+	default:
+		return (0);
+	}
 
 	return (1);
 }
@@ -1390,16 +1741,21 @@ LI_DESCRIBE_APP(openvpn)
 LI_DESCRIBE_APP(irc)
 {
 	static const char *strings[] = {
+		"NICK",
+		"PASS",
+		"USER",
+		":irc",
+		":loc",
 		"WHO ",
 		"WHOI",
 		"PING",
 		"CAP ",
 		"JOIN",
-		"NICK",
 		"PRIV",
-		":irc",
-		":loc",
 	};
+
+	LI_EXCLUDE_PORT(110);	/* pop3 */
+	LI_EXCLUDE_PORT(21);	/* ftp */
 
 	LI_MATCH_PAYLOAD(strings, 4, 1);
 
@@ -1438,13 +1794,14 @@ LI_DESCRIBE_APP(iptype)
 
 static const struct peak_lis apps[] = {
 	/* shallow protocols first (match by IP type) */
-	LI_LIST_IPTYPE(LI_ICMP, icmp, IPPROTO_ICMP, IPPROTO_MAX),
-	LI_LIST_IPTYPE(LI_ICMP, icmp, IPPROTO_ICMPV6, IPPROTO_MAX),
+	LI_LIST_IPTYPE(LI_ICMP, icmp, IPPROTO_ICMP, IPPROTO_ICMPV6),
 	LI_LIST_IPTYPE(LI_IGMP, igmp, IPPROTO_IGMP, IPPROTO_MAX),
 	LI_LIST_IPTYPE(LI_OSPF, ospf, IPPROTO_OSPFIGP, IPPROTO_MAX),
+	LI_LIST_IPTYPE(LI_L2TP, l2tp, IPPROTO_L2TP, IPPROTO_MAX),
 	/* real protocols follow now */
 	LI_LIST_APP(LI_PPTP, pptp, IPPROTO_TCP, IPPROTO_GRE),
 	LI_LIST_APP(LI_HTTP, http, IPPROTO_TCP, IPPROTO_MAX),
+	LI_LIST_APP(LI_RTSP, rtsp, IPPROTO_TCP, IPPROTO_UDP),
 	LI_LIST_APP(LI_POP3, pop3, IPPROTO_TCP, IPPROTO_MAX),
 	LI_LIST_APP(LI_IMAP, imap, IPPROTO_TCP, IPPROTO_MAX),
 	LI_LIST_APP(LI_SMTP, smtp, IPPROTO_TCP, IPPROTO_MAX),
@@ -1455,8 +1812,10 @@ static const struct peak_lis apps[] = {
 	LI_LIST_APP(LI_STUN, stun, IPPROTO_UDP, IPPROTO_TCP),
 	LI_LIST_APP(LI_SIP, sip, IPPROTO_UDP, IPPROTO_TCP),
 	LI_LIST_APP(LI_RIP, rip, IPPROTO_UDP, IPPROTO_MAX),
+	LI_LIST_APP(LI_RADIUS, radius, IPPROTO_UDP, IPPROTO_MAX),
 	LI_LIST_APP(LI_BGP, bgp, IPPROTO_TCP, IPPROTO_MAX),
 	LI_LIST_APP(LI_IKE, ike, IPPROTO_UDP, IPPROTO_MAX),
+	LI_LIST_APP(LI_NETFLOW, netflow, IPPROTO_UDP, IPPROTO_MAX),
 	LI_LIST_APP(LI_TFTP, tftp, IPPROTO_UDP, IPPROTO_MAX),
 	LI_LIST_APP(LI_DHCP, dhcp, IPPROTO_UDP, IPPROTO_MAX),
 	LI_LIST_APP(LI_DTLS, dtls, IPPROTO_UDP, IPPROTO_MAX),
@@ -1468,6 +1827,8 @@ static const struct peak_lis apps[] = {
 	LI_LIST_APP(LI_IMPP, impp, IPPROTO_TCP, IPPROTO_MAX),
 	LI_LIST_APP(LI_XMPP, xmpp, IPPROTO_TCP, IPPROTO_MAX),
 	LI_LIST_APP(LI_SYSLOG, syslog, IPPROTO_UDP, IPPROTO_TCP),
+	LI_LIST_APP(LI_L2TP, l2tp, IPPROTO_UDP, IPPROTO_MAX),
+	LI_LIST_APP(LI_NTP, ntp, IPPROTO_UDP, IPPROTO_MAX),
 	/* greedy protocols need to remain down here */
 	LI_LIST_APP(LI_DNS, dns, IPPROTO_UDP, IPPROTO_TCP),
 	LI_LIST_APP(LI_OPENVPN, openvpn, IPPROTO_UDP, IPPROTO_TCP),
