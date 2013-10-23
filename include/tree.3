@@ -23,7 +23,7 @@
 .\" * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 .\" * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\" */
-.Dd $Mdocdate: July 25 2012 $
+.Dd October 14, 2013
 .Dt TREE 3
 .Os
 .Sh NAME
@@ -114,9 +114,9 @@
 .Ft "int"
 .Fn RB_EMPTY "RB_HEAD *head"
 .Ft "struct TYPE *"
-.Fn RB_NEXT "NAME" "RB_HEAD *head" "struct TYPE *elm"
+.Fn RB_NEXT "NAME" "struct TYPE *elm"
 .Ft "struct TYPE *"
-.Fn RB_PREV "NAME" "RB_HEAD *head" "struct TYPE *elm"
+.Fn RB_PREV "NAME" "struct TYPE *elm"
 .Ft "struct TYPE *"
 .Fn RB_MIN "NAME" "RB_HEAD *head"
 .Ft "struct TYPE *"
@@ -448,7 +448,7 @@ and
 .Fn RB_PREV
 macros can be used to traverse the tree:
 .Bd -literal -offset indent
-for (np = RB_MIN(NAME, &head); np != NULL; np = RB_NEXT(NAME, &head, np))
+for (np = RB_MIN(NAME, &head); np != NULL; np = RB_NEXT(NAME, np))
 .Ed
 .Pp
 Or, for simplicity, one can use the
