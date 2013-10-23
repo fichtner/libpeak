@@ -1,4 +1,4 @@
 MAKEOBJDIRPREFIX=/
 BASEDIR=${.CURDIR}/..
 .include "makefile.inc"
-.include <bsd.lib.mk>
+.include <bsd.prog.mk>

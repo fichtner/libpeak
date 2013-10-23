@@ -14,10 +14,12 @@ all: .depend $(PROG)
 -include .depend
 
 .depend:
+ifdef SRCS
 ifdef _SRCS
 	@$(MKDEP) $(CFLAGS) $(_SRCS)
 else
 	@touch $@
+endif
 endif
 
 %.c: %.l
