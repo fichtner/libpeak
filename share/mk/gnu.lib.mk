@@ -3,6 +3,9 @@ CC=	gcc
 AR=	ar
 
 _LIBS=	lib$(LIB).a
+ifdef SHLIB_MAJOR
+_LIBS+=	lib$(LIB).so
+endif
 OBJS=	$(SRCS:.c=.o)
 
 ifdef LIB
@@ -14,7 +17,7 @@ endif
 -include .depend
 
 .depend:
-ifdef SRC
+ifdef SRCS
 	@$(MKDEP) $(CFLAGS) $(SRCS)
 else
 	@touch $@
@@ -25,6 +28,9 @@ endif
 
 %.a: $(OBJS)
 	$(AR) crus $@ $^
+
+%.so: $(SRCS)
+	$(CC) -shared $(CFLAGS) -o $@ $^ $(LDADD)
 
 clean:
 	@$(RM) $(OBJS) $(_LIBS) .depend
