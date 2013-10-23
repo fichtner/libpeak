@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd July 22, 2013
+.Dd October 6, 2013
 .Dt PEEK 1
 .Os
 .Sh NAME
@@ -70,10 +70,8 @@ Next, this flow tuple is converted into a unique storage slot in
 Finally, the flow's application layer protocol is detected using the
 .Xr peak_li 3
 API and remembered for all subsequent packets of the same flow.
-.Sh EXIT STATUS
-.Ex -std
 .Sh FILES
-.Bl -tag -width "scripts/peek_to_csv.py" -compact
+.Bl -tag -width ".Pa scripts/peek_to_csv.py" -compact
 .It Pa scripts/peek_to_csv.py
 A Python script converting
 .Nm
@@ -81,9 +79,8 @@ output to CSV.
 It is used mainly for preparing the output for statistical analysis
 in external tools.
 .El
-.Sh CAVEATS
-There is no IP defragmentation or TCP reordering available, which may
-cause unreliable output for application layer magic.
+.Sh EXIT STATUS
+.Ex -std
 .Sh SEE ALSO
 .Xr peak_li 3 ,
 .Xr peak_load 3 ,
@@ -92,3 +89,6 @@ cause unreliable output for application layer magic.
 .Xr peak_udp 3
 .Sh AUTHORS
 .An Franco Fichtner Aq Mt franco@packetwerk.com
+.Sh CAVEATS
+There is no IP defragmentation or TCP reordering available, which may
+cause unreliable output for application layer magic.

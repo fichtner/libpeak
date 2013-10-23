@@ -7,5 +7,6 @@ CFLAGS=		-g -m64 -std=gnu99
 CFLAGS+=	-Wall -Wextra -Werror
 CFLAGS+=	-I$(BASEDIR)/include -I$(BASEDIR)/lib
 
-LDADD=		-lc -pthread -L$(BASEDIR)/lib -lpeak
+LDADD=		-lc -pthread
+LDADD+=		$(BASEDIR)/lib/libpeak.a
 DPADD=		$(BASEDIR)/lib/libpeak.a
