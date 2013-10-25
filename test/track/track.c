@@ -23,9 +23,12 @@ static void
 test_track(void)
 {
 	struct peak_tracks *tracker;
+	struct peak_packet packet;
 	struct netaddr usr1, usr2;
 	struct peak_track _flow;
 	struct peak_track *flow;
+
+	bzero(&packet, sizeof(packet));
 
 	netaddr4(&usr1, 0);
 	netaddr4(&usr2, 1);
@@ -33,20 +36,37 @@ test_track(void)
 	tracker = peak_track_init(2);
 	assert(tracker);
 
-	TRACK_KEY(&_flow, usr1, usr2, 80, 51000, 0);
+	packet.net_saddr = usr1;
+	packet.net_daddr = usr2;
+	packet.flow_sport = 80;
+	packet.flow_dport = 51000;
+	TRACK_KEY(&_flow, &packet);
 	flow = peak_track_acquire(tracker, &_flow);
 
 	assert(flow);
 	assert(flow == peak_track_acquire(tracker, &_flow));
 	assert(flow == peak_track_acquire(tracker, flow));
 
-	TRACK_KEY(&_flow, usr2, usr1, 51000, 80, 0);
+	packet.net_saddr = usr2;
+	packet.net_daddr = usr1;
+	packet.flow_sport = 51000;
+	packet.flow_dport = 80;
+	TRACK_KEY(&_flow, &packet);
 	assert(flow == peak_track_acquire(tracker, &_flow));
 
-	TRACK_KEY(&_flow, usr1, usr2, 51000, 80, 0);
+	packet.net_saddr = usr1;
+	packet.net_daddr = usr2;
+	packet.flow_sport = 51000;
+	packet.flow_dport = 80;
+	TRACK_KEY(&_flow, &packet);
 	assert(flow != peak_track_acquire(tracker, &_flow));
 
-	TRACK_KEY(&_flow, usr1, usr2, 51000, 80, 1);
+	packet.net_saddr = usr1;
+	packet.net_daddr = usr2;
+	packet.flow_sport = 51000;
+	packet.flow_dport = 80;
+	packet.net_type = 1;
+	TRACK_KEY(&_flow, &packet);
 	assert(peak_track_acquire(tracker, &_flow));
 
 	peak_track_exit(tracker);

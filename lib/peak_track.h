@@ -18,7 +18,7 @@
 #define PEAK_TRACK_H
 
 struct peak_track {
-	struct netaddr user[2];
+	struct netaddr addr[2];
 	uint16_t port[2];
 	uint8_t type;
 	uint8_t padding[3];
@@ -31,14 +31,14 @@ struct peak_track {
 	RB_ENTRY(peak_track) rb_track;
 } __packed;
 
-#define TRACK_KEY(flow, src_user, dst_user, src_port, dst_port,		\
-    ip_type) do {							\
-	const unsigned int dir = netcmp(&(src_user), &(dst_user)) <= 0;	\
-	(flow)->port[dir] = src_port;					\
-	(flow)->port[!dir] = dst_port;					\
-	(flow)->user[dir] = src_user;					\
-	(flow)->user[!dir] = dst_user;					\
-	(flow)->type = ip_type;						\
+#define TRACK_KEY(flow, packet) do {					\
+	const unsigned int dir =					\
+	    !(netcmp(&(packet)->net_saddr, &(packet)->net_daddr) < 0);	\
+	(flow)->port[dir] = (packet)->flow_sport;			\
+	(flow)->port[!dir] = (packet)->flow_dport;			\
+	(flow)->addr[dir] = (packet)->net_saddr;			\
+	(flow)->addr[!dir] = (packet)->net_daddr;			\
+	(flow)->type = (packet)->net_type;				\
 } while (0)
 
 struct peak_tracks	*peak_track_init(const size_t);

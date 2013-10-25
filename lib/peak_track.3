@@ -13,18 +13,17 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd June 8, 2013
+.Dd October 25, 2013
 .Dt PEAK_TRACK 3
 .Os
 .Sh NAME
-.Nm peak_track_init ,
 .Nm peak_track_acquire ,
-.Nm peak_track_exit
+.Nm peak_track_exit ,
+.Nm peak_track_init ,
+.Nm TRACK_KEY
 .Nd flow tracker
 .Sh SYNOPSIS
 .In peak.h
-.Ft struct peak_tracks *
-.Fn peak_track_init "const size_t max_flows"
 .Ft struct peak_track *
 .Fo peak_track_acquire
 .Fa "struct peak_tracks *self"
@@ -32,6 +31,9 @@
 .Fc
 .Ft void
 .Fn peak_track_exit "stuct peak_tracks *self"
+.Ft struct peak_tracks *
+.Fn peak_track_init "const size_t max_flows"
+.Fn TRACK_KEY FLOW PACKET
 .Sh DESCRIPTION
 The
 .Nm peak_track

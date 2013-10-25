@@ -75,8 +75,6 @@ struct sll_header {
 	}								\
 } while (0)
 
-#define SRC(x, y)	((x) + !!(y))
-#define DST(x, y)	((x) + !(y))
 #define LOWER		0
 #define UPPER		1
 
@@ -102,6 +100,8 @@ struct peak_packet {
 	uint32_t mac_len;
 	uint16_t mac_type;
 	uint16_t net_len;
+	struct netaddr net_saddr;
+	struct netaddr net_daddr;
 	uint8_t net_hlen;
 	uint8_t net_type;
 	uint16_t flow_hlen;

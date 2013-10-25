@@ -16,7 +16,7 @@
 
 #include <peak.h>
 
-#define TRACK_SIZE(x)	(sizeof((x)->user) + sizeof((x)->port) +	\
+#define TRACK_SIZE(x)	(sizeof((x)->addr) + sizeof((x)->port) +	\
     sizeof((x)->type))
 
 #define TRACK_CMP(x, y)	memcmp(x, y, TRACK_SIZE(x))

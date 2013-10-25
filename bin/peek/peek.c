@@ -139,21 +139,20 @@ peek_packet(struct peak_tracks *peek, const timeslice_t *timer,
 	struct peak_packet packet;
 	struct peak_track *flow;
 	struct peak_track _flow;
-	struct netaddr src, dst;
 
 	PACKET_LINK(&packet, buf, len, type);
 
 	switch (packet.mac_type) {
 	case ETHERTYPE_IP:
-		netaddr4(&src, packet.net.iph->ip_src.s_addr);
-		netaddr4(&dst, packet.net.iph->ip_dst.s_addr);
+		netaddr4(&packet.net_saddr, packet.net.iph->ip_src.s_addr);
+		netaddr4(&packet.net_daddr, packet.net.iph->ip_dst.s_addr);
 		packet.net_len = be16dec(&packet.net.iph->ip_len);
 		packet.net_hlen = packet.net.iph->ip_hl << 2;
 		packet.net_type = packet.net.iph->ip_p;
 		break;
 	case ETHERTYPE_IPV6:
-		netaddr6(&src, &packet.net.ip6h->ip6_src);
-		netaddr6(&dst, &packet.net.ip6h->ip6_dst);
+		netaddr6(&packet.net_saddr, &packet.net.ip6h->ip6_src);
+		netaddr6(&packet.net_daddr, &packet.net.ip6h->ip6_dst);
 		peek_packet_ipv6(&packet);
 		break;
 	default:
@@ -179,8 +178,7 @@ peek_packet(struct peak_tracks *peek, const timeslice_t *timer,
 		break;
 	}
 
-	TRACK_KEY(&_flow, src, dst, packet.flow_sport, packet.flow_dport,
-	   packet.net_type);
+	TRACK_KEY(&_flow, &packet);
 
 	flow = peak_track_acquire(peek, &_flow);
 	if (!flow) {
@@ -188,7 +186,8 @@ peek_packet(struct peak_tracks *peek, const timeslice_t *timer,
 	}
 
 	{
-		const unsigned int dir = !!netcmp(&src, &flow->user[LOWER]);
+		const unsigned int dir =
+		    !!netcmp(&packet.net_saddr, &flow->addr[LOWER]);
 
 		if (!flow->li[dir]) {
 			flow->li[dir] = peak_li_get(&packet);
