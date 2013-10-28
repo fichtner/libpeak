@@ -4,7 +4,10 @@ AR=	ar
 
 _LIBS=	lib$(LIB).a
 ifdef SHLIB_MAJOR
-_LIBS+=	lib$(LIB).so
+ifdef SHLIB_MINOR
+SHLIB=	lib$(LIB).so.$(SHLIB_MAJOR).$(SHLIB_MINOR)
+_LIBS+=	$(SHLIB)
+endif
 endif
 OBJS=	$(SRCS:.c=.o)
 
@@ -29,8 +32,10 @@ endif
 %.a: $(OBJS)
 	$(AR) crus $@ $^
 
-%.so: $(SRCS)
+ifdef SHLIB
+$(SHLIB): $(SRCS)
 	$(CC) -shared $(CFLAGS) -o $@ $^ $(LDADD)
+endif
 
 clean:
 	@$(RM) $(OBJS) $(_LIBS) .depend
