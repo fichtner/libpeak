@@ -1,5 +1,5 @@
 SUBDIR+=	include
-SUBDIR+=	lib
 SUBDIR+=	contrib
+SUBDIR+=	lib
 SUBDIR+=	test
 SUBDIR+=	bin
