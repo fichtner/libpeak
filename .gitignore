@@ -1,5 +1,5 @@
 *.[ao]
-*.so
+*.so*
 *.po
 *.dSYM
 *.manlint
