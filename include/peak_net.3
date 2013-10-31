@@ -13,13 +13,16 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd August 5, 2013
+.Dd October 23, 2013
 .Dt PEAK_NET 3
 .Os
 .Sh NAME
 .Nm netaddr4 ,
 .Nm netaddr6 ,
-.Nm netcmp
+.Nm netcmp ,
+.Nm netcmp4 ,
+.Nm netcmp6 ,
+.Nm netprefix
 .Nd coherent network address mapping
 .Sh SYNOPSIS
 .In peak.h
@@ -31,6 +34,16 @@
 .Fo netcmp
 .Fa "const struct netaddr *x"
 .Fa "const struct netaddr *y"
+.Fc
+.Ft int
+.Fn netcmp4 "const struct netaddr *x"
+.Ft int
+.Fn netcmp6 "const struct netaddr *x"
+.Ft int
+.Fo netprefix
+.Fa "const struct netaddr *x"
+.Fa "const struct netaddr *y"
+.Fa "unsigned int yp"
 .Fc
 .Sh DESCRIPTION
 The
@@ -48,13 +61,12 @@ and
 .Fn netaddr6
 convert the provided IPv4 or IPv6 network address into a given
 .Vt struct netaddr .
+.Pp
+The function
 .Fn netcmp
 then allows the caller to compare such structures against each
 other.
-.Sh RETURN VALUES
-The
-.Fn netcmp
-function returns zero if the two addresses are identical.
+The function returns zero if the two addresses are identical.
 If
 .Va x
 is less than
@@ -65,5 +77,23 @@ Otherwise,
 is greater than
 .Va y ,
 which is indicated by a return value of >0.
+.Pp
+The functions
+.Fn netcmp4
+and
+.Fn netcmp6
+return zero if the address is an IPv4 or IPv6 address, respectively.
+Otherwise non-zero is returned.
+.Pp
+The function
+.Fn netprefix
+compares both addresses
+.Va x
+and
+.Va y
+according to the given prefix length
+.Va yp .
+When the addresses match in the prefix, the function returns zero.
+Otherwise, a non-zero value is returned.
 .Sh AUTHORS
 .An Franco Fichtner Aq Mt franco@packetwerk.com

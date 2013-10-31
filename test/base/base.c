@@ -84,13 +84,38 @@ test_net(void)
 	};
 	uint32_t ipv4_addr;
 	struct netaddr ip;
+	int i;
 
 	be32enc(&ipv4_addr, 0x11223344);
 	netaddr4(&ip, ipv4_addr);
 	assert(!netcmp(&ip, &ip4_ref));
+	assert(!netcmp4(&ip));
+	assert(netcmp6(&ip));
+
+	for (i = 1; i <= 32; ++i) {
+		assert(!netprefix(&ip, &ip4_ref, i));
+	}
+
+	assert(netprefix(&ip, &ip4_ref, 33));
+	assert(netprefix(&ip, &ip4_ref, 0));
 
 	netaddr6(&ip, &ip6_ref);
 	assert(!netcmp(&ip, &ip6_ref));
+	assert(netcmp4(&ip));
+	assert(!netcmp6(&ip));
+
+	for (i = 1; i <= 128; ++i) {
+		assert(!netprefix(&ip, &ip6_ref, i));
+	}
+
+	assert(netprefix(&ip, &ip6_ref, 129));
+	assert(netprefix(&ip, &ip6_ref, 0));
+
+	assert(netprefix(&ip4_ref, &ip6_ref, 1));
+	be32enc(&ipv4_addr, 0x11224433);
+	netaddr4(&ip, ipv4_addr);
+	assert(!netprefix(&ip, &ip4_ref, 16));
+	assert(netprefix(&ip, &ip4_ref, 17));
 }
 
 struct interval {
