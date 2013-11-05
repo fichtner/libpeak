@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd February 10, 2013
+.Dd November 1, 2013
 .Dt PEAK_ALLOC 3
 .Os
 .Sh NAME
@@ -24,6 +24,7 @@
 .Nm mcheck ,
 .Nm realloc ,
 .Nm reallocf ,
+.Nm zalign ,
 .Nm zalloc
 .Nd memory allocation
 .Sh SYNOPSIS
@@ -42,6 +43,8 @@
 .Fn realloc "void *ptr" "size_t size"
 .Ft void *
 .Fn reallocf "void *ptr" "size_t size"
+.Ft void *
+.Fn zalign "size_t size"
 .Ft void *
 .Fn zalloc "size_t size"
 .Sh DESCRIPTION
@@ -76,6 +79,9 @@ really know what you are doing.
 In case you wonder, this function
 wraps around
 .Xr posix_memalign 3 .
+The
+.Fn zalign
+function returns a pointer to the allocated, zero-filled memory instead.
 .Pp
 The
 .Fn calloc
@@ -154,6 +160,7 @@ If successful,
 .Fn malloc ,
 .Fn realloc ,
 .Fn reallocf ,
+.Fn zalign ,
 and
 .Fn zalloc
 functions return a pointer to the allocated memory.

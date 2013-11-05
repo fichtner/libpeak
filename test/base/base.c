@@ -167,6 +167,12 @@ test_alloc(void)
 
 	peak_free(test_ptr);
 
+	test_ptr = peak_zalign(sizeof(*test_ptr));
+
+	assert(!*test_ptr);
+
+	peak_free(test_ptr);
+
 	assert(!peak_realloc(NULL, 0));
 
 	test_ptr = peak_realloc(NULL, 7);

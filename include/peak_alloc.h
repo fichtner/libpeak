@@ -253,6 +253,18 @@ peak_malign(size_t size)
 	return (_peak_finalise_malign(size, ptr));
 }
 
+static inline void *
+peak_zalign(size_t size)
+{
+	void *ptr = peak_malign(size);
+
+	if (likely(ptr)) {
+		bzero(ptr, size);
+	}
+
+	return (ptr);
+}
+
 static inline unsigned int
 __peak_free(void *ptr, const unsigned int really_free)
 {
@@ -305,6 +317,7 @@ __peak_free(void *ptr, const unsigned int really_free)
 /* pave over all standard functions */
 #define reallocf	peak_reallocf
 #define realloc		peak_realloc
+#define zalign		peak_zalign
 #define malign		peak_malign
 #define zalloc		peak_zalloc
 #define malloc		peak_malloc
