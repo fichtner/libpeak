@@ -1,2 +1,0 @@
-Import('env')
-env.StaticLibrary(target='libnetmap',source=Glob('nm_*.c'),LIBS=env['LIBS'] + ['m'],CFLAGS=env['CFLAGS'])

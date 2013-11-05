@@ -27,7 +27,6 @@ The library has been developed by Packetwerk and is released under the
 ISC license (see COPYING for details).  Its main contributors are:
 
 Franco Fichtner <franco@packetwerk.com>
-Victor Pereira <victor@packetwerk.com>
 
 Feel free to fork or contribute back.  To do so, use GitHub or send
 your patches to us via email.  Contributions can also be made in the
@@ -51,19 +50,16 @@ test/		test binaries
 Building and running the code
 =============================
 
-Either make(1) or scons(1) can be used as the build tool.  The code
-builds fine on MacOS, OpenBSD, FreeBSD, DragonFly BSD and Linux
+The code builds fine on MacOS, OpenBSD, FreeBSD, DragonFly BSD and Linux
 (Ubuntu with pmake installed).  You break it, you fix it.
 
 Building the code:
 
     make
-    scons
 
 Running the tests:
 
     cd regress && make
-    cd regress && scons
 
 Having fun:
 

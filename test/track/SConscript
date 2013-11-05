@@ -1,3 +1,0 @@
-Import('env')
-Depends(env.Program('track.c'),env["LIBPEAK"])
-
