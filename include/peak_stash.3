@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd March 12, 2013
+.Dd November 6, 2013
 .Dt PEAK_STASH 3
 .Os
 .Sh NAME
@@ -21,11 +21,12 @@
 .Nm STASH_CLEAR ,
 .Nm STASH_COUNT ,
 .Nm STASH_EMPTY ,
+.Nm STASH_FOREACH ,
+.Nm STASH_FOREACH_REVERSE ,
 .Nm STASH_FULL ,
 .Nm STASH_PUSH ,
 .Nm STASH_POP ,
-.Nm STASH_FOREACH ,
-.Nm STASH_FOREACH_REVERSE
+.Nm STASH_REBUILD
 .Nd stack-based temporary storage
 .Sh SYNOPSIS
 .In peak.h
@@ -33,12 +34,13 @@
 .Fn STASH_CLEAR NAME
 .Fn STASH_COUNT NAME
 .Fn STASH_EMPTY NAME
+.Fn STASH_FOREACH PTR NAME
+.Fn STASH_FOREACH_REVERSE PTR NAME
 .Fn STASH_FULL NAME
 .Fn STASH_PUSH PTR NAME
 .Ft TYPE *
 .Fn STASH_POP NAME
-.Fn STASH_FOREACH PTR NAME
-.Fn STASH_FOREACH_REVERSE PTR NAME
+.Fn STASH_REBUILD NAME TYPE STASH_T
 .Sh DESCRIPTION
 The
 .Nm peak_stash
@@ -63,6 +65,13 @@ It is recommended to invoke the macro in the declaration part of
 the topmost function or global context depending on the type of
 stash that is required.
 In case of the latter, proper access serialisation must be considered.
+.Fn STASH_REBUILD
+can rebuild the stash across function boundaries.
+The type
+.Vt stash_t
+is used to pass
+.Va STASH_T
+to the macro.
 .Pp
 The
 .Fn STASH_PUSH

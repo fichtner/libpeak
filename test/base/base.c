@@ -123,11 +123,12 @@ struct interval {
 	int right;
 };
 
-static void
-test_stash(void)
+static const struct interval test[2] = { { 2, 1 }, { 1, 2 } };
+
+static unsigned int
+_test_stash(stash_t ptr)
 {
-	struct interval test[2] = { { 2, 1 }, { 1, 2 } };
-	STASH_DECLARE(stash, struct interval, 2);
+	STASH_REBUILD(stash, struct interval, ptr);
 	struct interval *p;
 	unsigned int i = 0;
 
@@ -145,6 +146,18 @@ test_stash(void)
 	}
 
 	assert(STASH_COUNT(stash) == i);
+
+	return (i);
+}
+
+static void
+test_stash(void)
+{
+	STASH_DECLARE(stash, struct interval, 2);
+	struct interval *p;
+	unsigned int i;
+
+	i = _test_stash(stash);
 
 	STASH_FOREACH_REVERSE(p, stash) {
 		--i;
@@ -217,7 +230,7 @@ test_alloc(void)
 	assert(ALLOC_UNDERFLOW == _peak_free(test_str));
 
 	*test_str_mod = test_char;
-	test_str_mod = test_str + strlen(test_str) + 1;
+	test_str_mod = test_str + strsize(test_str);
 	test_char = *test_str_mod;
 	*test_str_mod = 0;
 

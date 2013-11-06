@@ -13,10 +13,11 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd November 1, 2013
+.Dd November 6, 2013
 .Dt PEAK_ALLOC 3
 .Os
 .Sh NAME
+.Nm ALLOC_ALIGN ,
 .Nm calloc ,
 .Nm free ,
 .Nm malign ,
@@ -29,6 +30,8 @@
 .Nd memory allocation
 .Sh SYNOPSIS
 .In peak.h
+.Ft size_t
+.Fn ALLOC_ALIGN VALUE ALIGNMENT
 .Ft void *
 .Fn calloc "size_t count" "size_t size"
 .Ft void
@@ -173,6 +176,16 @@ the input pointer is still valid if reallocation failed.
 For
 .Fn reallocf ,
 the input pointer will have been freed if reallocation failed.
+.Pp
+The macro
+.Fn ALLOC_ALIGN
+returns an aligned value for
+.Va VALUE ,
+according to
+.Va ALIGNMENT .
+An already aligned
+.Va VALUE
+is returned directly (e.g. zero).
 .Pp
 The
 .Fn free
