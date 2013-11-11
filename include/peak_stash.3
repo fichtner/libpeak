@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd November 6, 2013
+.Dd November 11, 2013
 .Dt PEAK_STASH 3
 .Os
 .Sh NAME
@@ -37,6 +37,7 @@
 .Fn STASH_FOREACH PTR NAME
 .Fn STASH_FOREACH_REVERSE PTR NAME
 .Fn STASH_FULL NAME
+.Ft TYPE *
 .Fn STASH_PUSH PTR NAME
 .Ft TYPE *
 .Fn STASH_POP NAME
@@ -86,13 +87,15 @@ On the other hand, the
 macro reclaims the most recent element from the stash
 .Fa NAME
 and returns the pointer to the temporary location.
-Both macros have sanity checks in place and will panic when an
-out of bounds exception would occur.
+Both macros have sanity checks in place and will return
+.Dv NULL
+when an out of bounds exception would occur.
+Otherwise, the pointer to the inserted element is returned.
 .Pp
 The
 .Fn STASH_FOREACH
-macro runs through all stored elements after one another without
-triggering a panic. The argument
+macro runs through all stored elements after one another.
+The argument
 .Fa PTR
 represents a pointer of
 .Fa TYPE * .
@@ -100,24 +103,19 @@ The
 .Fn STASH_FOREACH_REVERSE
 does the same thing, but in reverse order.
 .Pp
-If you feel terrible about panics, an alernative is checking the
-current status of stash
-.Fa NAME
-via the
-.Fn STASH_EMPTY
-and
-.Fn STASH_FULL
-helper macros before attempting a
-.Fn STASH_POP
-or
-.Fn STASH_PUSH ,
-respectively.
 The
 .Fn STASH_COUNT
 macro may come in handy as well returning the current count of elemens
 stored; and the
 .Fn STASH_CLEAR
-macro resets the stash.
+macro resets the stash
+.Fa NAME .
+.Fn STASH_EMPTY
+and
+.Fn STASH_FULL
+return true if the stash
+.Fa NAME
+is empty or full, respectively.
 .Sh EXAMPLES
 A sample implentation with an embedded structure in a global stash
 may look as follows:
@@ -132,13 +130,13 @@ static STASH_DECLARE(storage, struct interval, 10);
 void
 push(struct interval *i)
 {
-	STASH_PUSH(storage, i);
+	STASH_PUSH(i, storage);
 }
 
 struct interval *
 pop(void)
 {
-	return STASH_POP(storage);
+	return (STASH_POP(storage));
 }
 .Ed
 .Sh AUTHORS
