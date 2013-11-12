@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd November 11, 2013
+.Dd November 12, 2013
 .Dt PEAK_STASH 3
 .Os
 .Sh NAME
@@ -24,6 +24,7 @@
 .Nm STASH_FOREACH ,
 .Nm STASH_FOREACH_REVERSE ,
 .Nm STASH_FULL ,
+.Nm STASH_LIST ,
 .Nm STASH_PUSH ,
 .Nm STASH_POP ,
 .Nm STASH_REBUILD
@@ -37,6 +38,7 @@
 .Fn STASH_FOREACH PTR NAME
 .Fn STASH_FOREACH_REVERSE PTR NAME
 .Fn STASH_FULL NAME
+.Fn STASH_LIST NAME
 .Ft TYPE *
 .Fn STASH_PUSH PTR NAME
 .Ft TYPE *
@@ -116,6 +118,10 @@ and
 return true if the stash
 .Fa NAME
 is empty or full, respectively.
+The macro
+.Fn STASH_LIST
+returns a pointer to the first element of the stash
+.Fa NAME .
 .Sh EXAMPLES
 A sample implentation with an embedded structure in a global stash
 may look as follows:

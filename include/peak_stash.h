@@ -38,26 +38,27 @@ struct peak_stash_##name {						\
 #define STASH_FULL(name)	((name)->index >= (name)->size)
 #define STASH_EMPTY(name)	!(name)->index
 #define STASH_COUNT(name)	(name)->index
+#define STASH_LIST(name)	(name)->values
 
 #define STASH_CLEAR(name) do {						\
 	(name)->index = 0;						\
 } while (0)
 
 #define STASH_PUSH(x, name) ({						\
-	typeof(&(name)->values[0]) ret = NULL;				\
+	typeof(&(name)->values[0]) _ret = NULL;				\
 	if (likely(!STASH_FULL(name))) {				\
-		ret = &(name)->values[(name)->index++];			\
-		*ret = *(x);						\
+		_ret = &(name)->values[(name)->index++];			\
+		*_ret = *(x);						\
 	}								\
-	ret;								\
+	_ret;								\
 })
 
 #define STASH_POP(name) ({	 					\
-	typeof(&(name)->values[0]) ret = NULL;				\
+	typeof(&(name)->values[0]) _ret = NULL;				\
 	if (likely(!STASH_EMPTY(name))) {				\
-		ret = &(name)->values[--(name)->index];			\
+		_ret = &(name)->values[--(name)->index];			\
 	}								\
-	ret;								\
+	_ret;								\
 })
 
 #define STASH_FOREACH(x, name)						\
