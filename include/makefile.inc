@@ -2,6 +2,7 @@ MAN+=	peak_alloc.3
 MAN+=	peak_hash.3
 MAN+=	peak_net.3
 MAN+=	peak_output.3
+MAN+=	peak_page.3
 MAN+=	peak_prealloc.3
 MAN+=	peak_stash.3
 MAN+=	peak_sys.3

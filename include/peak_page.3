@@ -1,0 +1,126 @@
+.\"
+.\" Copyright (c) 2013 Franco Fichtner <franco@packetwerk.com>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd November 17, 2013
+.Dt PEAK_PAGE 3
+.Os
+.Sh NAME
+.Nm PAGE_COLLAPSE ,
+.Nm PAGE_DECLARE ,
+.Nm PAGE_FIND ,
+.Nm PAGE_FOREACH ,
+.Nm PAGE_INSERT ,
+.Nm PAGE_MAX ,
+.Nm PAGE_MIN
+.Nd linked list pager
+.Sh SYNOPSIS
+.In peak.h
+.Fn PAGE_COLLAPSE ROOT FREE_FUN FREE_ARG
+.Fn PAGE_DECLARE NAME TYPE COUNT
+.Fn PAGE_FIND ROOT ELEMENT CMP_FUN
+.Fn PAGE_FOREACH ELEMENT PAGE ROOT
+.Ft TYPE *
+.Fn PAGE_INSERT ROOT ELEMENT CMP_FUN ALLOC_FUN ALLOC_ARG
+.Ft TYPE *
+.Fn PAGE_MIN ELEMENT PAGE ROOT
+.Ft TYPE *
+.Fn PAGE_MAX ELEMENT PAGE ROOT
+.Fn ALLOC_FUN ALLOC_ARG ALLOC_SIZE
+.Ft int
+.Fn CMP_FUN X Y
+.Ft void
+.Fn FREE_FUN FREE_ARG FREE_PTR
+.Sh DESCRIPTION
+The
+.Nm peak_page
+macros provide a paged approach to doing single-linked lists of elements.
+Linked lists tend to have performance issues when they get larger, which
+is mostly due to disrupted cache locality.
+Also, small elements tend to create a lot of overhead as compared to the
+list pointer.
+A number of arguments can be stored per page, mitigating these issues.
+.Pp
+The list is sorted, but this poses a small problem:
+if a page is full, but the element belongs to that page, the page
+needs to be split in half to make room for the current element as well
+as a number of upcoming elements.
+This wraps around nicely to the case of having a single elememnt for
+each page, which is split into two pages holding the old and the new
+value, respectively.
+.Pp
+The macro
+.Fn PAGE_DECLARE
+creates a paged element structure with
+.Va COUNT
+elememts of type
+.Va TYPE
+per page.
+.Va NAME
+is used to identify the declared structure.
+.Pp
+The macro
+.Fn PAGE_INSERT
+inserts a new element into the list pointed to by
+.Va ROOT .
+.Fn ALLOC_FUN
+takes two arguments: a context pointer
+.Va ALLOC_ARG
+and the actual allocation size (see
+.Xr malloc 3 ) .
+Upon success, the macro returns a pointer to the position of the
+inserted element.
+Otherwise,
+.Dv NULL
+is returned indicating that the allocation failed.
+.Pp
+The macro
+.Fn PAGE_FIND
+finds the element pointed to by
+.Va ELEMENT
+in the list pointed to by
+.Va ROOT .
+On success, a pointer to the matching element is returned.
+Otherwise,
+.Dv NULL
+is returned.
+.Pp
+The macro
+.Fn PAGE_FOREACH
+iterates over all elements in the paged list.
+.Va ELEMENT
+is a pointer to each element and needs to be provided by the caller.
+Also, a temporary page pointer needs to be provided to the macro
+via the
+.Va PAGE
+argument.
+The
+.Va ROOT
+of the paged list must be supplied as well.
+Similarly, the macros
+.Fn PAGE_MIN
+and
+.Fn PAGE_MAX
+return the first or the last element, respectively.
+.Pp
+The macro
+.Fn PAGE_COLLAPSE
+frees the whole list.
+.Fn FREE_FUN
+takes two arguments: a context pointer
+.Va FREE_ARG
+and the to be freed pointer (see
+.Xr free 3 ) .
+.Sh AUTHORS
+.An Franco Fichtner Aq Mt franco@packetwerk.com

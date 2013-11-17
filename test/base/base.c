@@ -134,9 +134,10 @@ _test_stash(stash_t ptr)
 
 	assert(STASH_EMPTY(stash));
 
-	STASH_PUSH(&test[0], stash);
-	STASH_PUSH(&test[1], stash);
+	assert(STASH_PUSH(&test[0], stash));
+	assert(STASH_PUSH(&test[1], stash));
 
+	assert(!STASH_PUSH(&test[1], stash));
 	assert(STASH_FULL(stash));
 
 	STASH_FOREACH(p, stash) {
@@ -157,6 +158,8 @@ test_stash(void)
 	struct interval *p;
 	unsigned int i;
 
+	assert(!STASH_POP(stash));
+
 	i = _test_stash(stash);
 
 	STASH_FOREACH_REVERSE(p, stash) {
@@ -165,9 +168,10 @@ test_stash(void)
 		    p->right == test[i].right);
 	}
 
-	STASH_POP(stash);
-	STASH_POP(stash);
+	assert(STASH_POP(stash));
+	assert(STASH_POP(stash));
 
+	assert(!STASH_POP(stash));
 	assert(STASH_EMPTY(stash));
 }
 
@@ -357,6 +361,107 @@ test_output(void)
 	}
 }
 
+PAGE_DECLARE(test_page_head, int, 7);
+
+#define TEST_PAGE_CMP(x, y)	(*(x) - *(y))
+#define TEST_PAGE_MALLOC(x, y)	malloc(y)
+#define TEST_PAGE_FREE(x, y)	free(y)
+#define TEST_PAGE_NULL(x, y)	NULL
+
+#define TEST_PAGE_SCMP(x, y)	((x)->value - (y)->value)
+
+struct test_page_struct {
+	int reserved;
+	int value;
+};
+
+PAGE_DECLARE(test_page_single, struct test_page_struct, 1);
+
+#define TEST_PAGE_LOOP	23
+
+static int test_page_list[TEST_PAGE_LOOP] = {
+	/*
+	 * These test values are designed to go through
+	 * all corner cases of a PAGE_INSERT() invoke.
+	 * Don't mess with them unless you are sure what
+	 * you are doing.
+	 */
+	2, 1, 20, 21, 19, 18, 17, 22, 0, 3, 4, 7,
+	6, 5, 16, 15, 14, 13, 12, 11, 10, 8, 9,
+};
+
+static void
+test_page(void)
+{
+	struct test_page_single *spage, *sroot = NULL;
+	struct test_page_head *page, *root = NULL;
+	struct test_page_struct *selem;
+	struct test_page_struct wrap;
+	int *elem;
+	int i = 0;
+
+	/* list size > 1 */
+
+	PAGE_FOREACH(elem, page, root) {
+		++i;
+	}
+
+	assert(!PAGE_MIN(elem, page, root));
+	assert(!PAGE_MAX(elem, page, root));
+
+	assert(!elem);
+	assert(!i);
+
+	assert(!PAGE_FIND(root, &test_page_list[0], TEST_PAGE_CMP));
+	assert(!PAGE_INSERT(root, &test_page_list[0], TEST_PAGE_CMP,
+	    TEST_PAGE_NULL, NULL));
+	assert(PAGE_INSERT(root, &test_page_list[0], TEST_PAGE_CMP,
+	    TEST_PAGE_MALLOC, NULL));
+	assert(*PAGE_MIN(elem, page, root) == *PAGE_MAX(elem, page, root));
+
+	assert(!PAGE_FIND(root, &test_page_list[1], TEST_PAGE_CMP));
+	assert(PAGE_INSERT(root, &test_page_list[1], TEST_PAGE_CMP,
+	    TEST_PAGE_MALLOC, NULL));
+	assert(*PAGE_MIN(elem, page, root) != *PAGE_MAX(elem, page, root));
+
+	for (i = 2; i < TEST_PAGE_LOOP; ++i) {
+		assert(!PAGE_FIND(root, &test_page_list[i], TEST_PAGE_CMP));
+		assert(PAGE_INSERT(root, &test_page_list[i],
+		    TEST_PAGE_CMP, TEST_PAGE_MALLOC, NULL));
+		assert(PAGE_INSERT(root, &test_page_list[i],
+		    TEST_PAGE_CMP, TEST_PAGE_MALLOC, NULL));
+	}
+
+	i = 0;
+
+	PAGE_FOREACH(elem, page, root) {
+		assert(i++ == *elem);
+	}
+
+	PAGE_COLLAPSE(root, TEST_PAGE_FREE, NULL);
+	assert(!root);
+
+	/* flat linked list case */
+
+	for (i = 0; i < TEST_PAGE_LOOP; ++i) {
+		wrap.value = test_page_list[i];
+		wrap.reserved = 0;
+
+		assert(PAGE_INSERT(sroot, &wrap,
+		    TEST_PAGE_SCMP, TEST_PAGE_MALLOC, NULL));
+	}
+
+	i = 0;
+
+	PAGE_FOREACH(selem, spage, sroot) {
+		assert(selem == PAGE_FIND(sroot, selem, TEST_PAGE_SCMP));
+		assert(i++ == selem->value);
+	}
+
+	PAGE_COLLAPSE(sroot, TEST_PAGE_FREE, NULL);
+	assert(!sroot);
+}
+
 static void
 test_hash(void)
 {
@@ -432,6 +537,7 @@ main(void)
 	test_alloc();
 	test_prealloc();
 	test_output();
+	test_page();
 	test_hash();
 	test_time();
 
