@@ -73,6 +73,11 @@ struct peak_stash_##name {						\
 		     (x) >= &(name)->values[0];				\
 		     (x)--)
 
+#define STASH_SORT(name, cmp) do {					\
+	qsort(STASH_LIST(name), STASH_COUNT(name),			\
+	    sizeof(*STASH_LIST(name)), cmp);				\
+} while (0)
+
 typedef void * stash_t;
 
 #endif /* !PEAK_STASH_H */

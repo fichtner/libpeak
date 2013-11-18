@@ -26,6 +26,7 @@
 #define segv()		*((volatile int *)0)
 #define msleep(x)	usleep((x)*1000)
 #define strsize(x)	(strlen(x) + 1)
+#define stackptr(x)	x[1]
 
 #ifndef unlikely
 #define unlikely(exp)	__builtin_expect(!!(exp), 0)

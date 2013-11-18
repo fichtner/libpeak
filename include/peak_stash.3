@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd November 12, 2013
+.Dd November 18, 2013
 .Dt PEAK_STASH 3
 .Os
 .Sh NAME
@@ -44,6 +44,9 @@
 .Ft TYPE *
 .Fn STASH_POP NAME
 .Fn STASH_REBUILD NAME TYPE STASH_T
+.Fn STASH_SORT NAME CMP
+.Ft int
+.Fn CMP "const void *x" "const void *x"
 .Sh DESCRIPTION
 The
 .Nm peak_stash
@@ -93,6 +96,16 @@ Both macros have sanity checks in place and will return
 .Dv NULL
 when an out of bounds exception would occur.
 Otherwise, the pointer to the inserted element is returned.
+.Pp
+The macro
+.Fn STASH_SORT
+sorts the stash
+.Fa NAME
+using the compare function
+.Fa CMP .
+Internally,
+.Xr qsort 3
+is used to do the sorting.
 .Pp
 The
 .Fn STASH_FOREACH

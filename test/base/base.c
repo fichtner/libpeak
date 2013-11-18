@@ -125,7 +125,22 @@ struct interval {
 
 static const struct interval test[2] = { { 2, 1 }, { 1, 2 } };
 
-static unsigned int
+static int
+test_stash_cmp(const void *xx, const void *yy)
+{
+	const struct interval *x = xx;
+	const struct interval *y = yy;
+	int ret;
+
+	ret = x->left - y->left;
+	if (ret) {
+		return (ret);
+	}
+
+	return (x->right - y->right);
+}
+
+static void
 _test_stash(stash_t ptr)
 {
 	STASH_REBUILD(stash, struct interval, ptr);
@@ -147,8 +162,6 @@ _test_stash(stash_t ptr)
 	}
 
 	assert(STASH_COUNT(stash) == i);
-
-	return (i);
 }
 
 static void
@@ -156,16 +169,18 @@ test_stash(void)
 {
 	STASH_DECLARE(stash, struct interval, 2);
 	struct interval *p;
-	unsigned int i;
+	unsigned int i = 0;
 
 	assert(!STASH_POP(stash));
 
-	i = _test_stash(stash);
+	_test_stash(stash);
+
+	STASH_SORT(stash, test_stash_cmp);
 
 	STASH_FOREACH_REVERSE(p, stash) {
-		--i;
 		assert(p->left == test[i].left &&
 		    p->right == test[i].right);
+		++i;
 	}
 
 	assert(STASH_POP(stash));
@@ -507,10 +522,7 @@ test_hash(void)
 static void
 test_time(void)
 {
-	timeslice_t _timer;
-	timeslice_t *timer;
-
-	timer = &_timer;
+	timeslice_t stackptr(timer);
 
 	TIMESLICE_INIT(timer);
 
