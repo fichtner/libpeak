@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Franco Fichtner <franco@packetwerk.com>
+ * Copyright (c) 2012-2013 Franco Fichtner <franco@packetwerk.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -308,7 +308,7 @@ test_prealloc(void)
 	prealloc_puts(test_mem, test_chunk);
 	test_chunk = prealloc_gets(test_mem);
 
-	assert(PREALLOC_MISSING_CHUNKS == _prealloc_exit(test_mem));
+	assert(_prealloc_exit(test_mem));
 
 	prealloc_puts(test_mem, test_chunk);
 	prealloc_exitd(test_mem);
@@ -325,11 +325,10 @@ test_prealloc(void)
 
 		*test_chunks[i] = i;
 
-		assert(PREALLOC_HEALTHY ==
-		    _prealloc_put(test_mem, test_chunks[i]));
-		assert(PREALLOC_DOUBLE_FREE ==
-		    _prealloc_put(test_mem, test_chunks[i]));
+		prealloc_put(test_mem, test_chunks[i]);
 		assert(prealloc_gets(test_mem) == test_chunks[i]);
+
+		*test_chunks[i] = i;
 	}
 
 	assert(!prealloc_gets(test_mem));
@@ -337,19 +336,10 @@ test_prealloc(void)
 	for (i = 0; i < 8; ++i) {
 		assert(i == *test_chunks[i]);
 
-		uint64_t magic = *(test_chunks[i] - 1);
-		*(test_chunks[i] - 1) = 0;
-
-		assert(PREALLOC_UNDERFLOW ==
-		    _prealloc_put(test_mem, test_chunks[i]));
-
-		*(test_chunks[i] - 1) = magic;
-
 		prealloc_puts(test_mem, test_chunks[i]);
 	}
 
-	assert(PREALLOC_POOL_MISMATCH ==
-	    _prealloc_put(test_mem, test_chunks));
+	assert(!prealloc_valid(test_mem, test_chunks));
 
 	prealloc_exitd(test_mem);
 

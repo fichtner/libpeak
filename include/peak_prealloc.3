@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2012 Franco Fichtner <franco@packetwerk.com>
+.\" Copyright (c) 2012-2013 Franco Fichtner <franco@packetwerk.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd April 15, 2013
+.Dd November 22, 2013
 .Dt PEAK_PREALLOC 3
 .Os
 .Sh NAME
@@ -84,6 +84,9 @@ work on an externally provided
 .Vt prealloc_t .
 However, the actual memory pool is always allocated dynamically.
 Either memory pool can be operated by all following functions.
+A process-wide panic message followed by an
+.Xr abort 3
+are issued by all exit functions in case of lost elements.
 .Pp
 The function pair
 .Fn prealloc_gets
@@ -119,16 +122,6 @@ returns the chunk size of the memory pool
 and
 .Fn prealloc_used
 returns the number of currently claimed chunks thereof.
-.Pp
-Some API calls provide inline consistency checks for buffer underflows,
-pool/chunk mismatch, double-free, as well as for prematurely exited
-memory pools.
-If a check fails, both a process-wide panic message describing the
-error and an
-.Xr abort 3
-are issued.
-There is no way to disable this at the moment, but the performance
-loss is minimal.
 .Sh RETURN VALUES
 Upon success,
 .Fn prealloc_initd
