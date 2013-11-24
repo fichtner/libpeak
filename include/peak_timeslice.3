@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd July 21, 2013
+.Dd November 24, 2013
 .Dt PEAK_TIMESLICE 3
 .Os
 .Sh NAME
@@ -50,9 +50,9 @@ for GMT and the local time zone are also provided.
 The structure's layout is as follows:
 .Bd -literal -offset indent
 typedef struct {
-	uint64_t normal;
-	uint64_t msec;
-	uint64_t sec;
+	int64_t normal;
+	int64_t msec;
+	int64_t sec;
 	time_t epoch;
 	struct tm local;
 	struct tm gmt;

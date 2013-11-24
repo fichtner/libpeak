@@ -21,7 +21,7 @@ struct peak_netmap {
 	const char *ifname;
 	unsigned int len;
 	unsigned int ll;
-	uint64_t ts_ms;
+	int64_t ts_ms;
 	time_t ts_unix;
 	void *buf;
 };

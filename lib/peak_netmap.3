@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd September 11, 2013
+.Dd November 24, 2013
 .Dt PEAK_NETMAP 3
 .Os
 .Sh NAME
@@ -105,7 +105,7 @@ struct peak_netmap {
 	const char *ifname;
 	unsigned int len;
 	unsigned int ll;
-	uint64_t ts_ms;
+	int64_t ts_ms;
 	time_t ts_unix;
 	void *buf;
 };

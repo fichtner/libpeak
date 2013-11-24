@@ -20,9 +20,9 @@
 #include <time.h>
 
 typedef struct {
-	uint64_t normal;
-	uint64_t msec;
-	uint64_t sec;
+	int64_t normal;
+	int64_t msec;
+	int64_t sec;
 	/* hrm, Ubuntu doesn't build with the name "unix"
 	 * and complains in a very cryptic way... */
 	time_t epoch;

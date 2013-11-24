@@ -21,6 +21,8 @@
 
 #define TRACK_CMP(x, y)	memcmp(x, y, TRACK_SIZE(x))
 
+static uint64_t next_flow_id = 0;
+
 RB_HEAD(peak_track_tree, peak_track);
 
 struct peak_tracks {
@@ -34,7 +36,6 @@ RB_GENERATE_STATIC(peak_track_tree, peak_track, rb_track, TRACK_CMP);
 struct peak_track *
 peak_track_acquire(struct peak_tracks *self, const struct peak_track *ref)
 {
-	static uint64_t next_flow_id = 0;
 	struct peak_track *flow;
 
 	if (unlikely(!ref)) {

@@ -62,7 +62,7 @@ struct pcap_packet_header {
 	uint32_t orig_len;
 };
 
-#define PCAP_MS(x, y)	((uint64_t)(x) * 1000 + (uint64_t)(y) / 1000)
+#define PCAP_MS(x, y)	((int64_t)(x) * 1000 + (int64_t)(y) / 1000)
 #define PCAP_MAGIC	0xA1B2C3D4
 #define PCAP_FMT	1
 
@@ -124,7 +124,7 @@ struct netmon_record_header {
 #define NETMON_FMT 	3
 
 static inline uint32_t
-peak_load_normalise(struct peak_load *self, uint64_t ts_ms)
+peak_load_normalise(struct peak_load *self, int64_t ts_ms)
 {
 	ts_ms += self->ts_off;
 
@@ -200,7 +200,7 @@ _peak_load_pcapng(struct _peak_load *self)
 	struct pcapng_iface_desc_header iface;
 	struct pcapng_block_header hdr;
 	ssize_t ret;
-	uint64_t ts;
+	int64_t ts;
 
 _peak_load_pcapng_again:
 
@@ -228,7 +228,7 @@ _peak_load_pcapng_again:
 			return;
 		}
 
-		ts = (uint64_t)pkt.ts_high << 32 | (uint64_t)pkt.ts_low;
+		ts = (int64_t)pkt.ts_high << 32 | (int64_t)pkt.ts_low;
 
 		self->data.ts_ms = ts / 1000ull;
 		self->data.ts_unix = ts / 1000ull / 1000ull;

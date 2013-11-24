@@ -86,7 +86,6 @@ _peak_netmap_claim(void)
 	struct netmap_ring *ring;
 	struct my_ring *me;
 	unsigned int j, si;
-	struct timeval ts;
 
 	for (j = 0; j < NETMAP_COUNT(); ++j) {
 		me = self->me[j];
@@ -118,26 +117,13 @@ _peak_netmap_claim(void)
 			packet->ring = ring;
 			packet->i = i;
 
-			/*
-			 * Atomically extract timestamp.  We need
-			 * more accurate timestamps from netmap(4),
-			 * so we need to do lockless atomic swaps.
-			 * If we do this here we can keep userland
-			 * consistent with the ABI, but can do more
-			 * aggressive (still atomic) updates on the
-			 * kernel side (for each new packet being
-			 * put into the ring ideally).
-			 */
-			*(uint64_t *)&ts = __sync_fetch_and_or(
-			    (uint64_t *)&ring->ts, 0);
-
 			/* external stuff */
 			packet->data.buf = NETMAP_BUF(ring, idx);
 			packet->data.len = ring->slot[i].len;
 			packet->data.ll = LINKTYPE_ETHERNET;
-			packet->data.ts_ms = (uint64_t)ts.tv_sec *
-			    1000 + (uint64_t)ts.tv_usec / 1000;
-			packet->data.ts_unix = ts.tv_sec;
+			packet->data.ts_ms = (int64_t)ring->ts.tv_sec *
+			    1000 + (int64_t)ring->ts.tv_usec / 1000;
+			packet->data.ts_unix = ring->ts.tv_sec;
 			packet->data.ifname = me->ifname;
 
 			return (NETPKT_TO_USER(packet));
