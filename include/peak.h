@@ -19,8 +19,11 @@
 #endif /* !_BSD_SOURCE */
 
 #include <sys/cdefs.h>
-#include <sys/queue.h>
 #include <sys/types.h>
+
+/* pull internal sys headers for portability */
+#include "sys/queue.h"
+#include "sys/tree.h"
 
 #define lengthof(x)	(sizeof(x)/sizeof((x)[0]))
 #define segv()		*((volatile int *)0)
@@ -72,7 +75,6 @@
 #include "peak_page.h"
 #include "peak_net.h"
 #include "peak_hash.h"
-#include "tree.h"
 
 /* forward declarations */
 struct peak_packet;
