@@ -13,7 +13,7 @@ all:
 	while : ; do \
 		case $$# in \
 		0) break;; \
-		[1]) echo "$$1 failed: missing arguments"; exit 1;; \
+		1) echo "$$1 failed: missing arguments"; exit 1;; \
 		esac; \
 		TRACE=$(BASEDIR)/sample/$$2; \
 		[ ! -f $$TRACE ] && \
