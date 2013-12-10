@@ -136,41 +136,41 @@ static void
 peek_packet(struct peak_tracks *peek, const timeslice_t *timer,
     void *buf, unsigned int len, unsigned int type)
 {
-	struct peak_packet packet;
+	struct peak_packet stackptr(packet);
 	struct peak_track *flow;
 	struct peak_track _flow;
 
-	PACKET_LINK(&packet, buf, len, type);
+	PACKET_LINK(packet, buf, len, type);
 
-	switch (packet.mac_type) {
+	switch (packet->mac_type) {
 	case ETHERTYPE_IP:
-		netaddr4(&packet.net_saddr, packet.net.iph->ip_src.s_addr);
-		netaddr4(&packet.net_daddr, packet.net.iph->ip_dst.s_addr);
-		packet.net_len = be16dec(&packet.net.iph->ip_len);
-		packet.net_hlen = packet.net.iph->ip_hl << 2;
-		packet.net_type = packet.net.iph->ip_p;
+		netaddr4(&packet->net_saddr, packet->net.iph->ip_src.s_addr);
+		netaddr4(&packet->net_daddr, packet->net.iph->ip_dst.s_addr);
+		packet->net_len = be16dec(&packet->net.iph->ip_len);
+		packet->net_hlen = packet->net.iph->ip_hl << 2;
+		packet->net_type = packet->net.iph->ip_p;
 		break;
 	case ETHERTYPE_IPV6:
-		netaddr6(&packet.net_saddr, &packet.net.ip6h->ip6_src);
-		netaddr6(&packet.net_daddr, &packet.net.ip6h->ip6_dst);
-		peek_packet_ipv6(&packet);
+		netaddr6(&packet->net_saddr, &packet->net.ip6h->ip6_src);
+		netaddr6(&packet->net_daddr, &packet->net.ip6h->ip6_dst);
+		peek_packet_ipv6(packet);
 		break;
 	default:
 		/* here be dragons */
 		return;
 	}
 
-	packet.flow.raw = packet.net.raw + packet.net_hlen;
-	packet.flow_len = packet.net_len - packet.net_hlen;
+	packet->flow.raw = packet->net.raw + packet->net_hlen;
+	packet->flow_len = packet->net_len - packet->net_hlen;
 
-	switch (packet.net_type) {
+	switch (packet->net_type) {
 	case IPPROTO_TCP:
-		if (peak_tcp_prepare(&packet)) {
+		if (peak_tcp_prepare(packet)) {
 			return;
 		}
 		break;
 	case IPPROTO_UDP:
-		if (peak_udp_prepare(&packet)) {
+		if (peak_udp_prepare(packet)) {
 			return;
 		}
 		break;
@@ -178,7 +178,7 @@ peek_packet(struct peak_tracks *peek, const timeslice_t *timer,
 		break;
 	}
 
-	TRACK_KEY(&_flow, &packet);
+	TRACK_KEY(&_flow, packet);
 
 	flow = peak_track_acquire(peek, &_flow);
 	if (!flow) {
@@ -187,14 +187,14 @@ peek_packet(struct peak_tracks *peek, const timeslice_t *timer,
 
 	{
 		const unsigned int dir =
-		    !!netcmp(&packet.net_saddr, &flow->addr[LOWER]);
+		    !!netcmp(&packet->net_saddr, &flow->addr[LOWER]);
 
 		if (!flow->li[dir]) {
-			flow->li[dir] = peak_li_get(&packet);
+			flow->li[dir] = peak_li_get(packet);
 		}
 	}
 
-	peek_report(&packet, flow, timer);
+	peek_report(packet, flow, timer);
 }
 
 static void
