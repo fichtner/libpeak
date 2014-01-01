@@ -326,4 +326,8 @@ __peak_free(void *ptr, const unsigned int really_free)
 #define mcheck		peak_mcheck
 #define free		peak_free
 
+/* just in case we need the native ones later */
+extern void *__libc_malloc(size_t);
+extern void __libc_free(void *);
+
 #endif /* !PEAK_ALLOC_H */

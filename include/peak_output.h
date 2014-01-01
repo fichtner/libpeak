@@ -36,16 +36,28 @@ _peak_print(FILE *stream, const char *message, ...)
 }
 
 /* keep syslog style layout so we can switch on demand later */
+#define __peak_bug(x, y, args...) do {					\
+	_peak_print(stderr, y, ##args);					\
+} while (0)
+
+/* additional wrapper with access to the format string */
 #define _peak_bug(x, y, args...) do {					\
-	if ((x) <= _peak_bug_priority) {				\
-		_peak_print(stderr, y, ##args);				\
+	static const char *_msg = y;					\
+	if ((x) <= __sync_fetch_and_or(&_peak_bug_priority, 0)) {	\
+		__peak_bug(x, _msg, ##args);				\
 	}								\
 } while (0)
 
 /* keep syslog style layout so we can switch on demand later */
+#define __peak_log(x, y, args...) do {					\
+	_peak_print(stdout, y, ##args);					\
+} while (0)
+
+/* additional wrapper with access to the format string */
 #define _peak_log(x, y, args...) do {					\
-	if ((x) <= _peak_log_priority) {				\
-		_peak_print(stdout, y, ##args);				\
+	static const char *_msg = y;					\
+	if ((x) <= __sync_fetch_and_or(&_peak_log_priority, 0)) {	\
+		__peak_log(x, _msg, ##args);				\
 	}								\
 } while (0)
 
@@ -124,7 +136,7 @@ _peak_backtrace(const int skip)
 } while (0)
 
 #define output_bump(priority) do {					\
-	switch (priority) {						\
+	switch (__sync_fetch_and_or(&(priority), 0)) {			\
 	case LOG_EMERG:							\
 		/* FALLTHROUGH */					\
 	case LOG_ALERT:							\
@@ -138,7 +150,7 @@ _peak_backtrace(const int skip)
 	case LOG_NOTICE:						\
 		/* FALLTHROUGH */					\
 	case LOG_INFO:							\
-		++(priority);						\
+		__sync_fetch_and_add(&(priority), 1);			\
 	case LOG_DEBUG:							\
 		break;							\
 	default:							\
