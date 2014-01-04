@@ -1,5 +1,7 @@
 /*
  * Copyright (c) 2013 Franco Fichtner <franco@packetwerk.com>
+ * Copyright (c) 2013 Victor Pereira <victor@packetwerk.com>
+ * Copyright (c) 2013 Masoud Chelongar <masoud@packetwerk.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -949,7 +951,6 @@ LI_DESCRIBE_APP(radius)
 	case 11:	/* Access-Challenge */
 	case 12:	/* Status-Server (experimental) */
 	case 13:	/* Status-Client (experimental) */
-	case 255:	/* Reserved */
 		break;
 	default:
 		return (0);
