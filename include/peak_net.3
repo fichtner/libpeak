@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2012-2013 Franco Fichtner <franco@packetwerk.com>
+.\" Copyright (c) 2012-2014 Franco Fichtner <franco@packetwerk.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -13,10 +13,12 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd October 23, 2013
+.Dd January 26, 2014
 .Dt PEAK_NET 3
 .Os
 .Sh NAME
+.Nm NET_PREFIX4 ,
+.Nm NET_PREFIX6 ,
 .Nm netaddr4 ,
 .Nm netaddr6 ,
 .Nm netcmp ,
@@ -45,6 +47,8 @@
 .Fa "const struct netaddr *y"
 .Fa "unsigned int yp"
 .Fc
+.Fn NET_PREFIX4 PREFIX
+.Fn NET_PREFIX6 PREFIX
 .Sh DESCRIPTION
 The
 .Nm peak_net
@@ -93,6 +97,15 @@ and
 .Va y
 according to the given prefix length
 .Va yp .
+The address prefix is required to be translated to an internal
+prefix representation using either
+.Fn NET_PREFIX4
+or
+.Fn NET_PREFIX6 ,
+respectively.
+To match the full address,
+.Dv NET_PREFIX_MAX
+can be used instead.
 When the addresses match in the prefix, the function returns zero.
 Otherwise, a non-zero value is returned.
 .Sh AUTHORS

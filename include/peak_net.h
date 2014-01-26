@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013 Franco Fichtner <franco@packetwerk.com>
+ * Copyright (c) 2012-2014 Franco Fichtner <franco@packetwerk.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -67,8 +67,9 @@ netcmp6(const struct netaddr *x)
 	return (!netcmp4(x));
 }
 
+#define NET_PREFIX4(x)	((x) ? (x) + 96 : 0)
+#define NET_PREFIX6(x)	(x)
 #define NET_PREFIX_MAX	128
-#define NET_PREFIX_64	96
 
 static inline int
 netprefix(const struct netaddr *x, const struct netaddr *y, unsigned int yp)
@@ -84,11 +85,6 @@ netprefix(const struct netaddr *x, const struct netaddr *y, unsigned int yp)
 	}
 
 	--yp;
-
-	if (!netcmp4(y)) {
-		/* IPv4 address */
-		yp += NET_PREFIX_64;
-	}
 
 	if (yp >= NET_PREFIX_MAX) {
 		return (1);
