@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013 Franco Fichtner <franco@packetwerk.com>
+ * Copyright (c) 2012-2014 Franco Fichtner <franco@packetwerk.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -273,7 +273,7 @@ test_alloc(void)
 
 	char *test_str_aligned = peak_malign(sizeof(THIS_IS_A_STRING));
 
-	bcopy(THIS_IS_A_STRING, test_str_aligned,
+	memcpy(test_str_aligned, THIS_IS_A_STRING,
 	    sizeof(THIS_IS_A_STRING));
 
 	char *test_str_mod_aligned = test_str_aligned - 1;

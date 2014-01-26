@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013 Franco Fichtner <franco@packetwerk.com>
+ * Copyright (c) 2012-2014 Franco Fichtner <franco@packetwerk.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -24,6 +24,17 @@
 
 extern int _peak_bug_priority;
 extern int _peak_log_priority;
+
+#ifdef __linux__
+#define asprintf(ptr, fmt, args...) ({					\
+	int _ret = -1;							\
+	*(ptr) = strdup("XXX");						\
+	if (*(ptr)) {							\
+		_ret = 0;						\
+	}								\
+	_ret;								\
+})
+#endif /* __linux__ */
 
 static inline void
 _peak_print(FILE *stream, const char *message, ...)

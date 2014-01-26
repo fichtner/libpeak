@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013 Franco Fichtner <franco@packetwerk.com>
+ * Copyright (c) 2012-2014 Franco Fichtner <franco@packetwerk.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -157,7 +157,7 @@ _peak_realloc(void *ptr, size_t size)
 
 		size = old_size < size ? old_size : size;
 		if (size) {
-			bcopy(ALLOC_USER(h), new_ptr, size);
+			memcpy(new_ptr, ALLOC_USER(h), size);
 		}
 	}
 
@@ -325,9 +325,5 @@ __peak_free(void *ptr, const unsigned int really_free)
 #define strdup		peak_strdup
 #define mcheck		peak_mcheck
 #define free		peak_free
-
-/* just in case we need the native ones later */
-extern void *__libc_malloc(size_t);
-extern void __libc_free(void *);
 
 #endif /* !PEAK_ALLOC_H */
