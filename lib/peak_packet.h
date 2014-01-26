@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2012-2013 Franco Fichtner <franco@packetwerk.com>
+ * Copyright (c) 2012-2014 Franco Fichtner <franco@packetwerk.com>
+ * Copyright (c) 2014 Ulrich Klein <ulrich@packetwerk.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -37,6 +38,14 @@
 #define IPPROTO_L2TP	115
 #endif /* !IPPROTO_L2TP */
 
+#ifndef IPPROTO_HIP
+#define IPPROTO_HIP	139
+#endif /* IPPROTO_HIP */
+
+#ifndef IPPROTO_SHIM6
+#define IPPROTO_SHIM6	140
+#endif /* IPPROTO_SHIM6 */
+
 #ifndef LINKTYPE_ETHERNET
 #define LINKTYPE_ETHERNET	1
 #endif /* !LINKTYPE_ETHERNET */
@@ -51,18 +60,37 @@ struct sll_header {
 	uint16_t ssl_halen;	/* link-layer address length */
 	uint8_t ssl_addr[8];	/* link-layer address */
 	uint16_t sll_protocol;	/* protocol */
-};
+} __packed;
+
+struct vlan_header {
+	uint8_t ether_dhost[6];	/* destination mac address */
+	uint8_t ether_shost[6];	/* source mac address */
+	uint16_t vlan_tpid;	/* vlan tag protocol identifier */
+	uint16_t vlan_tci;	/* vlan tag control information */
+	uint16_t ether_type;	/* protocol */
+} __packed;
 
 #define PACKET_LINK(pkt, buf, len, type) do {				\
 	bzero(pkt, sizeof(*(pkt)));					\
 	(pkt)->mac.raw = buf;						\
 	(pkt)->mac_len = len;						\
 	switch (type) {							\
-	case LINKTYPE_ETHERNET:						\
-		(pkt)->mac_type = be16dec(&(pkt)->mac.eth->ether_type);	\
-		(pkt)->net.raw = (pkt)->mac.raw +			\
-		    sizeof(*(pkt)->mac.eth);				\
+	case LINKTYPE_ETHERNET: {					\
+		uint16_t m_type = be16dec(&(pkt)->mac.eth->ether_type);	\
+		if (m_type == ETHERTYPE_VLAN) {				\
+			(pkt)->mac_type =				\
+			    be16dec(&(pkt)->mac.vlan->ether_type);	\
+			(pkt)->mac_vlan = 0x0FFF &			\
+			    be16dec(&(pkt)->mac.vlan->vlan_tci);	\
+			(pkt)->net.raw = (pkt)->mac.raw +		\
+			    sizeof(*(pkt)->mac.vlan);			\
+		}  else {						\
+			(pkt)->mac_type = m_type;			\
+			(pkt)->net.raw = (pkt)->mac.raw +		\
+			    sizeof(*(pkt)->mac.eth);			\
+		}							\
 		break;							\
+	}								\
 	case LINKTYPE_LINUX_SLL:					\
 		(pkt)->mac_type =					\
 		    be16dec(&(pkt)->mac.sll->sll_protocol);		\
@@ -81,6 +109,7 @@ struct sll_header {
 struct peak_packet {
 	union {
 		struct ether_header *eth;
+		struct vlan_header *vlan;
 		struct sll_header *sll;
 		unsigned char *raw;
 	} mac;
@@ -99,9 +128,10 @@ struct peak_packet {
 	} app;
 	uint32_t mac_len;
 	uint16_t mac_type;
-	uint16_t net_len;
+	uint16_t mac_vlan;
 	struct netaddr net_saddr;
 	struct netaddr net_daddr;
+	uint16_t net_len;
 	uint8_t net_hlen;
 	uint8_t net_type;
 	uint16_t flow_hlen;
@@ -109,7 +139,7 @@ struct peak_packet {
 	uint16_t app_len;
 	uint16_t flow_sport;
 	uint16_t flow_dport;
-	uint16_t reserved[2];
+	uint16_t padding[1];
 };
 
 #endif /* !PEAK_PACKET_H */
