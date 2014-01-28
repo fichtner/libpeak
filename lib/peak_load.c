@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013 Franco Fichtner <franco@packetwerk.com>
+ * Copyright (c) 2012-2014 Franco Fichtner <franco@packetwerk.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -65,6 +65,9 @@ struct pcap_packet_header {
 #define PCAP_MS(x, y)	((int64_t)(x) * 1000 + (int64_t)(y) / 1000)
 #define PCAP_MAGIC	0xA1B2C3D4
 #define PCAP_FMT	1
+
+#define PCAP_SWAP_MAGIC	0xD4C3B2A1
+#define PCAP_SWAP_FMT	4
 
 struct pcapng_block_header {
 	uint32_t type;
@@ -176,6 +179,13 @@ _peak_load_pcap(struct _peak_load *self)
 	ret = read(self->fd, &hdr, sizeof(hdr));
 	if (ret != sizeof(hdr)) {
 		return;
+	}
+
+	if (self->fmt == PCAP_SWAP_FMT) {
+		hdr.incl_len = bswap32(hdr.incl_len);
+		hdr.orig_len = bswap32(hdr.orig_len);
+		hdr.ts_usec = bswap32(hdr.ts_usec);
+		hdr.ts_sec = bswap32(hdr.ts_sec);
 	}
 
 	if (sizeof(self->data.buf) < hdr.incl_len) {
@@ -303,6 +313,7 @@ peak_load_next(struct peak_load *self_user)
 	case ERF_FMT:
 		_peak_load_erf(self);
 		break;
+	case PCAP_SWAP_FMT:
 	case PCAP_FMT:
 		_peak_load_pcap(self);
 		break;
@@ -346,6 +357,7 @@ peak_load_init(const char *file)
 		lseek(fd, 0, SEEK_SET);
 
 		switch (file_magic) {
+		case PCAP_SWAP_MAGIC:
 		case PCAP_MAGIC: {
 			struct pcap_file_header hdr;
 
@@ -353,8 +365,23 @@ peak_load_init(const char *file)
 				goto peak_load_init_close;
 			}
 
-			ll = hdr.network;
 			fmt = PCAP_FMT;
+
+			if (file_magic == PCAP_SWAP_MAGIC) {
+				hdr.magic_number =
+				    bswap32(hdr.magic_number);
+				hdr.version_major =
+				    bswap16(hdr.version_major);
+				hdr.version_minor =
+				    bswap16(hdr.version_minor);
+				hdr.thiszone = bswap32(hdr.thiszone);
+				hdr.sigfigs = bswap32(hdr.sigfigs);
+				hdr.snaplen = bswap32(hdr.snaplen);
+				hdr.network = bswap32(hdr.network);
+				fmt = PCAP_SWAP_FMT;
+			}
+
+			ll = hdr.network;
 
 			break;
 		}
