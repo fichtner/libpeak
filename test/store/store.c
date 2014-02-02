@@ -34,7 +34,7 @@ static const char *pcap_file = "../../sample/test.pcap";
 static void
 test_store(const char *file, const unsigned int *len, const size_t count)
 {
-	char template[] = "/tmp/store.XXXXX";
+	char template[] = "/tmp/store.XXXXXX";
 	struct peak_load *trace;
 	int store;
 	size_t i;
