@@ -43,7 +43,7 @@ struct erf_packet_header {
 
 #define ERF_MS(x)	((((x) >> 32) * 1000) +				\
     ((((x) & 0xFFFFFFFF) * 1000) >> 32))
-#define ERF_FMT		0
+#define ERF_MAGIC	0	/* there is no ERF magic; it's a stub */
 
 struct pcap_file_header {
 	uint32_t magic_number;
@@ -63,11 +63,8 @@ struct pcap_packet_header {
 };
 
 #define PCAP_MS(x, y)	((int64_t)(x) * 1000 + (int64_t)(y) / 1000)
-#define PCAP_MAGIC	0xA1B2C3D4
-#define PCAP_FMT	1
-
 #define PCAP_SWAP_MAGIC	0xD4C3B2A1
-#define PCAP_SWAP_FMT	4
+#define PCAP_MAGIC	0xA1B2C3D4
 
 struct pcapng_block_header {
 	uint32_t type;
@@ -89,7 +86,6 @@ struct pcapng_enhanced_pkt_header {
 };
 
 #define PCAPNG_MAGIC	0x0A0D0D0A
-#define PCAPNG_FMT	2
 
 struct netmon_file_header {
 	uint32_t magic;
@@ -124,9 +120,8 @@ struct netmon_record_header {
 
 #define NETMON_MS(x)	(((x) * 10) / 10000)
 #define NETMON_MAGIC	0x55424D47
-#define NETMON_FMT 	3
 
-static inline uint32_t
+static inline int64_t
 peak_load_normalise(struct peak_load *self, int64_t ts_ms)
 {
 	ts_ms += self->ts_off;
@@ -181,7 +176,7 @@ _peak_load_pcap(struct _peak_load *self)
 		return;
 	}
 
-	if (self->fmt == PCAP_SWAP_FMT) {
+	if (self->fmt == PCAP_SWAP_MAGIC) {
 		hdr.incl_len = bswap32(hdr.incl_len);
 		hdr.orig_len = bswap32(hdr.orig_len);
 		hdr.ts_usec = bswap32(hdr.ts_usec);
@@ -303,24 +298,24 @@ _peak_load_netmon(struct _peak_load *self)
 }
 
 unsigned int
-peak_load_next(struct peak_load *self_user)
+peak_load_packet(struct peak_load *self_user)
 {
 	struct _peak_load *self = LOAD_FROM_USER(self_user);
 
 	self->data.len = 0;
 
 	switch (self->fmt) {
-	case ERF_FMT:
+	case ERF_MAGIC:
 		_peak_load_erf(self);
 		break;
-	case PCAP_SWAP_FMT:
-	case PCAP_FMT:
+	case PCAP_SWAP_MAGIC:
+	case PCAP_MAGIC:
 		_peak_load_pcap(self);
 		break;
-	case PCAPNG_FMT:
+	case PCAPNG_MAGIC:
 		_peak_load_pcapng(self);
 		break;
-	case NETMON_FMT:
+	case NETMON_MAGIC:
 		_peak_load_netmon(self);
 		break;
 	}
@@ -334,8 +329,8 @@ peak_load_init(const char *file)
 	unsigned int ll = LINKTYPE_ETHERNET;
 	struct _peak_load *self = NULL;
 	uint32_t *netmon_table = NULL;
+	unsigned int fmt = ERF_MAGIC;
 	uint32_t netmon_length = 0;
-	unsigned int fmt = ERF_FMT;
 	time_t netmon_time = 0;
 	int fd = STDIN_FILENO;
 
@@ -365,7 +360,7 @@ peak_load_init(const char *file)
 				goto peak_load_init_close;
 			}
 
-			fmt = PCAP_FMT;
+			fmt = PCAP_MAGIC;
 
 			if (file_magic == PCAP_SWAP_MAGIC) {
 				hdr.magic_number =
@@ -378,7 +373,7 @@ peak_load_init(const char *file)
 				hdr.sigfigs = bswap32(hdr.sigfigs);
 				hdr.snaplen = bswap32(hdr.snaplen);
 				hdr.network = bswap32(hdr.network);
-				fmt = PCAP_SWAP_FMT;
+				fmt = PCAP_SWAP_MAGIC;
 			}
 
 			ll = hdr.network;
@@ -434,7 +429,7 @@ peak_load_init(const char *file)
 				goto peak_load_init_close;
 			}
 
-			fmt = NETMON_FMT;
+			fmt = NETMON_MAGIC;
 
 			break;
 		}
@@ -449,7 +444,7 @@ peak_load_init(const char *file)
 			lseek(fd, hdr.length - sizeof(hdr), SEEK_CUR);
 
 			/* change link type on the fly later */
-			fmt = PCAPNG_FMT;
+			fmt = PCAPNG_MAGIC;
 			ll = 0;
 
 			break;

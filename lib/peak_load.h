@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013 Franco Fichtner <franco@packetwerk.com>
+ * Copyright (c) 2012-2014 Franco Fichtner <franco@packetwerk.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -26,8 +26,8 @@ struct peak_load {
 	uint8_t buf[32 * 1024];
 };
 
+unsigned int		 peak_load_packet(struct peak_load *);
 void			 peak_load_exit(struct peak_load *);
-unsigned int		 peak_load_next(struct peak_load *);
 struct peak_load	*peak_load_init(const char *);
 
 #endif /* !PEAK_LOAD_H */

@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2012-2013 Franco Fichtner <franco@packetwerk.com>
+.\" Copyright (c) 2012-2014 Franco Fichtner <franco@packetwerk.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -13,22 +13,22 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd September 24, 2013
+.Dd February 1, 2014
 .Dt PEAK_LOAD 3
 .Os
 .Sh NAME
+.Nm peak_load_exit ,
 .Nm peak_load_init ,
-.Nm peak_load_next ,
-.Nm peak_load_exit
+.Nm peak_load_packet
 .Nd open and read a trace file
 .Sh SYNOPSIS
 .In peak.h
+.Ft void
+.Fn peak_load_exit "stuct peak_load *self"
 .Ft struct peak_load *
 .Fn peak_load_init "const char *file"
 .Ft unsigned int
-.Fn peak_load_next "struct peak_load *self"
-.Ft void
-.Fn peak_load_exit "stuct peak_load *self"
+.Fn peak_load_packet "struct peak_load *self"
 .Sh DESCRIPTION
 The
 .Nm peak_load
@@ -70,14 +70,14 @@ The function returns a
 reference, which is an argument for all other API calls.
 .Pp
 In order to load the next available packet, an application needs to call
-.Fn peak_load_next .
+.Fn peak_load_packet .
 The packet resides in the
 .Vt struct peak_load *
 for examination, until
-.Fn peak_load_next
+.Fn peak_load_packet
 is called again.
 Upon successful completion
-.Fn peak_load_next
+.Fn peak_load_packet
 returns the size of the next packet.
 Otherwise, 0 is returned.
 .Pp
@@ -86,6 +86,8 @@ A call to
 releases the reference to
 .Vt struct peak_load *
 and closes the trace file.
+.Sh SEE ALSO
+.Xr peak_store 3
 .Sh AUTHORS
 .An Franco Fichtner Aq Mt franco@packetwerk.com
 .Sh CAVEATS

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Franco Fichtner <franco@packetwerk.com>
+ * Copyright (c) 2013-2014 Franco Fichtner <franco@packetwerk.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -274,7 +274,7 @@ main(int argc, char **argv)
 
 	TIMESLICE_INIT(&timer);
 
-	if (peak_load_next(trace)) {
+	if (peak_load_packet(trace)) {
 		TIMESLICE_NORMALISE(&timer, trace->ts_ms);
 
 		do {
@@ -282,7 +282,7 @@ main(int argc, char **argv)
 			    trace->ts_ms);
 			peek_packet(peek, &timer, trace->buf, trace->len,
 			    trace->ll);
-		} while (peak_load_next(trace));
+		} while (peak_load_packet(trace));
 	}
 
 	peak_track_exit(peek);

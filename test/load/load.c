@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013 Franco Fichtner <franco@packetwerk.com>
+ * Copyright (c) 2012-2014 Franco Fichtner <franco@packetwerk.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -64,12 +64,12 @@ test_load(const char *file, const unsigned int *len, const size_t count)
 	eth = (struct ether_header *)trace->buf;
 
 	for (i = 0; i < count; ++i) {
-		assert(peak_load_next(trace) == len[i]);
+		assert(peak_load_packet(trace) == len[i]);
 		assert(be16dec(&eth->ether_type) == ETHERTYPE_IP);
 	}
 
-	assert(!peak_load_next(trace));
-	assert(!peak_load_next(trace));
+	assert(!peak_load_packet(trace));
+	assert(!peak_load_packet(trace));
 
 	peak_load_exit(trace);
 }
