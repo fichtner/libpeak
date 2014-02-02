@@ -8,6 +8,7 @@ tools written in C.  Currently, the available modules are:
 peak_li:	lightweight inspection (DPI)
 peak_load:	PCAP/PCAPNG/ERF/NETMON file reader
 peak_netmap:	simplified netmap(4) bindings
+peak_store:	PCAP file writer
 peak_tcp:	shallow TCP engine
 peak_track:	rudimentary flow tracker
 peak_udp:	shallow UDP engine

@@ -1,0 +1,63 @@
+.\"
+.\" Copyright (c) 2014 Franco Fichtner <franco@packetwerk.com>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd February 2, 2014
+.Dt PEAK_STORE 3
+.Os
+.Sh NAME
+.Nm peak_store_exit ,
+.Nm peak_store_init ,
+.Nm peak_store_packet
+.Nd open and write a trace file
+.Sh SYNOPSIS
+.In peak.h
+.Ft void
+.Fn peak_store_exit "int fd"
+.Ft int
+.Fn peak_store_init "const char *file"
+.Ft unsigned int
+.Fo peak_store_packet
+.Fa "int fd" "const void *buf"
+.Fa "const unsigned int len"
+.Fa "const int64_t ts_ms"
+.Fc
+.Sh DESCRIPTION
+The
+.Nm peak_store
+API provides a mechanism to write network captures (trace files)
+in the
+.Xr pcap 3
+format.
+.Pp
+The
+.Nm peak_store
+API needs to be initialised with
+.Fn peak_store_init
+before it can be used.
+The function returns a file descriptor,
+which is an argument for all other API calls.
+.Pp
+In order to store a packet, an application needs to call
+.Fn peak_store_packet .
+Upon successful completion the function returns a non-zero value.
+Otherwise, 0 is returned.
+.Pp
+A call to
+.Fn peak_store_exit
+closes the file descriptor previously aqcuired.
+.Sh SEE ALSO
+.Xr peak_load 3
+.Sh AUTHORS
+.An Franco Fichtner Aq Mt franco@packetwerk.com
