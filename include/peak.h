@@ -60,7 +60,12 @@
 #endif /* !XOR */
 
 #ifdef __linux__
-#define strlcpy(x,y,z)	strcpy(x,y)
+#define strlcpy(x,y,z) do {					\
+	if (z) {						\
+		memcpy(x, y, (z)-1);				\
+		x[(z)-1] = '\0';				\
+	}							\
+} while (0)
 #define strlcat(x,y,z)	strcat(x,y)
 #endif /* __linux__ */
 
