@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Franco Fichtner <franco@packetwerk.com>
+ * Copyright (c) 2013-2014 Franco Fichtner <franco@packetwerk.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -37,18 +37,18 @@
 #define NETPKT_GET(x)		prealloc_get(&self->pkt_pool)
 #define NETPKT_TO_USER(x)	&(x)->data
 
-#define NETMAP_PUT(x)		prealloc_put(&self->me_pool, x)
-#define NETMAP_COUNT()		prealloc_used(&self->me_pool)
-#define NETMAP_GET()		prealloc_get(&self->me_pool)
+#define NETMAP_PUT(x)		prealloc_put(&self->dev_pool, x)
+#define NETMAP_COUNT()		prealloc_used(&self->dev_pool)
+#define NETMAP_GET()		prealloc_get(&self->dev_pool)
 
 static pthread_mutex_t netmap_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static struct peak_netmaps {
 	prealloc_t pkt_pool;
-	prealloc_t me_pool;
+	prealloc_t dev_pool;
 	unsigned int busy;
 	unsigned int reserved;
-	struct my_ring *me[NETMAP_MAX];
+	struct my_ring *dev[NETMAP_MAX];
 	struct pollfd fd[NETMAP_MAX];
 } netmap_self;
 
@@ -61,6 +61,15 @@ struct _peak_netmap {
 	struct peak_netmap data;
 };
 
+#define NR_FOREACH(mode, ring, idx, dev)				\
+	for ((idx) = (dev)->begin,					\
+	    (ring) = NETMAP_##mode##RING((dev)->nifp, idx);		\
+	    (idx) <= (dev)->end; ++(idx),				\
+	    (ring) = NETMAP_##mode##RING((dev)->nifp, idx))
+
+#define NR_FOREACH_RX(r, i, d)	NR_FOREACH(RX, r, i, d)
+#define NR_FOREACH_TX(r, i, d)	NR_FOREACH(TX, r, i, d)
+
 static inline unsigned int
 peak_netmap_find(const char *ifname)
 {
@@ -71,7 +80,7 @@ peak_netmap_find(const char *ifname)
 	}
 
 	for (i = 0; i < NETMAP_COUNT(); ++i) {
-		if (!strcmp(ifname, self->me[i]->ifname)) {
+		if (!strcmp(ifname, self->dev[i]->ifname)) {
 			break;
 		}
 	}
@@ -84,16 +93,15 @@ _peak_netmap_claim(void)
 {
 	struct _peak_netmap *packet;
 	struct netmap_ring *ring;
-	struct my_ring *me;
-	unsigned int j, si;
+	struct my_ring *dev;
+	unsigned int j, rx;
 
 	for (j = 0; j < NETMAP_COUNT(); ++j) {
-		me = self->me[j];
+		dev = self->dev[j];
 
-		for (si = me->begin; si < me->end; ++si) {
+		NR_FOREACH_RX(ring, rx, dev) {
 			unsigned int i, idx;
 
-			ring = NETMAP_RXRING(me->nifp, si);
 			if (!ring->avail) {
 				continue;
 			}
@@ -110,7 +118,7 @@ _peak_netmap_claim(void)
 			idx = ring->slot[i].buf_idx;
 			if (idx < 2) {
 				panic("%s bugus RX index %d at offset %d\n",
-				    me->nifp->ni_name, idx, i);
+				    dev->nifp->ni_name, idx, i);
 			}
 
 			/* volatile internals */
@@ -124,7 +132,7 @@ _peak_netmap_claim(void)
 			packet->data.ts_ms = (int64_t)ring->ts.tv_sec *
 			    1000 + (int64_t)ring->ts.tv_usec / 1000;
 			packet->data.ts_unix = ring->ts.tv_sec;
-			packet->data.ifname = me->ifname;
+			packet->data.ifname = dev->ifname;
 
 			return (NETPKT_TO_USER(packet));
 		}
@@ -137,7 +145,7 @@ struct peak_netmap *
 peak_netmap_claim(int timeout)
 {
 	struct peak_netmap *packet;
-	struct my_ring *me;
+	struct my_ring *dev;
 	struct pollfd *fd;
 	unsigned int i;
 	int ret;
@@ -172,12 +180,12 @@ peak_netmap_claim(int timeout)
 	}
 
 	for (i = 0; i < NETMAP_COUNT(); ++i) {
+		dev = self->dev[i];
 		fd = &self->fd[i];
-		me = self->me[i];
 
 		if (fd->revents & POLLERR) {
-			alert("error on %s, rxcur %d@%d", me->ifname,
-			    me->rx->avail, me->rx->cur);
+			alert("error on %s, rxcur %d@%d", dev->ifname,
+			    dev->rx->avail, dev->rx->cur);
 		}
 
 		if (fd->revents & POLLIN) {
@@ -192,10 +200,15 @@ peak_netmap_claim(int timeout)
 	return (NULL);
 }
 
-static inline void
-peak_netmap_drop(struct _peak_netmap *packet)
+unsigned int
+peak_netmap_forward(struct peak_netmap *u_packet)
 {
+	struct _peak_netmap *packet = NETPKT_FROM_USER(u_packet);
 	struct netmap_ring *source = packet->ring;
+	struct netmap_slot *slot = &source->slot[packet->i];
+
+	/* set the forward bit */
+	slot->flags |= NS_FORWARD;
 
 	/* drop kernel reference */
 	source->cur = NETMAP_RING_NEXT(source, packet->i);
@@ -203,17 +216,39 @@ peak_netmap_drop(struct _peak_netmap *packet)
 
 	/* drop userland reference */
 	NETPKT_PUT(packet);
+
+	return (0);
 }
 
 unsigned int
-peak_netmap_forward(struct peak_netmap *u_packet, const char *ifname)
+peak_netmap_drop(struct peak_netmap *u_packet)
+{
+	struct _peak_netmap *packet = NETPKT_FROM_USER(u_packet);
+	struct netmap_ring *source = packet->ring;
+	struct netmap_slot *slot = &source->slot[packet->i];
+
+	/* clear the forward bit */
+	slot->flags &= ~NS_FORWARD;
+
+	/* drop kernel reference */
+	source->cur = NETMAP_RING_NEXT(source, packet->i);
+	--source->avail;
+
+	/* drop userland reference */
+	NETPKT_PUT(packet);
+
+	return (0);
+}
+
+unsigned int
+peak_netmap_divert(struct peak_netmap *u_packet, const char *ifname)
 {
 	/* assume the user is sane enough to not pass NULL */
 	struct _peak_netmap *packet = NETPKT_FROM_USER(u_packet);
 	struct netmap_ring *source = packet->ring;
 	struct netmap_ring *drain;
-	struct my_ring *me;
-	unsigned int i, di;
+	struct my_ring *dev;
+	unsigned int i, tx;
 
 	if (!source) {
 		/* packet is empty */
@@ -222,18 +257,16 @@ peak_netmap_forward(struct peak_netmap *u_packet, const char *ifname)
 
 	i = peak_netmap_find(ifname);
 	if (i >= NETMAP_COUNT()) {
-		/* not found means drop */
-		peak_netmap_drop(packet);
-		return (0);
+		/* not found means error */
+		return (1);
 	}
 
-	me = self->me[i];
+	dev = self->dev[i];
 
-	for (di = me->begin; di < me->end; ++di) {
+	NR_FOREACH_TX(drain, tx, dev) {
 		struct netmap_slot *rs, *ts;
 		uint32_t pkt;
 
-		drain = NETMAP_TXRING(me->nifp, di);
 		if (!drain->avail) {
 			continue;
 		}
@@ -253,6 +286,9 @@ peak_netmap_forward(struct peak_netmap *u_packet, const char *ifname)
 		ts->flags |= NS_BUF_CHANGED;
 		rs->flags |= NS_BUF_CHANGED;
 
+		/* don't forward to host anymore */
+		rs->flags &= ~NS_FORWARD;
+
 		--source->avail;
 		--drain->avail;
 
@@ -268,12 +304,31 @@ peak_netmap_forward(struct peak_netmap *u_packet, const char *ifname)
 	return (1);
 }
 
+static void
+peak_netmap_configure(struct my_ring *dev)
+{
+	struct netmap_ring *ring;
+	unsigned int i;
+
+	/*
+	 * Set `transparent' mode in the RX rings.
+	 * That'll allow us to indirectly forward
+	 * packets from a receive ring to its final
+	 * destination, unless we clear the NS_FORWARD
+	 * flag for a slot in packet processing.
+	 */
+
+	NR_FOREACH_RX(ring, i, dev) {
+		ring->flags |= NR_FORWARD;
+	}
+}
+
 unsigned int
 peak_netmap_attach(const char *ifname)
 {
-	struct my_ring *slot = NULL;
-	struct my_ring **me = NULL;
-	struct pollfd *fd = NULL;
+	struct my_ring **pdev = NULL;
+	struct my_ring *dev = NULL;
+	struct pollfd *pfd = NULL;
 	unsigned int i;
 
 	NETMAP_LOCK();
@@ -284,7 +339,7 @@ peak_netmap_attach(const char *ifname)
 
 		prealloc_init(&self->pkt_pool, NETMAP_MAX,
 		    sizeof(struct _peak_netmap));
-		prealloc_init(&self->me_pool, NETMAP_MAX,
+		prealloc_init(&self->dev_pool, NETMAP_MAX,
 		    sizeof(struct my_ring));
 	}
 
@@ -295,31 +350,33 @@ peak_netmap_attach(const char *ifname)
 		return (1);
 	}
 
-	slot = NETMAP_GET();
-	if (!slot) {
+	dev = NETMAP_GET();
+	if (!dev) {
 		NETMAP_UNLOCK();
 		alert("netmap interface capacity reached\n");
 		return (1);
 	}
 
-	bzero(slot, sizeof(*slot));
+	bzero(dev, sizeof(*dev));
 
-	me = &self->me[NETMAP_COUNT() - 1];
-	fd = &self->fd[NETMAP_COUNT() - 1];
+	pdev = &self->dev[NETMAP_COUNT() - 1];
+	pfd = &self->fd[NETMAP_COUNT() - 1];
 
-	slot->ifname = strdup(ifname);
+	dev->ifname = strdup(ifname);
 
-	if (netmap_open(slot, 0, 1)) {
-		free(slot->ifname);
-		NETMAP_PUT(slot);
+	if (netmap_open(dev, 0, 1)) {
+		free(dev->ifname);
+		NETMAP_PUT(dev);
 		NETMAP_UNLOCK();
 		alert("could not open netmap device %s\n", ifname);
 		return (1);
 	}
 
-	*me = slot;
+	peak_netmap_configure(dev);
 
-	fd->fd = slot->fd;
+	*pdev = dev;
+
+	pfd->fd = dev->fd;
 
 	NETMAP_UNLOCK();
 
@@ -329,9 +386,9 @@ peak_netmap_attach(const char *ifname)
 unsigned int
 peak_netmap_detach(const char *ifname)
 {
-	struct my_ring *slot = NULL;
-	struct my_ring **me = NULL;
-	struct pollfd *fd = NULL;
+	struct my_ring *dev = NULL;
+	struct my_ring **pdev = NULL;
+	struct pollfd *pfd = NULL;
 	unsigned int i;
 
 	NETMAP_LOCK();
@@ -343,30 +400,29 @@ peak_netmap_detach(const char *ifname)
 		return (1);
 	}
 
-	me = &self->me[i];
-	fd = &self->fd[i];
+	pdev = &self->dev[i];
+	pfd = &self->fd[i];
 
-	slot = *me;
+	dev = *pdev;
 
-	free(slot->ifname);
-	netmap_close(slot);
-
-	NETMAP_PUT(slot);
+	free(dev->ifname);
+	netmap_close(dev);
+	NETMAP_PUT(dev);
 
 	if (i < NETMAP_COUNT()) {
 		/* reshuffle list to make it linear */
-		*me = self->me[NETMAP_COUNT()];
-		self->me[NETMAP_COUNT()] = NULL;
+		*pdev = self->dev[NETMAP_COUNT()];
+		self->dev[NETMAP_COUNT()] = NULL;
 
 		/* rebuild pollfd list as well */
-		bcopy(fd, &self->fd[NETMAP_COUNT()], sizeof(*fd));
-		bzero(&self->fd[NETMAP_COUNT()], sizeof(*fd));
+		memcpy(pfd, &self->fd[NETMAP_COUNT()], sizeof(*pfd));
+		bzero(&self->fd[NETMAP_COUNT()], sizeof(*pfd));
 	}
 
 	/* lazy exit */
 	if (!NETMAP_COUNT()) {
 		prealloc_exit(&self->pkt_pool);
-		prealloc_exit(&self->me_pool);
+		prealloc_exit(&self->dev_pool);
 	}
 
 	NETMAP_UNLOCK();

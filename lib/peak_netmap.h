@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Franco Fichtner <franco@packetwerk.com>
+ * Copyright (c) 2013-2014 Franco Fichtner <franco@packetwerk.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -26,8 +26,10 @@ struct peak_netmap {
 	void *buf;
 };
 
-unsigned int		 peak_netmap_forward(struct peak_netmap *,
+unsigned int		 peak_netmap_divert(struct peak_netmap *,
 			     const char *);
+unsigned int		 peak_netmap_forward(struct peak_netmap *);
+unsigned int		 peak_netmap_drop(struct peak_netmap *);
 unsigned int		 peak_netmap_attach(const char *);
 unsigned int		 peak_netmap_detach(const char *);
 void			 peak_netmap_unlock(void);

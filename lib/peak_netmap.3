@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2013 Franco Fichtner <franco@packetwerk.com>
+.\" Copyright (c) 2013-2014 Franco Fichtner <franco@packetwerk.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -13,13 +13,15 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd November 24, 2013
+.Dd January 4, 2014
 .Dt PEAK_NETMAP 3
 .Os
 .Sh NAME
 .Nm peak_netmap_attach ,
 .Nm peak_netmap_claim ,
 .Nm peak_netmap_detach ,
+.Nm peak_netmap_divert ,
+.Nm peak_netmap_drop ,
 .Nm peak_netmap_forward ,
 .Nm peak_netmap_lock ,
 .Nm peak_netmap_unlock
@@ -33,7 +35,11 @@
 .Ft unsigned int
 .Fn peak_netmap_detach "const char *ifname"
 .Ft unsigned int
-.Fn peak_netmap_forward "struct peak_netmap *packet" "const char *ifname"
+.Fn peak_netmap_drop "struct peak_netmap *packet"
+.Ft unsigned int
+.Fn peak_netmap_forward "struct peak_netmap *packet"
+.Ft unsigned int
+.Fn peak_netmap_divert "struct peak_netmap *packet" "const char *ifname"
 .Ft void
 .Fn peak_netmap_lock void
 .Ft void
@@ -113,13 +119,29 @@ struct peak_netmap {
 .Pp
 The
 .Fn peak_netmap_forward
-function releases the reference to a previously claimed packet.
-Specifying
+function releases the previously claimed
+.Va packet
+and moves it over to the host stack or the interface,
+whichever was the original destination of the packet.
+This operation cannot fail.
+Note that this operation can cause performance degradation
+as the packet needs to be converted either from or to an
+.Xr mbuf 9 .
+.Pp
+The
+.Fn peak_netmap_drop
+function releases the previously claimed
+.Va packet
+and issues it to be dropped.
+This operation cannot fail.
+.Pp
+The
+.Fn peak_netmap_divert
+function releases the previously claimed
+.Va packet
+and moves it to the specified interface
 .Va ifname
-will invoke transmission on that particular interface using a
-zero-copy technique.
-.Dv NULL
-or unattached devices will cause the packet to be dropped instead.
+using a zero-copy technique.
 Upon success, the function returns zero.
 Otherwise, non-zero is returned indicating that the packet could not
 be transmitted via the specified interface.
@@ -132,4 +154,4 @@ The user must call the function again later or drop the packet.
 .Sh CAVEATS
 The current version of
 .Nm peak_netmap
-is only capable of single-threaded claim and forward operations.
+is only capable of single-threaded claim and divert operations.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Franco Fichtner <franco@packetwerk.com>
+ * Copyright (c) 2013-2014 Franco Fichtner <franco@packetwerk.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -72,11 +72,11 @@ main(int argc, char **argv)
 	while (loop) {
 		pkt = peak_netmap_claim(200);
 		if (pkt) {
-			if (peak_netmap_forward(pkt,
+			if (peak_netmap_divert(pkt,
 			    !strcmp(dev0, pkt->ifname) ? dev1 : dev0)) {
 				perr("%lld: dropping packet of size %u\n",
 				    pkt->ts_unix, pkt->len);
-				peak_netmap_forward(pkt, NULL);
+				peak_netmap_drop(pkt);
 			}
 		}
 	}
