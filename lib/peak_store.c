@@ -16,6 +16,7 @@
 
 #include <fcntl.h>
 #include <peak.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
 struct pcap_file_header {
@@ -77,6 +78,8 @@ peak_store_init(const char *file)
 	if (fd < 0) {
 		goto peak_store_init_out;
 	}
+
+	chmod(file, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 
 	if (write(fd, &hdr, sizeof(hdr)) != sizeof(hdr)) {
 		goto peak_store_init_close;
