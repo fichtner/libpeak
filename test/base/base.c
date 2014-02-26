@@ -88,6 +88,7 @@ test_net(void)
 
 	be32enc(&ipv4_addr, 0x11223344);
 	netaddr4(&ip, ipv4_addr);
+	assert(!memcmp(&ipv4_addr, netto4(&ip), sizeof(ipv4_addr)));
 	assert(!netcmp(&ip, &ip4_ref));
 	assert(!netcmp4(&ip));
 	assert(netcmp6(&ip));
@@ -100,6 +101,7 @@ test_net(void)
 	assert(netprefix(&ip, &ip4_ref, NET_PREFIX4(0)));
 
 	netaddr6(&ip, &ip6_ref);
+	assert(!memcmp(&ip6_ref, netto6(&ip), sizeof(ip6_ref)));
 	assert(!netcmp(&ip, &ip6_ref));
 	assert(netcmp4(&ip));
 	assert(!netcmp6(&ip));

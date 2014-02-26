@@ -26,6 +26,9 @@ struct netaddr {
 	} u;
 };
 
+#define netto4(x)	((const void *)&(x)->u.dword[3])
+#define netto6(x)	((const void *)&(x)->u.dword[0])
+
 static const struct netaddr net_in64 = {
 	/* IPv4-mapped IPv6 address via ::ffff:0:0/96 */
 	.u.word = {

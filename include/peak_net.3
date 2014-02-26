@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd January 26, 2014
+.Dd February 24, 2014
 .Dt PEAK_NET 3
 .Os
 .Sh NAME
@@ -24,7 +24,9 @@
 .Nm netcmp ,
 .Nm netcmp4 ,
 .Nm netcmp6 ,
-.Nm netprefix
+.Nm netprefix ,
+.Nm netto4 ,
+.Nm netto6
 .Nd coherent network address mapping
 .Sh SYNOPSIS
 .In peak.h
@@ -49,6 +51,10 @@
 .Fc
 .Fn NET_PREFIX4 PREFIX
 .Fn NET_PREFIX6 PREFIX
+.Ft void *
+.Fn netto4 "const struct netaddr *x"
+.Ft void *
+.Fn netto6 "const struct netaddr *x"
 .Sh DESCRIPTION
 The
 .Nm peak_net
@@ -108,5 +114,12 @@ To match the full address,
 can be used instead.
 When the addresses match in the prefix, the function returns zero.
 Otherwise, a non-zero value is returned.
+.Pp
+The functions
+.Fn netto4
+and
+.Fn netto6
+return a pointer to the location of the respective address in network
+order.
 .Sh AUTHORS
 .An Franco Fichtner Aq Mt franco@packetwerk.com
