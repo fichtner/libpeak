@@ -61,14 +61,14 @@ struct _peak_netmap {
 	struct peak_netmap data;
 };
 
-#define NR_FOREACH(mode, ring, idx, dev)				\
+#define NR_FOREACH(mode, ring, idx, dev, want_sw)			\
 	for ((idx) = (dev)->begin,					\
 	    (ring) = NETMAP_##mode##RING((dev)->nifp, idx);		\
-	    (idx) <= (dev)->end; ++(idx),				\
+	    (idx) < (dev)->end + !!(want_sw); ++(idx),			\
 	    (ring) = NETMAP_##mode##RING((dev)->nifp, idx))
 
-#define NR_FOREACH_RX(r, i, d)	NR_FOREACH(RX, r, i, d)
-#define NR_FOREACH_TX(r, i, d)	NR_FOREACH(TX, r, i, d)
+#define NR_FOREACH_RX(r, i, d, s)	NR_FOREACH(RX, r, i, d, s)
+#define NR_FOREACH_TX(r, i, d, s)	NR_FOREACH(TX, r, i, d, s)
 
 static inline unsigned int
 peak_netmap_find(const char *ifname)
@@ -89,7 +89,7 @@ peak_netmap_find(const char *ifname)
 }
 
 static struct peak_netmap *
-_peak_netmap_claim(void)
+_peak_netmap_claim(const unsigned int want_sw)
 {
 	struct _peak_netmap *packet;
 	struct netmap_ring *ring;
@@ -99,7 +99,7 @@ _peak_netmap_claim(void)
 	for (j = 0; j < NETMAP_COUNT(); ++j) {
 		dev = self->dev[j];
 
-		NR_FOREACH_RX(ring, rx, dev) {
+		NR_FOREACH_RX(ring, rx, dev, want_sw) {
 			unsigned int i, idx;
 
 			if (!ring->avail) {
@@ -142,7 +142,7 @@ _peak_netmap_claim(void)
 }
 
 struct peak_netmap *
-peak_netmap_claim(int timeout)
+peak_netmap_claim(int timeout, const unsigned int want_sw)
 {
 	struct peak_netmap *packet;
 	struct my_ring *dev;
@@ -155,7 +155,7 @@ peak_netmap_claim(int timeout)
 	 * the system call overhead when not needed.
 	 */
 
-	packet = _peak_netmap_claim();
+	packet = _peak_netmap_claim(want_sw);
 	if (packet) {
 		return (packet);
 	}
@@ -193,7 +193,7 @@ peak_netmap_claim(int timeout)
 			 * XXX This is quite naive: We know the fd,
 			 * but go through all interfaces anyway.
 			 */
-			return (_peak_netmap_claim());
+			return (_peak_netmap_claim(want_sw));
 		}
 	}
 
@@ -263,7 +263,7 @@ peak_netmap_divert(struct peak_netmap *u_packet, const char *ifname)
 
 	dev = self->dev[i];
 
-	NR_FOREACH_TX(drain, tx, dev) {
+	NR_FOREACH_TX(drain, tx, dev, 0) {
 		struct netmap_slot *rs, *ts;
 		uint32_t pkt;
 
@@ -318,7 +318,7 @@ peak_netmap_configure(struct my_ring *dev)
 	 * flag for a slot in packet processing.
 	 */
 
-	NR_FOREACH_RX(ring, i, dev) {
+	NR_FOREACH_RX(ring, i, dev, 1) {
 		ring->flags |= NR_FORWARD;
 	}
 }

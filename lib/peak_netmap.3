@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd January 4, 2014
+.Dd February 3, 2014
 .Dt PEAK_NETMAP 3
 .Os
 .Sh NAME
@@ -31,7 +31,7 @@
 .Ft unsigned int
 .Fn peak_netmap_attach "const char *ifname"
 .Ft struct peak_netmap *
-.Fn peak_netmap_claim "int timeout"
+.Fn peak_netmap_claim "int timeout" "const unsigned int want_sw"
 .Ft unsigned int
 .Fn peak_netmap_detach "const char *ifname"
 .Ft unsigned int
@@ -91,6 +91,9 @@ will return without blocking.
 If the value of
 .Va timeout
 is \-1, the call blocks indefinitely.
+Setting
+.Va want_sw
+to non-zero is used to also check the software receive ring.
 The returned packet remains in the mapped kernel slot,
 but can be modified safely in userland.
 The function returns

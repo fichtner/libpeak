@@ -70,7 +70,7 @@ main(int argc, char **argv)
 	peak_netmap_lock();
 
 	while (loop) {
-		pkt = peak_netmap_claim(200);
+		pkt = peak_netmap_claim(200, 0);
 		if (pkt) {
 			if (peak_netmap_divert(pkt,
 			    !strcmp(dev0, pkt->ifname) ? dev1 : dev0)) {
