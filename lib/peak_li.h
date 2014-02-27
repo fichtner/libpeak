@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Franco Fichtner <franco@packetwerk.com>
+ * Copyright (c) 2013-2014 Franco Fichtner <franco@packetwerk.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,8 +16,6 @@
 
 #ifndef PEAK_LI_H
 #define PEAK_LI_H
-
-#define LI_MERGE(array)		MAX((array)[0], (array)[1])
 
 enum {
 	/*
@@ -89,5 +87,24 @@ unsigned int	 peak_li_test(const struct peak_packet *,
 unsigned int	 peak_li_get(const struct peak_packet *);
 const char	*peak_li_name(const unsigned int);
 unsigned int	 peak_li_number(const char *);
+
+static inline unsigned int
+peak_li_merge(const uint16_t array[2])
+{
+	unsigned int ret = MAX(array[0], array[1]);
+
+	if (unlikely(ret == LI_UNDEFINED &&
+	    (array[0] == LI_UNKNOWN || array[1] == LI_UNKNOWN))) {
+		/*
+		 * If only one side is undefined, we don't want
+		 * to announce a completely undefined protocol
+		 * just yet, because it might change to something
+		 * else.  Direct protocol detection is not affected.
+		 */
+		ret = LI_UNKNOWN;
+	}
+
+	return (ret);
+}
 
 #endif /* !PEAK_LI_H */

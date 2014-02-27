@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2013 Franco Fichtner <franco@packetwerk.com>
+.\" Copyright (c) 2013-2014 Franco Fichtner <franco@packetwerk.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -13,21 +13,22 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd October 10, 2013
+.Dd February 27, 2014
 .Dt PEAK_LI 3
 .Os
 .Sh NAME
-.Nm LI_MERGE ,
 .Nm peak_li_get ,
+.Nm peak_li_merge ,
 .Nm peak_li_name ,
 .Nm peak_li_number ,
 .Nm peak_li_test
 .Nd lightweight inspection
 .Sh SYNOPSIS
 .In peak.h
-.Fn LI_MERGE ARRAY
 .Ft unsigned int
 .Fn peak_li_get "const struct peak_packet *packet"
+.Ft unsigned int
+.Fn peak_li_merge "const uint16_t array[2]"
 .Ft const char *
 .Fn peak_li_name "const unsigned int number"
 .Ft unsigned int
@@ -94,9 +95,9 @@ Please note that a return value of
 is not a failed attempt, but rather a necessary observation.
 .Pp
 The
-.Fn LI_MERGE
-macro takes an array of two previously acquired return values and returns
-its joined application.
+.Fn peak_li_merge
+function takes an array of two previously acquired return values and
+returns its joined application.
 Thus
 .Fn peak_li_name
 can be invoked to return a human-readable identifier string descibing
@@ -251,7 +252,7 @@ Thus both sides of the flow can be inspected separately without any
 conditional matching (and bloating the code in the process).
 The information can later be joined to produce a coherent picture
 (see
-.Fn LI_MERGE
+.Fn peak_li_merge
 for details).
 .Pp
 Matching UDP-based applications is generally easier, because it's a

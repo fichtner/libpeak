@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Franco Fichtner <franco@packetwerk.com>
+ * Copyright (c) 2013-2014 Franco Fichtner <franco@packetwerk.com>
  * Copyright (c) 2013 Victor Pereira <victor@packetwerk.com>
  * Copyright (c) 2013 Masoud Chelongar <masoud@packetwerk.com>
  *
@@ -1906,7 +1906,7 @@ peak_li_number(const char *name)
 	 * even better than rolling out script-generated lists.
 	 */
 	for (i = 0; i < lengthof(apps); ++i) {
-		if (!strcmp(name, apps[i].name)) {
+		if (!strcasecmp(name, apps[i].name)) {
 			return (apps[i].number);
 		}
 	}

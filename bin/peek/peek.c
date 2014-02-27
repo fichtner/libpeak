@@ -104,7 +104,7 @@ peek_report(const struct peak_packet *packet, const struct peak_track *flow,
 
 		switch (use_print[i]) {
 		case USE_APP:
-			pout("app: %s", peak_li_name(LI_MERGE(flow->li)));
+			pout("app: %s", peak_li_name(peak_li_merge(flow->li)));
 			break;
 		case USE_APP_LEN:
 			pout("app_len: %hu", packet->app_len);
