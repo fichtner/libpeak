@@ -25,7 +25,7 @@ enum {
 	LI_UNKNOWN = 0U,
 	/*
 	 * Undefined means there's no matching application
-	 * available in the library. This is needed to
+	 * available in the library.  This is needed to
 	 * distinguish between unknown and known!
 	 */
 	LI_UNDEFINED,
@@ -33,7 +33,7 @@ enum {
 	 * Applications are ordered by their likelyhood of
 	 * appearance *and* how well the detection works.
 	 * If an application is misbehaving, move it past
-	 * the one that is being shadowed. There is no exact
+	 * the one that is being shadowed.  There is no exact
 	 * sience involved here -- it's only best practise.
 	 */
 	LI_HTTP,

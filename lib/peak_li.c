@@ -193,7 +193,7 @@ LI_DESCRIBE_APP(dhcp)
 	}
 
 	/*
-	 * This should be obvious enough. If not,
+	 * This should be obvious enough.  If not,
 	 * record traces and read RFC 2131.
 	 */
 
@@ -535,7 +535,7 @@ LI_DESCRIBE_APP(rip)
 	 * the protocol is pretty distinctive and
 	 * nobody is going to use RIPv1 so badly.
 	 * RFC 2453 has quite a few hints on how
-	 * to proceed if needed. Have fun...
+	 * to proceed if needed.  Have fun...
 	 */
 
 	return (1);
@@ -1265,10 +1265,10 @@ LI_DESCRIBE_APP(pptp_raw)
 	}
 
 	/*
-	 * A control message may follow. RFC 2637 has some
+	 * A control message may follow.  RFC 2637 has some
 	 * fascinating insights on how this continues to be
 	 * an interesting opportunity to verify more bytes
-	 * into the payload. However, we don't really care.
+	 * into the payload.  However, we don't really care.
 	 */
 
 	return (1);
@@ -1460,8 +1460,8 @@ LI_DESCRIBE_APP(ldap)
 {
 	/*
 	 * LDAP uses BER encoding, so the detection needs
-	 * to check this first. Then we can move on to
-	 * request/response code validation. For more on
+	 * to check this first.  Then we can move on to
+	 * request/response code validation.  For more on
 	 * the topic see RFC 4511, but don't say I didn't
 	 * warn you -- that stuff is weird!
 	 */
@@ -1481,7 +1481,7 @@ LI_DESCRIBE_APP(ldap)
 
 	if (ptr->identifier_type != 0x30) {
 		/*
-		 * Only detect the structure tag. This makes sure
+		 * Only detect the structure tag.  This makes sure
 		 * that we don't have to deal with simple types,
 		 * because they won't creep up at the start of a
 		 * connection (at least a control message must be
@@ -1547,7 +1547,7 @@ LI_DESCRIBE_APP(snmp)
 {
 	/*
 	 * SNMP uses the same encoding as LDAP (BER), so
-	 * the code looks a lot alike. Also see RFC 1157.
+	 * the code looks a lot alike.  Also see RFC 1157.
 	 */
 	struct snmp {
 		uint8_t identifier_type;
@@ -1660,7 +1660,7 @@ LI_DESCRIBE_APP(impp)
 	 * acutally used:
 	 *
 	 *   "Probably 6-8 right now. 10 is on the way,
-	 *    9 was short-lived internally. Trillian 4.2
+	 *    9 was short-lived internally.  Trillian 4.2
 	 *    for Windows will continue to speak an older
 	 *    protocol though; generally there will be
 	 *    nothing older than 6 (as no servers support
@@ -1886,10 +1886,10 @@ peak_li_get(const struct peak_packet *packet)
 	}
 
 	/*
-	 * Set 'undefined' right away. This makes it easier
+	 * Set `undefined' right away.  This makes it easier
 	 * for a rules engine to do negation of policies.
 	 * Only exception is a leakage from IP type detection:
-	 * don't set undefined if we can't look...
+	 * don't set it if we can't look...
 	 */
 	return (packet->app_len ? LI_UNDEFINED : LI_UNKNOWN);
 }
@@ -1902,13 +1902,21 @@ peak_li_number(const char *name)
 	/*
 	 * The reverse protocol lookup is mostly meant for use
 	 * in a parser so that we can externalise the intel for
-	 * all apps to the place where it comes from. This is
+	 * all apps to the place where it comes from.  This is
 	 * even better than rolling out script-generated lists.
 	 */
 	for (i = 0; i < lengthof(apps); ++i) {
 		if (!strcasecmp(name, apps[i].name)) {
 			return (apps[i].number);
 		}
+	}
+
+	/*
+	 * Don't forget to check against undefined protocols,
+	 * which means no match was found in the known list.
+	 */
+	if (!strcasecmp(name, "undefined")) {
+		return (LI_UNDEFINED);
 	}
 
 	/*
