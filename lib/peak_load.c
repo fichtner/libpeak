@@ -255,7 +255,7 @@ _peak_load_pcapng_again:
 	default:
 		/*
 		 * The blocks we don't know we don't look at more
-		 * closely. A new section may begin here as well,
+		 * closely.  A new section may begin here as well,
 		 * but we mop up the link type change above anyway.
 		 */
 		lseek(self->fd, hdr.length - sizeof(hdr), SEEK_CUR);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Franco Fichtner <franco@packetwerk.com>
+ * Copyright (c) 2013-2014 Franco Fichtner <franco@packetwerk.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -47,7 +47,7 @@ struct peak_stash_##name {						\
 #define STASH_PUSH(x, name) ({						\
 	typeof(&(name)->values[0]) _ret = NULL;				\
 	if (likely(!STASH_FULL(name))) {				\
-		_ret = &(name)->values[(name)->index++];			\
+		_ret = &(name)->values[(name)->index++];		\
 		*_ret = *(x);						\
 	}								\
 	_ret;								\
@@ -56,7 +56,7 @@ struct peak_stash_##name {						\
 #define STASH_POP(name) ({	 					\
 	typeof(&(name)->values[0]) _ret = NULL;				\
 	if (likely(!STASH_EMPTY(name))) {				\
-		_ret = &(name)->values[--(name)->index];			\
+		_ret = &(name)->values[--(name)->index];		\
 	}								\
 	_ret;								\
 })
