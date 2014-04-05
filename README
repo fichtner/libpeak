@@ -11,6 +11,7 @@ peak_load:	PCAP/PCAPNG/ERF/NETMON file reader
 peak_netmap:	simplified netmap(4) bindings
 peak_store:	PCAP file writer
 peak_stream:	stream memory allocator
+peak_string:	full-text string search
 peak_tcp:	shallow TCP engine
 peak_track:	rudimentary flow tracker
 peak_udp:	shallow UDP engine

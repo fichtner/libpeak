@@ -1,0 +1,116 @@
+.\"
+.\" Copyright (c) 2013-2014 Franco Fichtner <franco@packetwerk.com>
+.\" Copyright (c) 2014 Masoud Chelongar <masoud@packetwerk.com>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd April 5, 2014
+.Dt PEAK_STRING 3
+.Os
+.Sh NAME
+.Nm peak_string_add ,
+.Nm peak_string_exit ,
+.Nm peak_string_find ,
+.Nm peak_string_init
+.Nd full text string search
+.Sh SYNOPSIS
+.In peak.h
+.Ft int
+.Fo peak_string_add
+.Fa "struct peak_strings *root"
+.Fa "const unsigned int result"
+.Fa "const char *buf"
+.Fa "const size_t len"
+.Fa "const unsigned int method"
+.Fc
+.Ft void
+.Fn peak_string_exit "struct peak_strings *root"
+.Ft void
+.Fo peak_string_find
+.Fa "struct peak_strings *root"
+.Fa "const char *buf"
+.Fa "const size_t len"
+.Fa "stash_t stash"
+.Fc
+.Ft struct peak_strings *
+.Fn peak_string_init void
+.Sh DESCRIPTION
+The
+.Nm peak_string
+API functions provide a minimal string search tree implementation.
+The search tree is constructed using
+.Xr peak_page 3 .
+.Pp
+The functions
+.Fn peak_string_init
+and
+.Fn peak_string_exit
+create and destroy a search tree, respectively.
+.Fn peak_string_init
+returns a pointer to the tree, or
+.Dv NULL
+if the memory allocation failed.
+.Pp
+The function
+.Fn peak_string_add
+inserts a search string into the tree pointed to by
+.Va root
+according to
+.Va buf
+and
+.Va len .
+The value of
+.Va result
+is stored on the leaf node.
+On success, the function returns the new or previous result.
+If a memory allocation failed, zero is returned.
+Please note that a result of zero is reserved and must not be used.
+.Pp
+The first matching
+.Va method ,
+.Dv STRING_RAW
+will find all matches along the input string.
+.Dv STRING_FI
+will find the matches at the beginning of the input string.
+.Dv STRING_LA
+will find all matches at the end of the input string.
+.Dv STRING_FILA
+will only find an exact match of the input string.
+.Pp
+The wildcard character
+.Sq ?\&
+can be used insde
+.Va buf
+to match any single character.
+To search for a literal
+.Sq ?\& ,
+the escape sequence
+.Sq \e?
+can be used.
+.Sq \e\e
+is also supported and produces a literal
+.Sq \e .
+.Pp
+The function
+.Fn peak_string_find
+takes a text to search in and finds all matching strings in the tree.
+To return the matches,
+.Va stash
+is used by calling
+.Fn STASH_PUSH
+for each matching result code.
+.Sh SEE ALSO
+.Xr peak_page 3 ,
+.Xr peak_stash 3
+.Sh AUTHORS
+.An Franco Fichtner Aq Mt franco@packetwerk.com
