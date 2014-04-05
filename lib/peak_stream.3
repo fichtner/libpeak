@@ -1,0 +1,140 @@
+.\"
+.\" Copyright (c) 2013 Franco Fichtner <franco@packetwerk.com>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd October 15, 2013
+.Dt PEAK_STREAM 3
+.Os
+.Sh NAME
+.Nm peak_stream_claim ,
+.Nm peak_stream_exit ,
+.Nm peak_stream_init ,
+.Nm peak_stream_release
+.Nd stream memory allocation
+.Sh SYNOPSIS
+.In peak.h
+.Ft unsigned int
+.Fo peak_stream_claim
+.Fa "struct peak_streams *self"
+.Fa "struct peak_stream **ref"
+.Fa "size_t size"
+.Fc
+.Ft void
+.Fn peak_stream_exit "struct peak_streams *self"
+.Ft struct peak_streams *
+.Fn peak_stream_init "size_t page_count" "size_t page_size"
+.Ft void
+.Fo peak_stream_release
+.Fa "struct peak_streams *self"
+.Fa "struct peak_stream **ref"
+.Fa "size_t size"
+.Fc
+.Sh DESCRIPTION
+The
+.Nm peak_stream
+API functions allocate and deallocate memory meant for stream-based
+purposes.
+It is similar in nature to
+.Xr peak_prealloc 3 ,
+but provides a more flexible approach in terms of memory claim and
+release.
+The allocated buffers can grow at the end of a stream and
+shrink from the beginning while staying linear in memory layout.
+The implementation attempts to solve the problem of how to cope with
+the unpredictable memory needs of network streams while maintaining
+reasonable performance.
+.Pp
+The concept of paging is used internally, but is of no concern to
+the caller.
+A tree structure keeps track of free pages for speeding up the
+claim and release operations.
+In case of colliding claimed pages, the implementation will attempt
+to relocate the current buffer.
+There is no notion of defragmentation in the implementation, but
+one may be added at a later time (if required).
+.Pp
+The
+.Fn peak_stream_init
+and
+.Fn peak_stream_exit
+functions initialise or destroy a stream memory pool, respectively.
+A
+.Va page_size
+of 2048 bytes or greater is recommended for network stream purposes,
+but not strictly necessary.
+.Fn peak_stream_init
+will fail if it could not allocate the requested pool size.
+Otherwise, a pointer to the initialised pool is
+returned to be used in all related function calls.
+.Pp
+The
+.Fn peak_stream_claim
+function will attempt to allocate
+.Va size
+bytes of memory at the end of the buffer.
+Passing a
+.Va *ref
+value of
+.Dv NULL
+will create a new stream reference with the specified size.
+The function will return non-zero if the allocation was successful.
+Otherwise, zero value is returned.
+.Pp
+It must be kept in mind that
+.Fn peak_stream_claim
+may relocate the buffer internally, so the buffer pointer in the stream
+reference must be read after each invoke.
+If the relocation failed due to not being able to find the number
+of requested continous pages, the stream reference remains unchanged
+(similar to
+.Xr realloc 3 ) .
+In this case, the return value will also be non-zero.
+.Pp
+In contrast, the
+.Fn peak_stream_release
+function will free the specified number of
+.Va size
+bytes from the beginning of the stream.
+The stream's location always changes during this operation,
+so the buffer pointer in the stream reference must be read after
+each invoke.
+.Sh SEE ALSO
+.Xr peak_prealloc 3
+.Sh AUTHORS
+.An Franco Fichtner Aq Mt franco@packetwerk.com
+.Sh CAVEATS
+.Nm peak_stream Ns 's
+page allocation algorithm is considered a weak point.
+It starts looking for new pages at the beginning of the free list
+and moves forward until it finds the requested amount of contiguous
+pages.
+.Pp
+Since the generic use case are TCP packets, let's assume a page size
+of 4096 bytes and a usual stream size change of about 1500 bytes.
+Thus it takes at least 3 calls to
+.Fn peak_stream_claim
+to actually
+.Dq grow
+the stream buffer internally.
+This behaviour clusters small buffers (one page) at the front of the
+page memory, while bigger buffers (more than one page) reside at the
+far end creating problems every time a new page is needed by the stream
+buffer \(em relocation to a new area will most likely be required to
+accomodate its new size requirements.
+.Pp
+A more sohpisticated algorithm may keep maximum distance between
+all allocated pages.
+This will have to wait until we have a real use case (a.k.a. TCP
+reassembly) and enough pseudo-random data to make a case for or
+against the current algorithm.
