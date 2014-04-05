@@ -5,6 +5,7 @@ This library consists of several modules and generic base headers
 designed around the daily needs of network packet-related userland
 tools written in C.  Currently, the available modules are:
 
+peak_jar:	context-based circular buffer
 peak_li:	lightweight inspection (DPI)
 peak_load:	PCAP/PCAPNG/ERF/NETMON file reader
 peak_netmap:	simplified netmap(4) bindings

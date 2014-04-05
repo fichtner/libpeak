@@ -1,0 +1,135 @@
+.\"
+.\" Copyright (c) 2012-2013 Franco Fichtner <franco@packetwerk.com>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd March 3, 2013
+.Dt PEAK_JAR 3
+.Os
+.Sh NAME
+.Nm peak_jar_init ,
+.Nm peak_jar_exit ,
+.Nm peak_jar_pack ,
+.Nm peak_jar_peek
+.Nd circular data context buffer
+.Sh SYNOPSIS
+.In peak.h
+.Ft unsigned int
+.Fn peak_jar_init "struct peak_jars *self" "size_t size"
+.Ft void
+.Fn peak_jar_exit "struct peak_jars *self"
+.Ft void
+.Fo peak_jar_pack
+.Fa "struct peak_jars *self"
+.Fa "struct peak_jar *context"
+.Fa "const void *buf"
+.Fa "const size_t len"
+.Fc
+.Ft void
+.Fo peak_jar_peek
+.Fa "struct peak_jars *self"
+.Fa "struct peak_jar *context"
+.Fa "peak_jar_fun callback"
+.Fa "void *userdata"
+.Fc
+.Ft unsigned int
+.Fo peak_jar_fun
+.Fa "void *userdata"
+.Fa "void *buf"
+.Fa "size_t size"
+.Fc
+.Sh DESCRIPTION
+The
+.Nm peak_jar
+API provides a mechanism to store and retrieve FIFO-like data in a
+single circular buffer, which is held together by any number of
+arbitrary context structures.
+This way it is possible to retrieve a chronological history for a
+single context as memory in the circular buffer permits.
+Old data is silently cleaned up to make room for new data.
+This is especially useful for flow- or user-based data like network
+packets or application events.
+.Pp
+The internal buffer layout consists of a mix of a circular header
+structure, which holds a predefined number of data headers followed
+by their respective data.
+Circular buffer storage space is only accounted in the circular header
+structures to speed up cleanup.
+Each circular header has a unique serial number associated.
+.Pp
+The data headers exist inside the domain of their circular header only.
+Here, the serial number is stored alongside the pointers to test them
+for validity.
+To make this more weird, the data headers are linked via the externally
+provided context.
+Thus all data stored for a context can be accessed in a chronological
+order.
+.Pp
+The
+.Fn peak_jar_init
+and
+.Fn peak_jar_exit
+functions create and destroy the internal state of a given
+.Vt struct peak_jars * ,
+respectively.
+That's about it.
+.Pp
+The
+.Fn peak_jar_pack
+function stores data in a given context.
+It also garbage-collects the circular buffer as needed.
+.Pp
+The
+.Fn peak_jar_peek
+function retrieves the currently stored data in chronological order
+by invoking the supplied callback for each BLOB.
+The callback can decide what to do next by returning one of the
+following values:
+.Bl -tag -width "JAR_RETURN"
+.It Dv JAR_RETURN
+This causes an immediate return after the callback without
+continuing through the remaining data.
+.It Dv JAR_DROP
+This causes the current data to be dropped from the context and
+continues to go through the remaining data.
+.It Dv JAR_KEEP
+This causes the current data to remain in the context and continues
+to go through the remaining data.
+.El
+.Sh RETURN VALUES
+Upon successful completion
+.Fn peak_jar_init
+returns non-zero.
+Otherwise, zero is returned.
+.Sh AUTHORS
+.An Franco Fichtner Aq Mt franco@packetwerk.com
+.Sh CAVEATS
+There is no way to notify the caller of data being garbage-collected
+in order to make room for new data on a
+.Fn peak_jar_pack
+call.
+The cleanup will free the oldest set of data in the circular buffer.
+This minimises the load, but may free a lot of data at once.
+.Pp
+The library is not intended for multithreading.
+However, if you do have such an interesting use-case, you need to
+make sure of the following: for
+.Fn peak_jar_pack
+and
+.Fn peak_jar_peek ,
+access to
+.Va self
+must always be serialised.
+Furthermore,
+.Va context
+should be unique in nature and access must also be serialised.

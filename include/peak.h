@@ -88,6 +88,7 @@ struct peak_packet;
 #include "peak_load.h"
 #include "peak_store.h"
 #include "peak_netmap.h"
+#include "peak_jar.h"
 #include "peak_udp.h"
 #include "peak_tcp.h"
 #include "peak_li.h"
