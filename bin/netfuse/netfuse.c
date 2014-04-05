@@ -22,7 +22,7 @@ output_init();
 static int loop = 1;
 
 static void
-fuse_signal(int sig)
+netfuse_signal(int sig)
 {
 	(void)sig;
 	loop = 0;
@@ -49,7 +49,7 @@ main(int argc, char **argv)
 		/* NOTREACHED */
 	}
 
-	signal(SIGINT, fuse_signal);
+	signal(SIGINT, netfuse_signal);
 
 	output_bug();
 

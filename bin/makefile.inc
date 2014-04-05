@@ -1,2 +1,2 @@
-SUBDIR+=	fuse
+SUBDIR+=	netfuse
 SUBDIR+=	peek
