@@ -38,24 +38,25 @@ _peak_string_find(struct peak_strings *node, const char *buf,
 	struct peak_strings stackptr(ref);
 	struct peak_strings *found;
 
-	if (node->result[STRING_RAW]) {
+	if (node->result[STRING_LOOSE]) {
 		/*
 		 * There is no need for duplicated matches, but
 		 * we'll do it anyway, e.g. "test test" produces
-		 * two results of the same value.  It might fill
-		 * up the stash, but then again maybe we can't be
-		 * overly concerned.
+		 * two results of the same value.
 		 */
-		STASH_PUSH(&node->result[STRING_RAW], temp);
+		STASH_PUSH(&node->result[STRING_LOOSE], temp);
 	}
-	if (start && node->result[STRING_FI]) {
-		STASH_PUSH(&node->result[STRING_FI], temp);
+
+	if (start && node->result[STRING_LEFT]) {
+		STASH_PUSH(&node->result[STRING_LEFT], temp);
 	}
-	if (!len && node->result[STRING_LA]) {
-		STASH_PUSH(&node->result[STRING_LA], temp);
+
+	if (!len && node->result[STRING_RIGHT]) {
+		STASH_PUSH(&node->result[STRING_RIGHT], temp);
 	}
-	if (!len && start && node->result[STRING_FILA]) {
-		STASH_PUSH(&node->result[STRING_FILA], temp);
+
+	if (!len && start && node->result[STRING_EXACT]) {
+		STASH_PUSH(&node->result[STRING_EXACT], temp);
 	}
 
 	if (!len) {
@@ -144,14 +145,6 @@ peak_string_add(struct peak_strings *root, const unsigned int result,
 	}
 
 	if (!node->result[method]) {
-		/*
-		 * Currently, we only have matching patterns,
-		 * but sooner or later we want search options
-		 * like anchor left/right or word boundary
-		 * checks.  In that case the result needs to be
-		 * a linked list with all the search options so
-		 * that the "match" can be verified.
-		 */
 		node->result[method] = result;
 	}
 

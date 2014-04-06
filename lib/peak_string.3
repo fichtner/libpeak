@@ -14,7 +14,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd April 5, 2014
+.Dd April 6, 2014
 .Dt PEAK_STRING 3
 .Os
 .Sh NAME
@@ -78,13 +78,13 @@ Please note that a result of zero is reserved and must not be used.
 .Pp
 The first matching
 .Va method ,
-.Dv STRING_RAW
+.Dv STRING_LOOSE
 will find all matches along the input string.
-.Dv STRING_FI
+.Dv STRING_LEFT
 will find the matches at the beginning of the input string.
-.Dv STRING_LA
+.Dv STRING_RIGHT
 will find all matches at the end of the input string.
-.Dv STRING_FILA
+.Dv STRING_EXACT
 will only find an exact match of the input string.
 .Pp
 The wildcard character

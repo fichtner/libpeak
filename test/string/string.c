@@ -37,8 +37,8 @@ test_string_single(void)
 	assert(STASH_EMPTY(stash));
 
 	/* deduplicate strings */
-	assert(1 == peak_string_add(root, 1, "test", 4, STRING_RAW));
-	assert(1 == peak_string_add(root, 2, "test", 4, STRING_RAW));
+	assert(1 == peak_string_add(root, 1, "test", 4, STRING_LOOSE));
+	assert(1 == peak_string_add(root, 2, "test", 4, STRING_LOOSE));
 
 	/* finds nothing */
 	peak_string_find(root, NULL, 0, stash);
@@ -85,7 +85,7 @@ test_string_fi(void)
 	root = peak_string_init();
 	assert(root);
 
-	assert(1 == peak_string_add(root, 1, "test", 4, STRING_FI));
+	assert(1 == peak_string_add(root, 1, "test", 4, STRING_LEFT));
 
 	/* finds nothing */
 	peak_string_find(root, "string test", 11, stash);
@@ -111,7 +111,7 @@ test_string_wildcard(void)
 	root = peak_string_init();
 	assert(root);
 
-	assert(1 == peak_string_add(root, 1, "t?st", 4, STRING_RAW));
+	assert(1 == peak_string_add(root, 1, "t?st", 4, STRING_LOOSE));
 
 	/* finds nothing */
 	peak_string_find(root, "string tst", 10, stash);
@@ -139,7 +139,7 @@ test_string_la(void)
 	root = peak_string_init();
 	assert(root);
 
-	assert(1 == peak_string_add(root, 1, "test", 4, STRING_LA));
+	assert(1 == peak_string_add(root, 1, "test", 4, STRING_RIGHT));
 
 	/* finds nothing */
 	peak_string_find(root, "test string", 11, stash);
@@ -165,7 +165,7 @@ test_string_fila(void)
 	root = peak_string_init();
 	assert(root);
 
-	assert(1 == peak_string_add(root, 1, "test", 4, STRING_FILA));
+	assert(1 == peak_string_add(root, 1, "test", 4, STRING_EXACT));
 
 	/* finds nothing */
 	peak_string_find(root, "test string test", 16, stash);
@@ -196,14 +196,14 @@ test_string_multiple(void)
 	root = peak_string_init();
 	assert(root);
 
-	assert(0 == peak_string_add(root, 1, " ipsum ", 0, STRING_RAW));
-	assert(0 == peak_string_add(root, 1, NULL, 1, STRING_RAW));
-	assert(1 == peak_string_add(root, 1, " ipsum ", 7, STRING_RAW));
-	assert(2 == peak_string_add(root, 2, ", sed", 5, STRING_RAW));
-	assert(3 == peak_string_add(root, 3, ", sef ", 5, STRING_RAW));
-	assert(4 == peak_string_add(root, 4, ".", 1, STRING_RAW));
-	assert(5 == peak_string_add(root, 5, "diam ", 4, STRING_RAW));
-	assert(6 == peak_string_add(root, 6, "dolor sit amet,", 15, STRING_RAW));
+	assert(0 == peak_string_add(root, 1, " ipsum ", 0, STRING_LOOSE));
+	assert(0 == peak_string_add(root, 1, NULL, 1, STRING_LOOSE));
+	assert(1 == peak_string_add(root, 1, " ipsum ", 7, STRING_LOOSE));
+	assert(2 == peak_string_add(root, 2, ", sed", 5, STRING_LOOSE));
+	assert(3 == peak_string_add(root, 3, ", sef ", 5, STRING_LOOSE));
+	assert(4 == peak_string_add(root, 4, ".", 1, STRING_LOOSE));
+	assert(5 == peak_string_add(root, 5, "diam ", 4, STRING_LOOSE));
+	assert(6 == peak_string_add(root, 6, "dolor sit amet,", 15, STRING_LOOSE));
 
 	peak_string_find(root, text, strlen(text), stash);
 
