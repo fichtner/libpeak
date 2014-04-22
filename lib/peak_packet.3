@@ -1,0 +1,63 @@
+.\"
+.\" Copyright (c) 2012-2014 Franco Fichtner <franco@packetwerk.com>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd April 22, 2013
+.Dt PEAK_PACKET 3
+.Os
+.Sh NAME
+.Nm peak_packet_parse
+.Nd packet preprocessing
+.Sh SYNOPSIS
+.In peak.h
+.Ft unsigned int
+.Fo peak_packet_next
+.Fa "struct peak_packet *self"
+.Fa "void *buf"
+.Fa "unsigned int len"
+.Fa "unsigned int type"
+.Fc
+.Sh DESCRIPTION
+The
+.Nm peak_packet
+API preprocesses a given packet and prepares its associated structure
+for general use.
+It will scan up until the transport layer and ensure the packet's
+validity.
+It can be considered a legacy packet filter (IPv4/v6, TCP, UDP, ICMP).
+.Pp
+In order to process a packet, the caller needs to invoke
+.Fn peak_packet_next ,
+with
+.Va buf ,
+.Va len ,
+and
+.Va type
+describing the location, size, and link type of the packet.
+If you may want to invoke the packet parsing only, the
+.Fn PACKET_LINK
+macro will do the link layer parsing, but does not invoke any associated
+subsystem.
+For now, the only link layer types known to
+.Nm peak_packet
+are
+.Dv LINKTYPE_ETHERNET
+and
+.Dv LINTYPE_LINUX_SLL .
+.Fn peak_packet_next
+returns zero if the packet was parsed successfully.
+Otherwise, non-zero is returned to advise the caller to drop the
+packet.
+.Sh AUTHORS
+.An Franco Fichtner Aq Mt franco@packetwerk.com

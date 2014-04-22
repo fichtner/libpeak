@@ -48,8 +48,10 @@ peak_jar_write(struct peak_jars *self, const size_t head_room)
 		free = size - write + read;
 	}
 
-	/* handle unlikely wrap around case
-	 * (head_room must be contiguous) */
+	/*
+	 * handle unlikely wrap around case
+	 * (head_room must be contiguous)
+	 */
 	if (unlikely(new_write >= size)) {
 		new_write = head_room;
 		ret = self->buffer;
@@ -73,8 +75,10 @@ peak_jar_read(struct peak_jars *self)
 {
 	struct peak_jar_head *head = TAILQ_FIRST(&self->heads);
 	if (head) {
-		/* free old data sets and invalidate
-		 * their associated serial number */
+		/*
+		 * free old data sets and invalidate
+		 * their associated serial number
+		 */
 		TAILQ_REMOVE(&self->heads, head, entry);
 		self->read = head->write;
 		++self->first_serial;

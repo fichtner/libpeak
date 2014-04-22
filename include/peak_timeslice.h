@@ -23,8 +23,10 @@ typedef struct {
 	int64_t normal;
 	int64_t msec;
 	int64_t sec;
-	/* hrm, Ubuntu doesn't build with the name "unix"
-	 * and complains in a very cryptic way... */
+	/*
+	 * Ubuntu doesn't build with the name "unix"
+	 * and complains in a very cryptic way...
+	 */
 	time_t epoch;
 	struct tm local;
 	struct tm gmt;

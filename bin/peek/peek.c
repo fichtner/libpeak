@@ -44,54 +44,6 @@ static unsigned int use_print[USE_MAX];
 static unsigned int use_count = 0;
 
 static void
-peek_packet_ipv6(struct peak_packet *packet)
-{
-	struct ip6_hdr *i6h = packet->net.ip6h;
-	struct ip6_ext *next_hdr = (struct ip6_ext *)(i6h + 1);
-	uint8_t next_type = i6h->ip6_nxt;
-
-	packet->net_len = sizeof(*i6h) + be16dec(&i6h->ip6_plen);
-	packet->net_hlen = sizeof(*i6h);
-
-	for (;;) {
-		switch (next_type) {
-		case IPPROTO_HOPOPTS:
-			/* FALLTHROUGH */
-		case IPPROTO_ROUTING:
-			/* FALLTHROUGH */
-		case IPPROTO_DSTOPTS:
-			/* FALLTHROUGH */
-		case IPPROTO_ESP:
-			/* FALLTHROUGH */
-		case IPPROTO_AH:
-			/* variable extension header */
-			if (next_hdr->ip6e_len % 8) {
-				panic("invalid ipv6 extension header"
-				    "size %hhu\n", next_hdr->ip6e_len);
-			}
-			packet->net_hlen += next_hdr->ip6e_len;
-			next_type = next_hdr->ip6e_nxt;
-			next_hdr += next_hdr->ip6e_len >> 1;
-			break;
-		case IPPROTO_FRAGMENT:
-			/* fixed extension header */
-			packet->net_hlen += sizeof(struct ip6_frag);
-			next_type = next_hdr->ip6e_nxt;
-			next_hdr += sizeof(struct ip6_frag) >> 1;
-			break;
-		case IPPROTO_NONE:
-			/* FALLTHROUGH */
-		default:
-			/* no more extension headers  */
-			packet->net_type = next_type;
-			return;
-		}
-	}
-
-	/* NOTREACHED */
-}
-
-static void
 peek_report(const struct peak_packet *packet, const struct peak_track *flow,
     const timeslice_t *timer)
 {
@@ -140,42 +92,9 @@ peek_packet(struct peak_tracks *peek, const timeslice_t *timer,
 	struct peak_track *flow;
 	struct peak_track _flow;
 
-	PACKET_LINK(packet, buf, len, type);
-
-	switch (packet->mac_type) {
-	case ETHERTYPE_IP:
-		netaddr4(&packet->net_saddr, packet->net.iph->ip_src.s_addr);
-		netaddr4(&packet->net_daddr, packet->net.iph->ip_dst.s_addr);
-		packet->net_len = be16dec(&packet->net.iph->ip_len);
-		packet->net_hlen = packet->net.iph->ip_hl << 2;
-		packet->net_type = packet->net.iph->ip_p;
-		break;
-	case ETHERTYPE_IPV6:
-		netaddr6(&packet->net_saddr, &packet->net.ip6h->ip6_src);
-		netaddr6(&packet->net_daddr, &packet->net.ip6h->ip6_dst);
-		peek_packet_ipv6(packet);
-		break;
-	default:
+	if (peak_packet_next(packet, buf, len, type) || !packet->net_len) {
 		/* here be dragons */
 		return;
-	}
-
-	packet->flow.raw = packet->net.raw + packet->net_hlen;
-	packet->flow_len = packet->net_len - packet->net_hlen;
-
-	switch (packet->net_type) {
-	case IPPROTO_TCP:
-		if (peak_tcp_prepare(packet)) {
-			return;
-		}
-		break;
-	case IPPROTO_UDP:
-		if (peak_udp_prepare(packet)) {
-			return;
-		}
-		break;
-	default:
-		break;
 	}
 
 	TRACK_KEY(&_flow, packet);
