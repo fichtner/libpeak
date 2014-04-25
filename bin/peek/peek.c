@@ -15,17 +15,6 @@
  */
 
 #include <peak.h>
-#if defined(__OpenBSD__) || defined(__FreeBSD__)
-#include <sys/socket.h>
-#include <net/if.h>
-#include <netinet/in.h>
-#include <netinet/if_ether.h>
-#include <netinet/in_systm.h>
-#else /* !__OpenBSD__ && !__FreeBSD__ */
-#include <net/ethernet.h>
-#endif /* __OpenBSD__ || __FreeBSD__ */
-#include <netinet/ip.h>
-#include <netinet/ip6.h>
 #include <unistd.h>
 
 output_init();
@@ -92,7 +81,7 @@ peek_packet(struct peak_tracks *peek, const timeslice_t *timer,
 	struct peak_track *flow;
 	struct peak_track _flow;
 
-	if (peak_packet_next(packet, buf, len, type) || !packet->net_len) {
+	if (peak_packet_parse(packet, buf, len, type) || !packet->net_len) {
 		/* here be dragons */
 		return;
 	}
@@ -194,11 +183,12 @@ main(int argc, char **argv)
 	TIMESLICE_INIT(&timer);
 
 	if (peak_load_packet(trace)) {
-		TIMESLICE_NORMALISE(&timer, trace->ts_ms);
+		TIMESLICE_NORMALISE(&timer, trace->ts_unix.tv_sec);
 
 		do {
-			TIMESLICE_ADVANCE(&timer, trace->ts_unix,
-			    trace->ts_ms);
+			TIMESLICE_ADVANCE(&timer, trace->ts_unix.tv_sec,
+			    trace->ts_unix.tv_sec * 1000 +
+			    trace->ts_unix.tv_usec / 1000);
 			peek_packet(peek, &timer, trace->buf, trace->len,
 			    trace->ll);
 		} while (peak_load_packet(trace));

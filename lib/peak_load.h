@@ -20,9 +20,7 @@
 struct peak_load {
 	unsigned int len;
 	unsigned int ll;
-	int64_t ts_off;
-	int64_t ts_ms;
-	time_t ts_unix;
+	struct timeval ts_unix;
 	uint8_t buf[32 * 1024];
 };
 

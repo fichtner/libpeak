@@ -36,7 +36,26 @@
 #endif /* !TCP_MAXHLEN */
 
 const char *
-peak_packet_iptype(const struct peak_packet *self)
+peak_packet_mac(const struct peak_packet *self)
+{
+	const char *ret;
+
+	switch (self->mac_type) {
+	case ETHERTYPE_IP:
+		ret = "ip";
+		break;
+	case ETHERTYPE_IPV6:
+		ret = "ipv6";
+		break;
+	default:
+		ret = "xxx";
+		break;
+	}
+
+	return (ret);
+}
+const char *
+peak_packet_net(const struct peak_packet *self)
 {
 	const char *ret;
 
@@ -216,7 +235,7 @@ peak_packet_tcp(struct peak_packet *self)
 	return (0);
 }
 unsigned int
-peak_packet_next(struct peak_packet *self, void *buf, unsigned int len,
+peak_packet_parse(struct peak_packet *self, void *buf, unsigned int len,
     unsigned int type)
 {
 	bzero(self, sizeof(*self));

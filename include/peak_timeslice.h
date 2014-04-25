@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013 Franco Fichtner <franco@packetwerk.com>
+ * Copyright (c) 2012-2014 Franco Fichtner <franco@packetwerk.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -20,30 +20,27 @@
 #include <time.h>
 
 typedef struct {
-	int64_t normal;
+	int64_t offset;
 	int64_t msec;
 	int64_t sec;
-	/*
-	 * Ubuntu doesn't build with the name "unix"
-	 * and complains in a very cryptic way...
-	 */
-	time_t epoch;
+	struct timeval tv;
 	struct tm local;
 	struct tm gmt;
 } timeslice_t;
 
-#define TIMESLICE_ADVANCE(clock, ts_unix, ts_ms) do {			\
-	(clock)->msec = (ts_ms) - (clock)->normal + 1000;		\
+#define TIMESLICE_ADVANCE(clock, ts_sec, ts_ms) do {			\
+	(clock)->msec = (ts_ms) - (clock)->offset;			\
 	(clock)->sec = (clock)->msec / 1000;				\
-	if (unlikely((ts_unix) != (clock)->epoch)) {			\
-		(clock)->epoch = (ts_unix);				\
-		localtime_r(&(clock)->epoch, &(clock)->local);		\
-		gmtime_r(&(clock)->epoch, &(clock)->gmt);		\
+	if (unlikely((ts_sec) != (clock)->tv.tv_sec)) {			\
+		(clock)->tv.tv_sec = (ts_sec);				\
+		localtime_r(&(clock)->tv.tv_sec, &(clock)->local);	\
+		gmtime_r(&(clock)->tv.tv_sec, &(clock)->gmt);		\
 	}								\
 } while (0)
 
-#define TIMESLICE_NORMALISE(clock, ts_ms) do {				\
-	(clock)->normal = (clock)->normal ? : (ts_ms);			\
+#define TIMESLICE_NORMALISE(clock, ts_sec) do {				\
+	(clock)->offset = (ts_sec);					\
+	(clock)->offset *= 1000;					\
 } while (0)
 
 #define TIMESLICE_INIT(clock) do {					\

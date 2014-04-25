@@ -42,6 +42,8 @@ struct erf_packet_header {
 	uint16_t wtf;
 } __packed;
 
+#define ERF_USEC(x)	((((x) & 0xFFFFFFFFull) * 1000ull * 1000ull) >> 32)
+#define ERF_SEC(x)	((x) >> 32)
 #define ERF_MS(x)	((((x) >> 32) * 1000) +				\
     ((((x) & 0xFFFFFFFF) * 1000) >> 32))
 #define ERF_MAGIC	0	/* there is no ERF magic; it's a stub */
@@ -119,23 +121,9 @@ struct netmon_record_header {
 	uint32_t include_length;
 };
 
-#define NETMON_MS(x)	(((x) * 10) / 10000)
+#define NETMON_USEC(x)	((((x) * 10ull) / 10ull) % (1000ull * 1000ull))
+#define NETMON_SEC(x)	(((x) * 10ll) / (10ll * 1000ll * 1000ll))
 #define NETMON_MAGIC	0x55424D47
-
-static inline int64_t
-peak_load_normalise(struct peak_load *self, int64_t ts_ms)
-{
-	ts_ms += self->ts_off;
-
-	if (likely(!wrap32(ts_ms - self->ts_ms))) {
-		return (ts_ms);
-	}
-
-	/* went back in time! */
-	self->ts_off += self->ts_ms - ts_ms;
-
-	return (self->ts_ms);
-}
 
 static void
 _peak_load_erf(struct _peak_load *self)
@@ -160,9 +148,8 @@ _peak_load_erf(struct _peak_load *self)
 		return;
 	}
 
-	self->data.ts_ms = peak_load_normalise(LOAD_TO_USER(self),
-	    ERF_MS(hdr.ts));
-	self->data.ts_unix = hdr.ts >> 32;
+	self->data.ts_unix.tv_usec = ERF_USEC(hdr.ts);
+	self->data.ts_unix.tv_sec = ERF_SEC(hdr.ts);
 	self->data.len = hdr.wlen;
 }
 
@@ -193,9 +180,8 @@ _peak_load_pcap(struct _peak_load *self)
 		return;
 	}
 
-	self->data.ts_ms = peak_load_normalise(LOAD_TO_USER(self),
-	    PCAP_MS(hdr.ts_sec, hdr.ts_usec));
-	self->data.ts_unix = hdr.ts_sec;
+	self->data.ts_unix.tv_usec = hdr.ts_usec;
+	self->data.ts_unix.tv_sec = hdr.ts_sec;
 	self->data.len = hdr.incl_len;
 }
 
@@ -236,8 +222,8 @@ _peak_load_pcapng_again:
 
 		ts = (int64_t)pkt.ts_high << 32 | (int64_t)pkt.ts_low;
 
-		self->data.ts_ms = ts / 1000ull;
-		self->data.ts_unix = ts / 1000ull / 1000ull;
+		self->data.ts_unix.tv_usec = ts % (1000ll * 1000ll);
+		self->data.ts_unix.tv_sec = ts / 1000ll / 1000ll;
 		self->data.len = pkt.packetlen;
 
 		break;
@@ -291,9 +277,8 @@ _peak_load_netmon(struct _peak_load *self)
 		return;
 	}
 
-	self->data.ts_ms = peak_load_normalise(LOAD_TO_USER(self),
-	    NETMON_MS(hdr.time_stamp_data));
-	self->data.ts_unix = NETMON_MS(hdr.time_stamp_data) / 1000 +
+	self->data.ts_unix.tv_usec = NETMON_USEC(hdr.time_stamp_data);
+	self->data.ts_unix.tv_sec = NETMON_SEC(hdr.time_stamp_data) +
 	    self->netmon_time;
 	self->data.len = hdr.original_length;
 }

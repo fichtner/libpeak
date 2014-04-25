@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2012-2013 Franco Fichtner <franco@packetwerk.com>
+.\" Copyright (c) 2012-2014 Franco Fichtner <franco@packetwerk.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd November 24, 2013
+.Dd April 25, 2014
 .Dt PEAK_TIMESLICE 3
 .Os
 .Sh NAME
@@ -24,8 +24,8 @@
 .Sh SYNOPSIS
 .In peak.h
 .Fn TIMESLICE_INIT CLOCK
-.Fn TIMESLICE_NORMALISE CLOCK TS_MS
-.Fn TIMESLICE_ADVANCE CLOCK TS_UNIX TS_MS
+.Fn TIMESLICE_NORMALISE CLOCK TS_SEC
+.Fn TIMESLICE_ADVANCE CLOCK TS_SEC TS_MS
 .Sh DESCRIPTION
 The
 .Nm peak_timeslice
@@ -50,10 +50,10 @@ for GMT and the local time zone are also provided.
 The structure's layout is as follows:
 .Bd -literal -offset indent
 typedef struct {
-	int64_t normal;
+	int64_t offset;
 	int64_t msec;
 	int64_t sec;
-	time_t epoch;
+	struct timeval tv;
 	struct tm local;
 	struct tm gmt;
 } timeslice_t;
@@ -67,6 +67,7 @@ Then,
 .Fn TIMESLICE_NORMALISE
 is used to adjust the internal monotonic clock to start at zero,
 which is quite handy for initial timeouts in other libraries.
+(Note that seconds are normalised, not sub-seconds.)
 To advance the clocks the caller invokes
 .Fn TIMESLICE_ADVANCE
 once per time slice.

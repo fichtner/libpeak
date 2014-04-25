@@ -90,11 +90,11 @@ struct peak_packet {
 	} net;
 	union {
 		unsigned char *raw;
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__OpenBSD__)
 		struct icmp *ih;
-#else /* !__APPLE__ */
+#else /* !__APPLE__ && !__OpenBSD__ */
 		struct icmphdr *ih;
-#endif /* __APPLE__ */
+#endif /* __APPLE__ || __OpenBSD__ */
 		struct tcphdr *th;
 		struct udphdr *uh;
 	} flow;
@@ -117,8 +117,9 @@ struct peak_packet {
 	uint16_t flow_dport;
 };
 
-unsigned int	 peak_packet_next(struct peak_packet *, void *,
+unsigned int	 peak_packet_parse(struct peak_packet *, void *,
 		     unsigned int, unsigned int);
-const char	*peak_packet_iptype(const struct peak_packet *);
+const char	*peak_packet_mac(const struct peak_packet *);
+const char	*peak_packet_net(const struct peak_packet *);
 
 #endif /* !PEAK_PACKET_H */

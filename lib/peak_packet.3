@@ -13,16 +13,22 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd April 22, 2013
+.Dd April 23, 2013
 .Dt PEAK_PACKET 3
 .Os
 .Sh NAME
+.Nm peak_packet_mac ,
+.Nm peak_packet_net ,
 .Nm peak_packet_parse
 .Nd packet preprocessing
 .Sh SYNOPSIS
 .In peak.h
+.Ft const char *
+.Fn peak_packet_mac "const struct peak_packet *self"
+.Ft const char *
+.Fn peak_packet_net "const struct peak_packet *self"
 .Ft unsigned int
-.Fo peak_packet_next
+.Fo peak_packet_parse
 .Fa "struct peak_packet *self"
 .Fa "void *buf"
 .Fa "unsigned int len"
@@ -35,29 +41,32 @@ API preprocesses a given packet and prepares its associated structure
 for general use.
 It will scan up until the transport layer and ensure the packet's
 validity.
-It can be considered a legacy packet filter (IPv4/v6, TCP, UDP, ICMP).
+It can be considered a legacy packet filter for protocols such as
+IPv4/v6, TCP, UDP, or ICMP.
 .Pp
 In order to process a packet, the caller needs to invoke
-.Fn peak_packet_next ,
+.Fn peak_packet_parse ,
 with
 .Va buf ,
 .Va len ,
 and
 .Va type
 describing the location, size, and link type of the packet.
-If you may want to invoke the packet parsing only, the
-.Fn PACKET_LINK
-macro will do the link layer parsing, but does not invoke any associated
-subsystem.
 For now, the only link layer types known to
 .Nm peak_packet
 are
 .Dv LINKTYPE_ETHERNET
 and
-.Dv LINTYPE_LINUX_SLL .
-.Fn peak_packet_next
+.Dv LINKTYPE_LINUX_SLL .
+.Fn peak_packet_parse
 returns zero if the packet was parsed successfully.
 Otherwise, non-zero is returned to advise the caller to drop the
 packet.
+.Pp
+.Fn peak_packet_mac
+and
+.Fn peak_packet_net
+translate a low level MAC or network type into a string for the given
+packet, respectively.
 .Sh AUTHORS
 .An Franco Fichtner Aq Mt franco@packetwerk.com

@@ -519,15 +519,15 @@ test_time(void)
 	TIMESLICE_INIT(timer);
 
 	TIMESLICE_NORMALISE(timer, 42);
-	TIMESLICE_ADVANCE(timer, 1, 42);
+	TIMESLICE_ADVANCE(timer, 42, 42015);
 
-	assert(timer->normal == 42);
-	assert(timer->msec == 1000);
+	assert(timer->offset == 42000);
+	assert(timer->msec == 15);
 
-	TIMESLICE_ADVANCE(timer, 1, 45);
+	TIMESLICE_ADVANCE(timer, 45, 45018);
 
-	assert(timer->normal == 42);
-	assert(timer->msec == 1003);
+	assert(timer->offset == 42000);
+	assert(timer->msec == 3018);
 }
 
 int

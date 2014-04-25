@@ -38,16 +38,14 @@ struct pcap_packet_header {
 
 unsigned int
 peak_store_packet(int fd, const void *buf, const unsigned int len,
-    const int64_t ts_ms)
+    const int64_t ts_sec, const int64_t ts_usec)
 {
 	struct pcap_packet_header hdr = {
-		.ts_sec = ts_ms / 1000,
+		.ts_usec = ts_usec,
+		.ts_sec = ts_sec,
 		.incl_len = len,
 		.orig_len = len,
 	};
-
-	/* calculate subseconds away from initialisation */
-	hdr.ts_usec = (ts_ms - (hdr.ts_sec * 1000)) * 1000;
 
 	if (write(fd, &hdr, sizeof(hdr)) != sizeof(hdr)) {
 		return (0);

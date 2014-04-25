@@ -18,7 +18,7 @@
 #define PEAK_STORE_H
 
 unsigned int	peak_store_packet(int, const void *, const unsigned int,
-		    const int64_t);
+		    const int64_t, const int64_t);
 int		peak_store_init(const char *);
 void		peak_store_exit(int);
 

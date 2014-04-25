@@ -49,7 +49,7 @@ test_store(const char *file, const unsigned int *len, const size_t count)
 	for (i = 0; i < count; ++i) {
 		assert(peak_load_packet(trace) == len[i]);
 		assert(peak_store_packet(store, trace->buf, len[i],
-		    trace->ts_ms));
+		    trace->ts_unix.tv_sec, trace->ts_unix.tv_usec));
 	}
 
 	peak_store_exit(store);

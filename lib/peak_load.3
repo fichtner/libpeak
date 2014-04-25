@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd February 1, 2014
+.Dd April 25, 2014
 .Dt PEAK_LOAD 3
 .Os
 .Sh NAME
@@ -90,13 +90,3 @@ and closes the trace file.
 .Xr peak_store 3
 .Sh AUTHORS
 .An Franco Fichtner Aq Mt franco@packetwerk.com
-.Sh CAVEATS
-Millisecond timestamps are normalised to make it possible to run
-numerous traces from different eras in immediate succession.
-Thus the time always runs forward, even when the next trace
-is older than the previous one.
-In this case, time
-.Sq stops
-when the backwards jump occurs and afterwards continues as usual.
-Thus the millisecond timestamp may be used like a monotonic clock.
-The unix timestamp, however, always reflects the correct time.
