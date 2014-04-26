@@ -18,9 +18,9 @@
 #define PEAK_LOAD_H
 
 struct peak_load {
+	struct peak_timeval ts;
 	unsigned int len;
 	unsigned int ll;
-	struct timeval ts_unix;
 	uint8_t buf[32 * 1024];
 };
 

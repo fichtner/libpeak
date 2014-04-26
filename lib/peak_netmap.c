@@ -129,9 +129,8 @@ _peak_netmap_claim(const unsigned int want_sw)
 			packet->data.buf = NETMAP_BUF(ring, idx);
 			packet->data.len = ring->slot[i].len;
 			packet->data.ll = LINKTYPE_ETHERNET;
-			packet->data.ts_ms = (int64_t)ring->ts.tv_sec *
-			    1000 + (int64_t)ring->ts.tv_usec / 1000;
-			packet->data.ts_unix = ring->ts.tv_sec;
+			packet->data.ts.tv_usec = ring->ts.tv_usec;
+			packet->data.ts.tv_sec = ring->ts.tv_sec;
 			packet->data.ifname = dev->ifname;
 
 			return (NETPKT_TO_USER(packet));

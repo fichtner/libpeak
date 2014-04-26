@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd April 25, 2014
+.Dd April 26, 2014
 .Dt PEAK_TIMESLICE 3
 .Os
 .Sh NAME
@@ -25,7 +25,7 @@
 .In peak.h
 .Fn TIMESLICE_INIT CLOCK
 .Fn TIMESLICE_NORMALISE CLOCK TS_SEC
-.Fn TIMESLICE_ADVANCE CLOCK TS_SEC TS_MS
+.Fn TIMESLICE_ADVANCE CLOCK TS_SEC TS_USEC
 .Sh DESCRIPTION
 The
 .Nm peak_timeslice
@@ -38,22 +38,34 @@ switch to happen.
 The
 .Vt timeslice_t
 structure is preloaded with the current time slice's clock using
-several monotonic timestamps and an
+several monotonic timestamps, a
 .Ux
-timestamp.
-Both types are needed, as most timeout functionality needs to run on a
-monotonic clock, while external functionality will need the actual
-time.
+timestamp, as well as a
+.Vt struct peak_timeval
+resembling
+.Vt struct timeval ,
+but with
+.Vt time_t
+set to
+.Vt long long .
+(The current
+.Vt time_t
+will end in 2038.)
+.Pp
+Most timeout functionality needs to run on monotonic clocks,
+while external functionality will need the actual time.
 A
 .Vt struct tm
 for GMT and the local time zone are also provided.
 The structure's layout is as follows:
 .Bd -literal -offset indent
 typedef struct {
-	int64_t offset;
-	int64_t msec;
-	int64_t sec;
-	struct timeval tv;
+	int64_t mono_off;
+	int64_t mono_sec;
+	int64_t mono_msec;
+	int64_t mono_usec;
+	struct peak_timeval tv;
+	time_t time;
 	struct tm local;
 	struct tm gmt;
 } timeslice_t;
@@ -68,23 +80,24 @@ Then,
 is used to adjust the internal monotonic clock to start at zero,
 which is quite handy for initial timeouts in other libraries.
 (Note that seconds are normalised, not sub-seconds.)
+.Pp
 To advance the clocks the caller invokes
 .Fn TIMESLICE_ADVANCE
-once per time slice.
+once per time slice using seconds and subseconds.
 Of course, inside the time slice, there will be no going forward
-in time, but the time slices should be as small as possible anyway.
+in time, but the time slices will be as small as possible anyway.
 A basic loop may look like this:
 .Bd -literal -offset indent
 timeslice_t clock;
 
 TIMESLICE_INIT(&clock)
 
-update_time_values_once(&unix_value, &ms_value);
-TIMESLICE_NORMALISE(&clock, ms_value);
+update_time_values_once(&sec_value, &usec_value);
+TIMESLICE_NORMALISE(&clock, sec_value);
 
 do {
-	update_time_values_once(&unix_value, &ms_value);
-	TIMESLICE_ADVANCE(&clock, unix_value, ms_value);
+	update_time_values_once(&sec_value, &usec_value);
+	TIMESLICE_ADVANCE(&clock, sec_value, usec_value);
 	do_time_slice_work_now(&clock);
 } while (cond);
 .Ed

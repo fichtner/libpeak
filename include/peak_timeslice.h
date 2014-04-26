@@ -19,28 +19,41 @@
 
 #include <time.h>
 
+struct peak_timeval {
+	/* it's bound to happen... */
+	long long tv_sec;
+	long tv_usec;
+};
+
 typedef struct {
-	int64_t offset;
-	int64_t msec;
-	int64_t sec;
-	struct timeval tv;
+	int64_t mono_off;
+	int64_t mono_sec;
+	int64_t mono_msec;
+	int64_t mono_usec;
+	struct peak_timeval tv;
+	time_t time;
 	struct tm local;
 	struct tm gmt;
 } timeslice_t;
 
-#define TIMESLICE_ADVANCE(clock, ts_sec, ts_ms) do {			\
-	(clock)->msec = (ts_ms) - (clock)->offset;			\
-	(clock)->sec = (clock)->msec / 1000;				\
-	if (unlikely((ts_sec) != (clock)->tv.tv_sec)) {			\
-		(clock)->tv.tv_sec = (ts_sec);				\
-		localtime_r(&(clock)->tv.tv_sec, &(clock)->local);	\
-		gmtime_r(&(clock)->tv.tv_sec, &(clock)->gmt);		\
+#define TIMESLICE_ADVANCE(clock, ts_sec, ts_usec) do {			\
+	(clock)->tv.tv_usec = (ts_usec);				\
+	(clock)->tv.tv_sec = (ts_sec);					\
+	(clock)->mono_usec = (ts_sec) * 1000ll * 1000ll + (ts_usec);	\
+	(clock)->mono_msec = (ts_sec) * 1000ll + (ts_usec) / 1000ll;	\
+	(clock)->mono_sec = (ts_sec);					\
+	(clock)->mono_sec -= (clock)->mono_off;				\
+	(clock)->mono_msec -= (clock)->mono_off * 1000ll;		\
+	(clock)->mono_usec -= (clock)->mono_off * 1000ll * 1000ll;	\
+	if (unlikely((ts_sec) != (clock)->time)) {			\
+		(clock)->time = (ts_sec);				\
+		localtime_r(&(clock)->time, &(clock)->local);		\
+		gmtime_r(&(clock)->time, &(clock)->gmt);		\
 	}								\
 } while (0)
 
 #define TIMESLICE_NORMALISE(clock, ts_sec) do {				\
-	(clock)->offset = (ts_sec);					\
-	(clock)->offset *= 1000;					\
+	(clock)->mono_off = (ts_sec);					\
 } while (0)
 
 #define TIMESLICE_INIT(clock) do {					\

@@ -148,8 +148,8 @@ _peak_load_erf(struct _peak_load *self)
 		return;
 	}
 
-	self->data.ts_unix.tv_usec = ERF_USEC(hdr.ts);
-	self->data.ts_unix.tv_sec = ERF_SEC(hdr.ts);
+	self->data.ts.tv_usec = ERF_USEC(hdr.ts);
+	self->data.ts.tv_sec = ERF_SEC(hdr.ts);
 	self->data.len = hdr.wlen;
 }
 
@@ -180,8 +180,8 @@ _peak_load_pcap(struct _peak_load *self)
 		return;
 	}
 
-	self->data.ts_unix.tv_usec = hdr.ts_usec;
-	self->data.ts_unix.tv_sec = hdr.ts_sec;
+	self->data.ts.tv_usec = hdr.ts_usec;
+	self->data.ts.tv_sec = hdr.ts_sec;
 	self->data.len = hdr.incl_len;
 }
 
@@ -222,8 +222,8 @@ _peak_load_pcapng_again:
 
 		ts = (int64_t)pkt.ts_high << 32 | (int64_t)pkt.ts_low;
 
-		self->data.ts_unix.tv_usec = ts % (1000ll * 1000ll);
-		self->data.ts_unix.tv_sec = ts / 1000ll / 1000ll;
+		self->data.ts.tv_usec = ts % (1000ll * 1000ll);
+		self->data.ts.tv_sec = ts / 1000ll / 1000ll;
 		self->data.len = pkt.packetlen;
 
 		break;
@@ -277,8 +277,8 @@ _peak_load_netmon(struct _peak_load *self)
 		return;
 	}
 
-	self->data.ts_unix.tv_usec = NETMON_USEC(hdr.time_stamp_data);
-	self->data.ts_unix.tv_sec = NETMON_SEC(hdr.time_stamp_data) +
+	self->data.ts.tv_usec = NETMON_USEC(hdr.time_stamp_data);
+	self->data.ts.tv_sec = NETMON_SEC(hdr.time_stamp_data) +
 	    self->netmon_time;
 	self->data.len = hdr.original_length;
 }

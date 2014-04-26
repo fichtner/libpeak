@@ -18,11 +18,10 @@
 #define PEAK_NETMAP_H
 
 struct peak_netmap {
+	struct peak_timeval ts;
 	const char *ifname;
 	unsigned int len;
 	unsigned int ll;
-	int64_t ts_ms;
-	time_t ts_unix;
 	void *buf;
 };
 

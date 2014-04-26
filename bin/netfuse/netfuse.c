@@ -75,7 +75,7 @@ main(int argc, char **argv)
 			if (peak_netmap_divert(pkt,
 			    !strcmp(dev0, pkt->ifname) ? dev1 : dev0)) {
 				perr("%lld: dropping packet of size %u\n",
-				    pkt->ts_unix, pkt->len);
+				    pkt->ts.tv_sec, pkt->len);
 				peak_netmap_drop(pkt);
 			}
 		}

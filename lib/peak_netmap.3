@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd February 3, 2014
+.Dd April 26, 2014
 .Dt PEAK_NETMAP 3
 .Os
 .Sh NAME
@@ -111,11 +111,10 @@ the claimed packet.
 The structure is defined as follows:
 .Bd -literal -offset indent
 struct peak_netmap {
+	struct peak_timeval ts;
 	const char *ifname;
 	unsigned int len;
 	unsigned int ll;
-	int64_t ts_ms;
-	time_t ts_unix;
 	void *buf;
 };
 .Ed

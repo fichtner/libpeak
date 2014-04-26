@@ -183,12 +183,11 @@ main(int argc, char **argv)
 	TIMESLICE_INIT(&timer);
 
 	if (peak_load_packet(trace)) {
-		TIMESLICE_NORMALISE(&timer, trace->ts_unix.tv_sec);
+		TIMESLICE_NORMALISE(&timer, trace->ts.tv_sec);
 
 		do {
-			TIMESLICE_ADVANCE(&timer, trace->ts_unix.tv_sec,
-			    trace->ts_unix.tv_sec * 1000 +
-			    trace->ts_unix.tv_usec / 1000);
+			TIMESLICE_ADVANCE(&timer, trace->ts.tv_sec,
+			    trace->ts.tv_usec);
 			peek_packet(peek, &timer, trace->buf, trace->len,
 			    trace->ll);
 		} while (peak_load_packet(trace));
