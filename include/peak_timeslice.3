@@ -13,19 +13,19 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd April 26, 2014
+.Dd April 27, 2014
 .Dt PEAK_TIMESLICE 3
 .Os
 .Sh NAME
-.Nm TIMESLICE_INIT ,
-.Nm TIMESLICE_NORMALISE ,
-.Nm TIMESLICE_ADVANCE
-.Nd simple clock service
+.Nm TIMESLICE_ADVANCE ,
+.Nm TIMESLICE_CALIBRATE ,
+.Nm TIMESLICE_INIT
+.Nd clock service
 .Sh SYNOPSIS
 .In peak.h
+.Fn TIMESLICE_ADVANCE CLOCK TIMEVAL
+.Fn TIMESLICE_CALIBRATE CLOCK TIMEVAL
 .Fn TIMESLICE_INIT CLOCK
-.Fn TIMESLICE_NORMALISE CLOCK TS_SEC
-.Fn TIMESLICE_ADVANCE CLOCK TS_SEC TS_USEC
 .Sh DESCRIPTION
 The
 .Nm peak_timeslice
@@ -60,14 +60,16 @@ for GMT and the local time zone are also provided.
 The structure's layout is as follows:
 .Bd -literal -offset indent
 typedef struct {
-	int64_t mono_off;
-	int64_t mono_sec;
-	int64_t mono_msec;
-	int64_t mono_usec;
 	struct peak_timeval tv;
-	time_t time;
+	int64_t mono_usec_off;
+	int64_t mono_msec_off;
+	int64_t mono_sec_off;
+	int64_t mono_usec;
+	int64_t mono_msec;
+	int64_t mono_sec;
 	struct tm local;
 	struct tm gmt;
+	time_t time;
 } timeslice_t;
 .Ed
 .Pp
@@ -76,7 +78,7 @@ will prepare a
 .Vt timeslice_t
 for operation.
 Then,
-.Fn TIMESLICE_NORMALISE
+.Fn TIMESLICE_CALIBRATE
 is used to adjust the internal monotonic clock to start at zero,
 which is quite handy for initial timeouts in other libraries.
 (Note that seconds are normalised, not sub-seconds.)
@@ -88,16 +90,17 @@ Of course, inside the time slice, there will be no going forward
 in time, but the time slices will be as small as possible anyway.
 A basic loop may look like this:
 .Bd -literal -offset indent
+struct peak_timeval now;
 timeslice_t clock;
 
 TIMESLICE_INIT(&clock)
 
-update_time_values_once(&sec_value, &usec_value);
-TIMESLICE_NORMALISE(&clock, sec_value);
+update_time_values_once(&now);
+TIMESLICE_CALIBRATE(&clock, &now);
 
 do {
-	update_time_values_once(&sec_value, &usec_value);
-	TIMESLICE_ADVANCE(&clock, sec_value, usec_value);
+	update_time_values_once(&now);
+	TIMESLICE_ADVANCE(&clock, &now);
 	do_time_slice_work_now(&clock);
 } while (cond);
 .Ed

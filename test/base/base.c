@@ -514,24 +514,71 @@ test_hash(void)
 static void
 test_time(void)
 {
+	struct peak_timeval stackptr(now);
 	timeslice_t stackptr(timer);
 
 	TIMESLICE_INIT(timer);
 
-	TIMESLICE_NORMALISE(timer, 42);
-	TIMESLICE_ADVANCE(timer, 42, 15003);
+	now->tv_sec = 42;
+	now->tv_usec = 0;
+	TIMESLICE_CALIBRATE(timer, now);
 
-	assert(timer->mono_off == 42);
+	now->tv_sec = 42;
+	now->tv_usec = 15003;
+	TIMESLICE_ADVANCE(timer, now);
 	assert(timer->mono_sec == 0);
 	assert(timer->mono_msec == 15);
 	assert(timer->mono_usec == 15003);
 
-	TIMESLICE_ADVANCE(timer, 45, 18001);
-
-	assert(timer->mono_off == 42);
+	now->tv_sec = 45;
+	now->tv_usec = 18001;
+	TIMESLICE_ADVANCE(timer, now);
 	assert(timer->mono_sec == 3);
 	assert(timer->mono_msec == 3018);
 	assert(timer->mono_usec == 3018001);
+
+	/*
+	 * Going backwards in time is evil.  We avoid
+	 * it by stopping time and resuming in the next
+	 * slice, given the time is moving forward again.
+	 */
+
+	now->tv_sec = 44;
+	now->tv_usec = 842;
+	TIMESLICE_ADVANCE(timer, now);
+	assert(timer->mono_sec == 3);
+	assert(timer->mono_msec == 3018);
+	assert(timer->mono_usec == 3018001);
+
+	now->tv_sec = 43;
+	now->tv_usec = 842;
+	TIMESLICE_ADVANCE(timer, now);
+	assert(timer->mono_sec == 3);
+	assert(timer->mono_msec == 3018);
+	assert(timer->mono_usec == 3018001);
+
+	now->tv_sec = 44;
+	now->tv_usec = 845;
+	TIMESLICE_ADVANCE(timer, now);
+	assert(timer->mono_sec == 4);
+	assert(timer->mono_msec == 4018);
+	assert(timer->mono_usec == 4018004);
+
+	/* Subseconds have the same mechanic. */
+
+	now->tv_sec = 44;
+	now->tv_usec = 840;
+	TIMESLICE_ADVANCE(timer, now);
+	assert(timer->mono_sec == 4);
+	assert(timer->mono_msec == 4018);
+	assert(timer->mono_usec == 4018004);
+
+	now->tv_sec = 44;
+	now->tv_usec = 841;
+	TIMESLICE_ADVANCE(timer, now);
+	assert(timer->mono_sec == 4);
+	assert(timer->mono_msec == 4018);
+	assert(timer->mono_usec == 4018005);
 }
 
 int
