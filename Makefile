@@ -1,2 +1,2 @@
-.include "makefile.inc"
+.include "common.mk"
 .include <bsd.subdir.mk>
