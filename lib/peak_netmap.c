@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2013-2014 Franco Fichtner <franco@packetwerk.com>
+ * Copyright (c) 2014 Alexey Saushev <alexey@packetwerk.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,43 +15,110 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+/*
+ * Copyright (C) 2012 Luigi Rizzo. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *   1. Redistributions of source code must retain the above copyright
+ *      notice, this list of conditions and the following disclaimer.
+ *   2. Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ */
+
+#ifdef __FreeBSD__
+
 #include <peak.h>
 
-#ifdef __linux__
-#undef __unused	/* clashes with struct member in <sys/sysctl.h> */
-#endif /* __linux__ */
+#define NETMAP_DEBUG
 
-#include "../contrib/libnetmap/nm_util.h"
+/* debug support */
+#ifdef NETMAP_DEBUG
+#define D(format, ...)					\
+	fprintf(stderr, "%s [%d] " format "\n",		\
+	__FUNCTION__, __LINE__, ##__VA_ARGS__)
+#else /* !NETMAP_DEBUG */
+#define D(format, ...)	do {} while(0)
+#endif /* NETMAP_DEBUG */
+
+#include <errno.h>
+#include <signal.h>	/* signal */
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdbool.h>
+#include <inttypes.h>	/* PRI* macros */
+#include <string.h>	/* strcmp */
+#include <fcntl.h>	/* open */
+#include <unistd.h>	/* close */
+#include <ifaddrs.h>	/* getifaddrs */
+
+#include <sys/mman.h>	/* PROT_* */
+#include <sys/ioctl.h>	/* ioctl */
+#include <sys/poll.h>
+#include <sys/socket.h>	/* sockaddr.. */
+#include <arpa/inet.h>	/* ntohs */
+#include <sys/param.h>
+#include <sys/sysctl.h>	/* sysctl */
+#include <sys/time.h>	/* timersub */
+
+#include <net/ethernet.h>
+#include <net/if.h>	/* ifreq */
+#include <netinet/in.h>
+#include <netinet/if_ether.h>
+#include <netinet/in_systm.h>
+#include <net/netmap.h>
+#include <net/netmap_user.h>
+#include <netinet/ip.h>
+
+#include <machine/param.h>
+
+#include <pthread_np.h> /* pthread w/ affinity */
+#include <sys/cpuset.h> /* cpu_set */
+#include <net/if_dl.h>  /* LLADDR */
 
 #define NETMAP_MAX	64
 
-#define NETMAP_LOCK() do {						\
-	pthread_mutex_lock(&netmap_mutex);				\
-} while (0)
-
-#define NETMAP_UNLOCK() do {						\
-	pthread_mutex_unlock(&netmap_mutex);				\
-} while (0)
-
-#define NETPKT_FROM_USER(x)	(((struct _peak_netmap *)((x) + 1)) - 1)
-#define NETPKT_PUT(x)		prealloc_put(&self->pkt_pool, x)
-#define NETPKT_GET(x)		prealloc_get(&self->pkt_pool)
-#define NETPKT_TO_USER(x)	&(x)->data
-
-#define NETMAP_PUT(x)		prealloc_put(&self->dev_pool, x)
-#define NETMAP_COUNT()		prealloc_used(&self->dev_pool)
-#define NETMAP_GET()		prealloc_get(&self->dev_pool)
+/* Allow building on unmodified FreeBSD: */
+#if NETMAP_API < 11
+/* Use stubs. */
+#else
 
 static pthread_mutex_t netmap_mutex = PTHREAD_MUTEX_INITIALIZER;
 
+struct peak_netmap_dev {
+	char ifname[IFNAMSIZ];
+	int fd;
+	char *mem;                      /* userspace mmap address */
+	u_int memsize;
+	u_int queueid;
+	u_int begin, end;               /* first..last+1 rings to check */
+	struct netmap_if *nifp;
+	struct netmap_ring *tx, *rx;    /* shortcuts */
+};
+
 static struct peak_netmaps {
+	unsigned int lastdev;
+	struct peak_netmap_dev dev[NETMAP_MAX];
+
 	prealloc_t pkt_pool;
-	prealloc_t dev_pool;
 	unsigned int busy;
 	unsigned int reserved;
-	struct my_ring *dev[NETMAP_MAX];
 	struct pollfd fd[NETMAP_MAX];
-} netmap_self;
+} netmap_self = {.lastdev = 0};
 
 static struct peak_netmaps *const self = &netmap_self;	/* global ref */
 
@@ -70,17 +138,186 @@ struct _peak_netmap {
 #define NR_FOREACH_RX(r, i, d, s)	NR_FOREACH(RX, r, i, d, s)
 #define NR_FOREACH_TX(r, i, d, s)	NR_FOREACH(TX, r, i, d, s)
 
+
+static inline void
+netmap_lock()
+{
+	pthread_mutex_lock(&netmap_mutex);
+}
+
+static inline void
+netmap_unlock()
+{
+	pthread_mutex_unlock(&netmap_mutex);
+}
+
+static inline struct _peak_netmap *
+netpkt_from_user(struct peak_netmap *x)
+{
+	return (((struct _peak_netmap *)((x) + 1)) - 1);
+}
+
+static inline void
+netpkt_put(struct _peak_netmap *x)
+{
+	prealloc_put(&self->pkt_pool, x);
+}
+
+static inline struct _peak_netmap *
+netpkt_get()
+{
+	return prealloc_get(&self->pkt_pool);
+}
+
+static inline void *
+netpkt_to_user(struct _peak_netmap *x)
+{
+	return &(x)->data;
+}
+
+/* Manage underlying pool resources */
+static inline void
+allocate_pool()
+{
+	bzero(self, sizeof(*self));
+
+	prealloc_init(&self->pkt_pool, NETMAP_MAX,
+		      sizeof(struct _peak_netmap));
+	self->lastdev = 0;
+}
+
+static inline void
+free_pool()
+{
+	prealloc_exit(&self->pkt_pool);
+}
+
+static int
+_peak_netmap_init(struct peak_netmap_dev *me)
+{
+	uint16_t ringid = 0;
+	int err;
+	struct nmreq req;
+
+	me->fd = open("/dev/netmap", O_RDWR);
+	if (me->fd < 0) {
+		D("Unable to open /dev/netmap");
+		return (-1);
+	}
+
+	/* Put the interface into netmap mode: */
+	bzero(&req, sizeof(req));
+	req.nr_version = NETMAP_API;
+	req.nr_ringid = 0;
+	req.nr_flags = NR_REG_ALL_NIC;
+	strlcpy(req.nr_name, me->ifname, sizeof(req.nr_name));
+	err = ioctl(me->fd, NIOCREGIF, &req);
+	if (err) {
+		D("Unable to register %s", me->ifname);
+		goto error;
+	}
+	me->memsize = req.nr_memsize;
+	D("memsize is %d MB", me->memsize >> 20);
+
+	/* Map associated memory: */
+	if (me->mem == NULL) {
+		me->mem = mmap(0, me->memsize, PROT_WRITE | PROT_READ, MAP_SHARED, me->fd, 0);
+		if (me->mem == MAP_FAILED) {
+			D("Unable to mmap");
+			me->mem = NULL;
+			goto error;
+		}
+	}
+
+
+	/* Set the operating mode. */
+	if (ringid != NETMAP_SW_RING) {
+		const unsigned int if_flags = IFF_UP | IFF_PPROMISC;
+		struct ifreq ifr;
+
+		bzero(&ifr, sizeof(ifr));
+		strncpy(ifr.ifr_name, me->ifname, sizeof(ifr.ifr_name));
+
+		if (ioctl(me->fd, SIOCGIFFLAGS, &ifr)) {
+			D("ioctl error on SIOCGIFFLAGS");
+			goto error;
+		}
+
+		ifr.ifr_flagshigh |= if_flags >> 16;
+		ifr.ifr_flags |= if_flags & 0xffff;
+
+		if (ioctl(me->fd, SIOCSIFFLAGS, &ifr)) {
+			D("ioctl error on SIOCSIFFLAGS");
+			goto error;
+		}
+
+		bzero(&ifr, sizeof(ifr));
+		strncpy(ifr.ifr_name, me->ifname, sizeof(ifr.ifr_name));
+
+		if (ioctl(me->fd, SIOCGIFCAP, &ifr)) {
+			D("ioctl error on SIOCGIFCAP");
+			goto error;
+		}
+
+		ifr.ifr_reqcap = ifr.ifr_curcap;
+		ifr.ifr_reqcap &= ~(IFCAP_HWCSUM | IFCAP_TSO | IFCAP_TOE);
+
+		if (ioctl(me->fd, SIOCSIFCAP, &ifr)) {
+			D("ioctl error on SIOCSIFCAP");
+			goto error;
+		}
+	}
+
+	me->nifp = NETMAP_IF(me->mem, req.nr_offset);
+	me->queueid = ringid;
+
+	switch (req.nr_flags) {
+	case NR_REG_DEFAULT:
+		abort();
+	case NR_REG_ALL_NIC: /* our only supported case for now */
+		me->begin = 0;
+		me->end = req.nr_rx_rings; // XXX max of the two
+		me->tx = NETMAP_TXRING(me->nifp, 0);
+		me->rx = NETMAP_RXRING(me->nifp, 0);
+		break;
+	case NR_REG_SW: /* if (ringid & NETMAP_SW_RING) - ? */
+		me->begin = req.nr_rx_rings;
+		me->end = me->begin + 1;
+		me->tx = NETMAP_TXRING(me->nifp, req.nr_tx_rings);
+		me->rx = NETMAP_RXRING(me->nifp, req.nr_rx_rings);
+		break;
+	case NR_REG_NIC_SW: /* ? */
+		break;
+	case NR_REG_ONE_NIC: /* if (ringid & NETMAP_HW_RING) - ? */
+		D("XXX check multiple threads");
+		me->begin = ringid & NETMAP_RING_MASK;
+		me->end = me->begin + 1;
+		me->tx = NETMAP_TXRING(me->nifp, me->begin);
+		me->rx = NETMAP_RXRING(me->nifp, me->begin);
+		break;
+	case NR_REG_PIPE_MASTER:
+	case NR_REG_PIPE_SLAVE:
+		break;
+	default: /* broken */
+		abort();
+	};
+	return (0);
+error:
+	close(me->fd);
+	return -1;
+}
+
 static inline unsigned int
 peak_netmap_find(const char *ifname)
 {
 	unsigned int i;
 
 	if (!ifname) {
-		return (NETMAP_COUNT());
+		return self->lastdev;
 	}
 
-	for (i = 0; i < NETMAP_COUNT(); ++i) {
-		if (!strcmp(ifname, self->dev[i]->ifname)) {
+	for (i = 0; i < self->lastdev; ++i) {
+		if (!strcmp(ifname, self->dev[i].ifname)) {
 			break;
 		}
 	}
@@ -92,21 +329,21 @@ static struct peak_netmap *
 _peak_netmap_claim(const unsigned int want_sw)
 {
 	struct _peak_netmap *packet;
+	struct peak_netmap_dev *dev;
 	struct netmap_ring *ring;
-	struct my_ring *dev;
 	unsigned int j, rx;
 
-	for (j = 0; j < NETMAP_COUNT(); ++j) {
-		dev = self->dev[j];
+	for (j = 0; j < self->lastdev; ++j) {
+		dev = &self->dev[j];
 
 		NR_FOREACH_RX(ring, rx, dev, want_sw) {
 			unsigned int i, idx;
 
-			if (!ring->avail) {
+			if (nm_ring_empty(ring)) {
 				continue;
 			}
 
-			packet = NETPKT_GET();
+			packet = netpkt_get();
 			if (!packet) {
 				alert("netmap packet pool empty\n");
 				return (NULL);
@@ -133,7 +370,7 @@ _peak_netmap_claim(const unsigned int want_sw)
 			packet->data.ts.tv_sec = ring->ts.tv_sec;
 			packet->data.ifname = dev->ifname;
 
-			return (NETPKT_TO_USER(packet));
+			return (netpkt_to_user(packet));
 		}
 	}
 
@@ -143,8 +380,8 @@ _peak_netmap_claim(const unsigned int want_sw)
 struct peak_netmap *
 peak_netmap_claim(int timeout, const unsigned int want_sw)
 {
+	struct peak_netmap_dev *dev;
 	struct peak_netmap *packet;
-	struct my_ring *dev;
 	struct pollfd *fd;
 	unsigned int i;
 	int ret;
@@ -165,26 +402,26 @@ peak_netmap_claim(int timeout, const unsigned int want_sw)
 	 * timeout value (see poll(3)'s timeout parameter).
 	 */
 
-	for (i = 0; i < NETMAP_COUNT(); ++i) {
+	for (i = 0; i < self->lastdev; ++i) {
 		fd = &self->fd[i];
 
 		fd->events = POLLIN;
 		fd->revents = 0;
 	}
 
-	ret = poll(self->fd, NETMAP_COUNT(), timeout);
+	ret = poll(self->fd, self->lastdev, timeout);
 	if (ret <= 0) {
 		/* error or timeout */
 		return (NULL);
 	}
 
-	for (i = 0; i < NETMAP_COUNT(); ++i) {
-		dev = self->dev[i];
+	for (i = 0; i < self->lastdev; ++i) {
+		dev = &self->dev[i];
 		fd = &self->fd[i];
 
 		if (fd->revents & POLLERR) {
-			alert("error on %s, rxcur %d@%d", dev->ifname,
-			    dev->rx->avail, dev->rx->cur);
+			alert("error on %s, rxcur %d/%d", dev->ifname,
+			    dev->rx->head, dev->rx->cur);
 		}
 
 		if (fd->revents & POLLIN) {
@@ -202,7 +439,7 @@ peak_netmap_claim(int timeout, const unsigned int want_sw)
 unsigned int
 peak_netmap_forward(struct peak_netmap *u_packet)
 {
-	struct _peak_netmap *packet = NETPKT_FROM_USER(u_packet);
+	struct _peak_netmap *packet = netpkt_from_user(u_packet);
 	struct netmap_ring *source = packet->ring;
 	struct netmap_slot *slot = &source->slot[packet->i];
 
@@ -210,11 +447,10 @@ peak_netmap_forward(struct peak_netmap *u_packet)
 	slot->flags |= NS_FORWARD;
 
 	/* drop kernel reference */
-	source->cur = NETMAP_RING_NEXT(source, packet->i);
-	--source->avail;
+	source->head = source->cur = nm_ring_next(source, source->cur);
 
 	/* drop userland reference */
-	NETPKT_PUT(packet);
+	netpkt_put(packet);
 
 	return (0);
 }
@@ -222,7 +458,7 @@ peak_netmap_forward(struct peak_netmap *u_packet)
 unsigned int
 peak_netmap_drop(struct peak_netmap *u_packet)
 {
-	struct _peak_netmap *packet = NETPKT_FROM_USER(u_packet);
+	struct _peak_netmap *packet = netpkt_from_user(u_packet);
 	struct netmap_ring *source = packet->ring;
 	struct netmap_slot *slot = &source->slot[packet->i];
 
@@ -230,11 +466,10 @@ peak_netmap_drop(struct peak_netmap *u_packet)
 	slot->flags &= ~NS_FORWARD;
 
 	/* drop kernel reference */
-	source->cur = NETMAP_RING_NEXT(source, packet->i);
-	--source->avail;
+	source->head = source->cur = nm_ring_next(source, source->cur);
 
 	/* drop userland reference */
-	NETPKT_PUT(packet);
+	netpkt_put(packet);
 
 	return (0);
 }
@@ -243,10 +478,10 @@ unsigned int
 peak_netmap_divert(struct peak_netmap *u_packet, const char *ifname)
 {
 	/* assume the user is sane enough to not pass NULL */
-	struct _peak_netmap *packet = NETPKT_FROM_USER(u_packet);
+	struct _peak_netmap *packet = netpkt_from_user(u_packet);
 	struct netmap_ring *source = packet->ring;
+	struct peak_netmap_dev *dev;
 	struct netmap_ring *drain;
-	struct my_ring *dev;
 	unsigned int i, tx;
 
 	if (!source) {
@@ -255,18 +490,18 @@ peak_netmap_divert(struct peak_netmap *u_packet, const char *ifname)
 	}
 
 	i = peak_netmap_find(ifname);
-	if (i >= NETMAP_COUNT()) {
+	if (i >= self->lastdev) {
 		/* not found means error */
 		return (1);
 	}
 
-	dev = self->dev[i];
+	dev = &self->dev[i];
 
 	NR_FOREACH_TX(drain, tx, dev, 0) {
 		struct netmap_slot *rs, *ts;
 		uint32_t pkt;
 
-		if (!drain->avail) {
+		if (nm_ring_empty(drain)) {
 			continue;
 		}
 
@@ -288,13 +523,10 @@ peak_netmap_divert(struct peak_netmap *u_packet, const char *ifname)
 		/* don't forward to host anymore */
 		rs->flags &= ~NS_FORWARD;
 
-		--source->avail;
-		--drain->avail;
+		source->head = source->cur = nm_ring_next(source, source->cur);
+		drain->head = drain->cur = nm_ring_next(drain, drain->cur);
 
-		source->cur = NETMAP_RING_NEXT(source, packet->i);
-		drain->cur = NETMAP_RING_NEXT(drain, i);
-
-		NETPKT_PUT(packet);
+		netpkt_put(packet);
 
 		return (0);
 	}
@@ -304,7 +536,7 @@ peak_netmap_divert(struct peak_netmap *u_packet, const char *ifname)
 }
 
 static void
-peak_netmap_configure(struct my_ring *dev)
+peak_netmap_configure(struct peak_netmap_dev *dev)
 {
 	struct netmap_ring *ring;
 	unsigned int i;
@@ -325,59 +557,42 @@ peak_netmap_configure(struct my_ring *dev)
 unsigned int
 peak_netmap_attach(const char *ifname)
 {
-	struct my_ring **pdev = NULL;
-	struct my_ring *dev = NULL;
-	struct pollfd *pfd = NULL;
-	unsigned int i;
+	unsigned int devno;
 
-	NETMAP_LOCK();
+	netmap_lock();
 
 	/* lazy init */
-	if (!NETMAP_COUNT()) {
-		bzero(self, sizeof(*self));
+	if (self->lastdev == 0)
+		allocate_pool();
 
-		prealloc_init(&self->pkt_pool, NETMAP_MAX,
-		    sizeof(struct _peak_netmap));
-		prealloc_init(&self->dev_pool, NETMAP_MAX,
-		    sizeof(struct my_ring));
-	}
-
-	i = peak_netmap_find(ifname);
-	if (i < NETMAP_COUNT()) {
-		NETMAP_UNLOCK();
+	devno = peak_netmap_find(ifname);
+	if (devno < self->lastdev) {
+		netmap_unlock();
 		alert("netmap interface %s already attached\n");
 		return (1);
 	}
 
-	dev = NETMAP_GET();
-	if (!dev) {
-		NETMAP_UNLOCK();
+	if (self->lastdev >= sizeof(self->dev)/sizeof(self->dev[0])) {
+		netmap_unlock();
 		alert("netmap interface capacity reached\n");
 		return (1);
 	}
 
-	bzero(dev, sizeof(*dev));
+	devno = self->lastdev++; /* allocate it */
 
-	pdev = &self->dev[NETMAP_COUNT() - 1];
-	pfd = &self->fd[NETMAP_COUNT() - 1];
-
-	dev->ifname = strdup(ifname);
-
-	if (netmap_open(dev, 0, 1)) {
-		free(dev->ifname);
-		NETMAP_PUT(dev);
-		NETMAP_UNLOCK();
+	bzero(&self->dev[devno], sizeof(self->dev[devno]));
+	strlcpy(self->dev[devno].ifname, ifname, sizeof(self->dev[devno].ifname));
+	if (_peak_netmap_init(&self->dev[devno])) {
+		self->lastdev--; /* deallocate it */
+		netmap_unlock();
 		alert("could not open netmap device %s\n", ifname);
 		return (1);
 	}
 
-	peak_netmap_configure(dev);
+	peak_netmap_configure(&self->dev[devno]);
+	self->fd[devno].fd = self->dev[devno].fd;
 
-	*pdev = dev;
-
-	pfd->fd = dev->fd;
-
-	NETMAP_UNLOCK();
+	netmap_unlock();
 
 	return (0);
 }
@@ -385,46 +600,37 @@ peak_netmap_attach(const char *ifname)
 unsigned int
 peak_netmap_detach(const char *ifname)
 {
-	struct my_ring *dev = NULL;
-	struct my_ring **pdev = NULL;
-	struct pollfd *pfd = NULL;
-	unsigned int i;
+	unsigned int devno;
 
-	NETMAP_LOCK();
+	netmap_lock();
 
-	i = peak_netmap_find(ifname);
-	if (i >= NETMAP_COUNT()) {
-		NETMAP_UNLOCK();
+	devno = peak_netmap_find(ifname);
+	if (devno >= self->lastdev) {
+		netmap_unlock();
 		alert("netmap interface %s not attached\n", ifname);
 		return (1);
 	}
 
-	pdev = &self->dev[i];
-	pfd = &self->fd[i];
-
-	dev = *pdev;
-
-	free(dev->ifname);
-	netmap_close(dev);
-	NETMAP_PUT(dev);
-
-	if (i < NETMAP_COUNT()) {
-		/* reshuffle list to make it linear */
-		*pdev = self->dev[NETMAP_COUNT()];
-		self->dev[NETMAP_COUNT()] = NULL;
-
-		/* rebuild pollfd list as well */
-		memcpy(pfd, &self->fd[NETMAP_COUNT()], sizeof(*pfd));
-		bzero(&self->fd[NETMAP_COUNT()], sizeof(*pfd));
+	if (self->dev[devno].mem) {
+		munmap(self->dev[devno].mem, self->dev[devno].memsize);
 	}
+
+	close(self->dev[devno].fd);
+
+	if (devno < self->lastdev - 1) {
+		/* Replace the dead element with the last
+		   element in the list to fill the hole in */
+		self->dev[devno] = self->dev[self->lastdev - 1];
+		self->fd[devno] = self->fd[self->lastdev - 1];
+	};
+
+	self->lastdev--;
 
 	/* lazy exit */
-	if (!NETMAP_COUNT()) {
-		prealloc_exit(&self->pkt_pool);
-		prealloc_exit(&self->dev_pool);
-	}
+	if (self->lastdev == 0)
+		free_pool();
 
-	NETMAP_UNLOCK();
+	netmap_unlock();
 
 	return (0);
 }
@@ -432,11 +638,14 @@ peak_netmap_detach(const char *ifname)
 void
 peak_netmap_lock(void)
 {
-	NETMAP_LOCK();
+	netmap_lock();
 }
 
 void
 peak_netmap_unlock(void)
 {
-	NETMAP_UNLOCK();
+	netmap_unlock();
 }
+
+#endif
+#endif /* __FreeBSD__ */

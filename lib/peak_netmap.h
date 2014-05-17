@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2013-2014 Franco Fichtner <franco@packetwerk.com>
+ * Copyright (c) 2014 Alexey Saushev <alexey@packetwerk.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -17,6 +18,11 @@
 #ifndef PEAK_NETMAP_H
 #define PEAK_NETMAP_H
 
+#ifdef __FreeBSD__
+#include <net/if.h>
+#include <net/netmap.h>
+#endif /* __FreeBSD__ */
+
 struct peak_netmap {
 	struct peak_timeval ts;
 	const char *ifname;
@@ -24,6 +30,8 @@ struct peak_netmap {
 	unsigned int ll;
 	void *buf;
 };
+
+#if defined(__FreeBSD__) && defined(NETMAP_API) && (NETMAP_API >= 11)
 
 unsigned int		 peak_netmap_divert(struct peak_netmap *,
 			     const char *);
@@ -34,5 +42,18 @@ unsigned int		 peak_netmap_attach(const char *);
 unsigned int		 peak_netmap_detach(const char *);
 void			 peak_netmap_unlock(void);
 void			 peak_netmap_lock(void);
+
+#else /* !__FreeBSD__ */
+
+#define peak_netmap_divert(x, y)	1
+#define peak_netmap_claim(x, y)		NULL
+#define peak_netmap_forward(x)		do { (void)(x); } while (0)
+#define peak_netmap_drop(x)		do { (void)(x); } while (0)
+#define peak_netmap_attach(x)		1
+#define peak_netmap_detach(x)		do { (void)(x); } while (0)
+#define peak_netmap_unlock()		do { } while (0)
+#define peak_netmap_lock()		do { } while (0)
+
+#endif /* __FreeBSD__ */
 
 #endif /* !PEAK_NETMAP_H */
