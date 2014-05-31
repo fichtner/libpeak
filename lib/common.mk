@@ -16,6 +16,3 @@ CFLAGS+=	-Wall -Wextra -Werror
 CFLAGS+=	-I$(BASEDIR)/include -I$(BASEDIR)/lib
 
 LDADD=		-lc -pthread
-LDADD+=		$(BASEDIR)/contrib/libnetmap/libnetmap.a
-
-DPADD=		$(BASEDIR)/contrib/libnetmap/libnetmap.a

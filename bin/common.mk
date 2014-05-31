@@ -1,2 +1,2 @@
-SUBDIR+=	netfuse
-SUBDIR+=	peek
+SUBDIR+=netfuse
+SUBDIR+=peek

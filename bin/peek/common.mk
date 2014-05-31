@@ -1,7 +1,7 @@
 PROG=		peek
 SRCS=		peek.c
 
-BINDIR=		/usr/bin
+BINDIR=		/usr/local/sbin
 
 CFLAGS=		-g -m64 -std=gnu99
 CFLAGS+=	-Wall -Wextra -Werror
