@@ -25,17 +25,6 @@
 extern int _peak_bug_priority;
 extern int _peak_log_priority;
 
-#ifdef __linux__
-#define asprintf(ptr, fmt, args...) ({					\
-	int _ret = -1;							\
-	*(ptr) = strdup("XXX");						\
-	if (*(ptr)) {							\
-		_ret = 0;						\
-	}								\
-	_ret;								\
-})
-#endif /* __linux__ */
-
 static inline void
 _peak_print(FILE *stream, const char *message, ...)
 {
