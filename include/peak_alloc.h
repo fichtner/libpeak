@@ -258,9 +258,8 @@ peak_malign(size_t count, size_t size)
 		return (NULL);
 	}
 
-	posix_memalign(&ptr, ALLOC_CACHELINE,
-	    ALLOC_CACHEALIGN(size) + ALLOC_PAD(malign));
-	if (!ptr) {
+	if (posix_memalign(&ptr, ALLOC_CACHELINE,
+	    ALLOC_CACHEALIGN(size) + ALLOC_PAD(malign))) {
 		return (NULL);
 	}
 
