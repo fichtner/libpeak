@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2012-2013 Franco Fichtner <franco@packetwerk.com>
+.\" Copyright (c) 2012-2014 Franco Fichtner <franco@packetwerk.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd November 6, 2013
+.Dd May 31, 2014
 .Dt PEAK_ALLOC 3
 .Os
 .Sh NAME
@@ -24,9 +24,7 @@
 .Nm malloc ,
 .Nm mcheck ,
 .Nm realloc ,
-.Nm reallocf ,
-.Nm zalign ,
-.Nm zalloc
+.Nm reallocf
 .Nd memory allocation
 .Sh SYNOPSIS
 .In peak.h
@@ -37,7 +35,7 @@
 .Ft void
 .Fn free "void *ptr"
 .Ft void *
-.Fn malign "size_t size"
+.Fn malign "size_t count" "size_t size"
 .Ft void *
 .Fn malloc "size_t size"
 .Ft void
@@ -46,10 +44,6 @@
 .Fn realloc "void *ptr" "size_t size"
 .Ft void *
 .Fn reallocf "void *ptr" "size_t size"
-.Ft void *
-.Fn zalign "size_t size"
-.Ft void *
-.Fn zalloc "size_t size"
 .Sh DESCRIPTION
 The
 .Nm peak_alloc
@@ -59,32 +53,21 @@ They wrap around
 and
 .Xr free 3 ,
 and provide better inline consistency checks.
-They can detect simple buffer over- and underflows and also provide
-on demand checks via the
+They can detect simple buffer over- and underflows on
+.Xr free 3 ;
+and also provide runtime checking via the
 .Fn mcheck
 function.
+The wrapper can be disabled by defining
+.Dv WANT_UNGUARDED
+prior to including
+.In peak.h .
 .Pp
 The
 .Fn malloc
 function allocates
 .Va size
 bytes of memory and returns a pointer to the allocated memory.
-.Pp
-The
-.Fn malign
-function allocates
-.Va size
-bytes of memory aligned to
-.Dv ALLOC_CACHELINE
-(64 bytes) and returns a pointer to the allocated memory.
-It can be used to shield against cacheline bouncing, but you should
-really know what you are doing.
-In case you wonder, this function
-wraps around
-.Xr posix_memalign 3 .
-The
-.Fn zalign
-function returns a pointer to the allocated, zero-filled memory instead.
 .Pp
 The
 .Fn calloc
@@ -94,12 +77,20 @@ objects that are
 .Va size
 bytes of memory each and returns a pointer to the allocated memory.
 The allocated memory is filled with bytes of value zero.
-As a close friend, the
-.Fn zalloc
-function only takes the
+.Pp
+The
+.Fn malign
+function allocates
+.Va count
+elements of
 .Va size
-argument, but will also return a pointer to the allocated,
-zero-filled memory.
+bytes of memory aligned to
+.Dv ALLOC_CACHELINE
+(64 bytes) and returns a pointer to the allocated memory.
+It can be used to shield against cacheline bouncing.
+The function, unlike
+.Xr calloc 3 ,
+does not zero the allocated memory.
 .Pp
 The
 .Fn realloc
@@ -162,10 +153,8 @@ If successful,
 .Fn malign ,
 .Fn malloc ,
 .Fn realloc ,
-.Fn reallocf ,
-.Fn zalign ,
 and
-.Fn zalloc
+.Fn reallocf
 functions return a pointer to the allocated memory.
 If there is an error, they return
 .Dv NULL .

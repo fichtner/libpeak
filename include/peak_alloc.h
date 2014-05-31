@@ -112,6 +112,11 @@ peak_malloc(size_t size)
 		return (NULL);
 	}
 
+	if (size > SIZE_MAX - ALLOC_PAD(malloc)) {
+		/* do not overflow */
+		return (NULL);
+	}
+
 	ptr = malloc(size + ALLOC_PAD(malloc));
 	if (!ptr) {
 		return (NULL);
@@ -120,21 +125,30 @@ peak_malloc(size_t size)
 	return (_peak_finalise_malloc(size, ptr));
 }
 
-static inline void *
-peak_zalloc(size_t size)
-{
-	void *ptr = peak_malloc(size);
-	if (ptr) {
-		bzero(ptr, size);
-	}
-
-	return (ptr);
-}
+/*
+ * This is sqrt(SIZE_MAX+1), as s1*s2 <= SIZE_MAX
+ * if both s1 < MUL_NO_OVERFLOW and s2 < MUL_NO_OVERFLOW
+ */
+#define MUL_NO_OVERFLOW (1UL << (sizeof(size_t) * 4))
 
 static inline void *
 peak_calloc(size_t count, size_t size)
 {
-	return (peak_zalloc(count * size));
+	void *ptr;
+
+	if ((count >= MUL_NO_OVERFLOW || size >= MUL_NO_OVERFLOW) &&
+	    count > 0 && SIZE_MAX / count < size) {
+		return (NULL);
+	}
+
+	size *= count;
+
+	ptr = peak_malloc(size);
+	if (ptr) {
+		memset(ptr, 0, size);
+	}
+
+	return (ptr);
 }
 
 static inline void *
@@ -224,45 +238,33 @@ _peak_mcheck_malign(void *ptr)
 }
 
 static inline void *
-peak_posix_memalign(size_t alignment, size_t size)
+peak_malign(size_t count, size_t size)
 {
-	void *ptr;
-
-	if (posix_memalign(&ptr, alignment, size)) {
-		return (NULL);
-	}
-
-	return (ptr);
-}
-
-static inline void *
-peak_malign(size_t size)
-{
-	void *ptr;
+	void *ptr = NULL;
 
 	if (!size) {
 		return (NULL);
 	}
 
-	ptr = peak_posix_memalign(ALLOC_CACHELINE,
+	if ((count >= MUL_NO_OVERFLOW || size >= MUL_NO_OVERFLOW) &&
+	    count > 0 && SIZE_MAX / count < size) {
+		return (NULL);
+	}
+
+	size *= count;
+
+	if (size > SIZE_MAX - ALLOC_CACHELINE - ALLOC_PAD(malign)) {
+		/* still an overflow */
+		return (NULL);
+	}
+
+	posix_memalign(&ptr, ALLOC_CACHELINE,
 	    ALLOC_CACHEALIGN(size) + ALLOC_PAD(malign));
 	if (!ptr) {
 		return (NULL);
 	}
 
 	return (_peak_finalise_malign(size, ptr));
-}
-
-static inline void *
-peak_zalign(size_t size)
-{
-	void *ptr = peak_malign(size);
-
-	if (likely(ptr)) {
-		bzero(ptr, size);
-	}
-
-	return (ptr);
 }
 
 static inline unsigned int
@@ -314,16 +316,19 @@ __peak_free(void *ptr, const unsigned int really_free)
 #define peak_mcheck(x)	ALLOC_ERROR(_peak_mcheck((void *)(x)))
 #define peak_free(x)	ALLOC_ERROR(_peak_free((void *)(x)))
 
+#ifndef WANT_UNGUARDED
 /* pave over all standard functions */
 #define reallocf	peak_reallocf
 #define realloc		peak_realloc
-#define zalign		peak_zalign
 #define malign		peak_malign
-#define zalloc		peak_zalloc
 #define malloc		peak_malloc
 #define calloc		peak_calloc
 #define strdup		peak_strdup
 #define mcheck		peak_mcheck
 #define free		peak_free
+#else
+#define mcheck(x)	do { (void)x; } while (0)
+#define malign(x, y)	calloc(x, y)	/* bite the bullet, zero memory */
+#endif /* !WANT_UNGUARDED */
 
 #endif /* !PEAK_ALLOC_H */

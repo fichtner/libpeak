@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Franco Fichtner <franco@packetwerk.com>
+ * Copyright (c) 2014 Franco Fichtner <franco@packetwerk.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -405,18 +405,12 @@ peak_stream_init(size_t page_count, size_t page_size)
 		goto peak_stream_init_fail;
 	}
 
-	i = page_count * page_size;
-	if (i / page_size != page_count) {
-		/* overflow case */
-		goto peak_stream_init_fail;
-	}
-
-	self = zalloc(sizeof(*self));
+	self = calloc(1, sizeof(*self));
 	if (!self) {
 		goto peak_stream_init_fail;
 	}
 
-	self->page_mem = malign(page_count * page_size);
+	self->page_mem = malign(page_count, page_size);
 	if (!self->page_mem) {
 		goto peak_stream_init_fail;
 	}

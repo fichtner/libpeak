@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Franco Fichtner <franco@packetwerk.com>
+ * Copyright (c) 2013-2014 Franco Fichtner <franco@packetwerk.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -78,7 +78,7 @@ peak_track_acquire(struct peak_tracks *self, const struct peak_track *ref)
 struct peak_tracks *
 peak_track_init(const size_t max_flows)
 {
-	struct peak_tracks *self = zalloc(sizeof(*self));
+	struct peak_tracks *self = calloc(1, sizeof(*self));
 
 	if (!self) {
 		return (NULL);

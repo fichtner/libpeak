@@ -441,7 +441,7 @@ peak_load_init(const char *file)
 		}
 	}
 
-	self = zalloc(sizeof(*self));
+	self = calloc(1, sizeof(*self));
 	if (!self) {
 		goto peak_load_init_close;
 	}

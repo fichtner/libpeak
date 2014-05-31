@@ -195,14 +195,15 @@ test_stash(void)
 static void
 test_alloc(void)
 {
-	uint64_t *test_ptr = peak_zalloc(sizeof(*test_ptr));
+	uint64_t *test_ptr = peak_calloc(1, sizeof(*test_ptr));
 
 	assert(!*test_ptr);
 
 	peak_free(test_ptr);
 
-	test_ptr = peak_zalign(sizeof(*test_ptr));
-
+	test_ptr = peak_malign(1, sizeof(*test_ptr));
+	assert(test_ptr);
+	memset(test_ptr, 0, sizeof(*test_ptr));
 	assert(!*test_ptr);
 
 	peak_free(test_ptr);
@@ -268,12 +269,14 @@ test_alloc(void)
 	assert(ALLOC_CACHEALIGN(1) == ALLOC_CACHELINE);
 	assert(ALLOC_CACHEALIGN(0) == 0);
 
-	peak_free(peak_malign(0));
-	peak_free(peak_malign(1));
-	peak_free(peak_zalloc(0));
-	peak_free(peak_zalloc(1));
+	peak_free(peak_malign(1, 0));
+	peak_free(peak_malign(1, 1));
+	peak_free(peak_calloc(1, 0));
+	peak_free(peak_calloc(1, 1));
 
-	char *test_str_aligned = peak_malign(sizeof(THIS_IS_A_STRING));
+	assert(!peak_calloc(2, (SIZE_MAX / 2) + 42));
+
+	char *test_str_aligned = peak_malign(1, sizeof(THIS_IS_A_STRING));
 
 	memcpy(test_str_aligned, THIS_IS_A_STRING,
 	    sizeof(THIS_IS_A_STRING));

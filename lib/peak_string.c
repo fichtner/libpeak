@@ -178,5 +178,5 @@ peak_string_exit(struct peak_strings *root)
 struct peak_strings *
 peak_string_init(void)
 {
-	return (zalloc(sizeof(struct peak_strings)));
+	return (calloc(1, sizeof(struct peak_strings)));
 }

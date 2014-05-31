@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013 Franco Fichtner <franco@packetwerk.com>
+ * Copyright (c) 2012-2014 Franco Fichtner <franco@packetwerk.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -94,8 +94,8 @@ prealloc_init(prealloc_t *self, size_t count, size_t size)
 		return (0);
 	}
 
-	const size_t mem_size = count * size;
-	if (mem_size / count != size) {
+	self->mem_start = malign(count, size);
+	if (!self->mem_start) {
 		return (0);
 	}
 
@@ -103,12 +103,8 @@ prealloc_init(prealloc_t *self, size_t count, size_t size)
 	prealloc_used(self) = 0;
 	spin_init(&self->lock);
 
-	self->mem_start = malign(mem_size);
-	if (!self->mem_start) {
-		return (0);
-	}
-
-	self->mem_stop = ((unsigned char *)self->mem_start) + mem_size;
+	self->mem_stop = ((unsigned char *)self->mem_start) +
+	    (count * size);
 
 	struct peak_prealloc *e = self->mem_start;
 	struct peak_prealloc *f;
