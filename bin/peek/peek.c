@@ -51,7 +51,7 @@ peek_report(const struct peak_packet *packet, const struct peak_track *flow,
 			pout("app_len: %hu", packet->app_len);
 			break;
 		case USE_FLOW:
-			pout("flow: %zu", flow->id);
+			pout("flow: %llu", (unsigned long long)flow->id);
 			break;
 		case USE_IP_LEN:
 			pout("ip_len: %hu", packet->net_len);
