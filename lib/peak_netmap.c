@@ -405,7 +405,7 @@ peak_netmap_claim(int timeout, const unsigned int want_sw)
 	for (i = 0; i < self->lastdev; ++i) {
 		fd = &self->fd[i];
 
-		fd->events = POLLIN;
+		fd->events = POLLIN | POLLOUT;
 		fd->revents = 0;
 	}
 
@@ -541,16 +541,11 @@ peak_netmap_configure(struct peak_netmap_dev *dev)
 	struct netmap_ring *ring;
 	unsigned int i;
 
-	/*
-	 * Set `transparent' mode in the RX rings.
-	 * That'll allow us to indirectly forward
-	 * packets from a receive ring to its final
-	 * destination, unless we clear the NS_FORWARD
-	 * flag for a slot in packet processing.
-	 */
-
 	NR_FOREACH_RX(ring, i, dev, 1) {
+		/* transparent mode: automatic forward via NS_FORWARD */
 		ring->flags |= NR_FORWARD;
+		/* timestamping: always update timestamps */
+		ring->flags |= NR_TIMESTAMP;
 	}
 }
 
