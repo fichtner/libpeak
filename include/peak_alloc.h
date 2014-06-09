@@ -187,12 +187,24 @@ _peak_realloc(void *ptr, size_t size)
 	_peak_realloc(x, y);						\
 })
 
-#define peak_reallocf(x, y) ({						\
-	void *__new__ = peak_realloc(x, y);				\
-	if (!__new__) {							\
-		peak_free(x);						\
+static inline void *
+_peak_reallocarray(void *ptr, size_t count, size_t size)
+{
+	if ((count >= MUL_NO_OVERFLOW || size >= MUL_NO_OVERFLOW) &&
+	    count > 0 && SIZE_MAX / count < size) {
+		return (NULL);
+	}
+
+	size *= count;
+
+	return (_peak_realloc(ptr, size));
+}
+
+#define peak_reallocarray(x, y, z) ({					\
+	if (x) {							\
+		ALLOC_ERROR(_peak_mcheck_malloc(x));			\
 	}								\
-	__new__;							\
+	_peak_reallocarray(x, y, z);					\
 })
 
 static inline char *
@@ -312,22 +324,68 @@ __peak_free(void *ptr, const unsigned int really_free)
 #define _peak_mcheck(x)	__peak_free(x, 0)
 #define _peak_free(x)	__peak_free(x, 1)
 
-#define peak_mcheck(x)	ALLOC_ERROR(_peak_mcheck((void *)(x)))
-#define peak_free(x)	ALLOC_ERROR(_peak_free((void *)(x)))
+#define peak_mcheck(x)	ALLOC_ERROR(_peak_mcheck(x))
+#define peak_free(x)	ALLOC_ERROR(_peak_free(x))
 
 #ifndef WANT_UNGUARDED
+
 /* pave over all standard functions */
-#define reallocf	peak_reallocf
 #define realloc		peak_realloc
+#define reallocarray	peak_reallocarray
 #define malign		peak_malign
 #define malloc		peak_malloc
 #define calloc		peak_calloc
 #define strdup		peak_strdup
 #define mcheck		peak_mcheck
 #define free		peak_free
-#else
+
+#else /* WANT_UNGUARDED */
+
+static inline void *
+malign(size_t count, size_t size)
+{
+	void *ptr = NULL;
+
+	if (!size) {
+		return (NULL);
+	}
+
+	if ((count >= MUL_NO_OVERFLOW || size >= MUL_NO_OVERFLOW) &&
+	    count > 0 && SIZE_MAX / count < size) {
+		return (NULL);
+	}
+
+	size *= count;
+
+	if (size > SIZE_MAX - ALLOC_CACHELINE) {
+		/* still an overflow */
+		return (NULL);
+	}
+
+	if (posix_memalign(&ptr, ALLOC_CACHELINE, ALLOC_CACHEALIGN(size))) {
+		return (NULL);
+	}
+
+	return (ptr);
+}
+
+#ifndef __OpenBSD__
+static inline void *
+reallocarray(void *ptr, size_t count, size_t size)
+{
+	if ((count >= MUL_NO_OVERFLOW || size >= MUL_NO_OVERFLOW) &&
+	    count > 0 && SIZE_MAX / count < size) {
+		return (NULL);
+	}
+
+	size *= count;
+
+	return (realloc(ptr, size));
+}
+#endif /* !__OpenBSD__ */
+
 #define mcheck(x)	do { (void)x; } while (0)
-#define malign(x, y)	calloc(x, y)	/* bite the bullet, zero memory */
+
 #endif /* !WANT_UNGUARDED */
 
 #endif /* !PEAK_ALLOC_H */

@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd May 31, 2014
+.Dd June 9, 2014
 .Dt PEAK_ALLOC 3
 .Os
 .Sh NAME
@@ -24,7 +24,7 @@
 .Nm malloc ,
 .Nm mcheck ,
 .Nm realloc ,
-.Nm reallocf
+.Nm reallocarray
 .Nd memory allocation
 .Sh SYNOPSIS
 .In peak.h
@@ -43,16 +43,17 @@
 .Ft void *
 .Fn realloc "void *ptr" "size_t size"
 .Ft void *
-.Fn reallocf "void *ptr" "size_t size"
+.Fn reallocarray "void *ptr" "size_t count" "size_t size"
 .Sh DESCRIPTION
 The
 .Nm peak_alloc
 functions allocate and deallocate memory.
 They wrap around
-.Xr malloc 3
+.Xr malloc 3 ,
+.Xr posix_memalign 3
 and
-.Xr free 3 ,
-and provide better inline consistency checks.
+.Xr free 3
+to provide runtime consistency checks.
 They can detect simple buffer over- and underflows on
 .Xr free 3 ;
 and also provide runtime checking via the
@@ -73,9 +74,9 @@ The
 .Fn calloc
 function contiguously allocates enough space for
 .Va count
-objects that are
+objects which are each
 .Va size
-bytes of memory each and returns a pointer to the allocated memory.
+bytes of memory and returns a pointer to the allocated memory.
 The allocated memory is filled with bytes of value zero.
 .Pp
 The
@@ -122,15 +123,16 @@ When extending a region allocated with
 does not guarantee that the additional memory is also zero-filled
 .Pp
 The
-.Fn reallocf
-function is identical to the
-.Fn realloc
-function, except that it will free the passed pointer when the
-requested memory cannot be allocated.
-This was a FreeBSD specific API designed to ease the problems with
-traditional coding styles for
-.Fn realloc
-causing memory leaks in libraries.
+.Fn reallocarray
+function contiguously allocates or reallocates space for
+.Va count
+objects which are each
+.Va size
+bytes of memory and returns a pointer to the allocated memory.
+It is an overflow-immune general-purpose replacement for
+.Fn malloc
+and
+.Fn realloc .
 .Pp
 The
 .Fn free
@@ -152,19 +154,18 @@ If successful,
 .Fn calloc ,
 .Fn malign ,
 .Fn malloc ,
-.Fn realloc ,
+.Fn realloc
 and
-.Fn reallocf
+.Fn reallocarray
 functions return a pointer to the allocated memory.
 If there is an error, they return
 .Dv NULL .
 .Pp
 For
-.Fn realloc ,
+.Fn realloc
+and
+.Fn reallocarray
 the input pointer is still valid if reallocation failed.
-For
-.Fn reallocf ,
-the input pointer will have been freed if reallocation failed.
 .Pp
 The macro
 .Fn ALLOC_ALIGN

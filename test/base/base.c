@@ -218,7 +218,7 @@ test_alloc(void)
 
 	*test_ptr = backup;
 
-	test_ptr = peak_reallocf(test_ptr, 16);
+	test_ptr = peak_realloc(test_ptr, 16);
 
 	test_ptr[0] = 'o';
 	test_ptr[1] = 'k';
@@ -226,7 +226,7 @@ test_alloc(void)
 	assert('o' == test_ptr[0]);
 	assert('k' == test_ptr[1]);
 
-	test_ptr = peak_realloc(test_ptr, 24);
+	test_ptr = peak_reallocarray(test_ptr, 1, 24);
 
 	assert('o' == test_ptr[0]);
 	assert('k' == test_ptr[1]);
@@ -238,7 +238,7 @@ test_alloc(void)
 	assert('o' == test_ptr[0]);
 	assert('k' != test_ptr[1]);
 
-	assert(!peak_realloc(test_ptr, 0));
+	assert(!peak_reallocarray(test_ptr, 1, 0));
 
 	char *test_str = peak_strdup(THIS_IS_A_STRING);
 
