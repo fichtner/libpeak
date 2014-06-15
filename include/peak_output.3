@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2012-2013 Franco Fichtner <franco@packetwerk.com>
+.\" Copyright (c) 2012-2014 Franco Fichtner <franco@packetwerk.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -13,12 +13,11 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd May 7, 2013
+.Dd June 15, 2014
 .Dt PEAK_OUTPUT 3
 .Os
 .Sh NAME
 .Nm output_init ,
-.Nm output_log ,
 .Nm output_bug ,
 .Nm plog ,
 .Nm pbug ,
@@ -37,7 +36,6 @@
 .Sh SYNOPSIS
 .In peak.h
 .Fn output_init
-.Fn output_log
 .Fn output_bug
 .Ft void
 .Fn plog "int priority" "const char *message" ...
@@ -71,8 +69,6 @@ output levels used for the process, to the lowest available level.
 The level style is that of
 .Xr syslog 3
 and the currently selected level is increased by one each time
-.Fn output_log
-(log level) or
 .Fn output_bug
 (debug level) is called.
 .Pp
@@ -144,6 +140,7 @@ The log level (from sparse to noisy) corresponds thus:
 .El
 .Sh SEE ALSO
 .Xr abort 3 ,
+.Xr backtrace 3 ,
 .Xr printf 3 ,
 .Xr syslog 3 ,
 .Xr stderr 4 ,

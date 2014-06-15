@@ -16,6 +16,12 @@ CFLAGS+=-I$(.CURDIR)/../include -I$(.CURDIR)/../lib
 
 LDADD+=	-lc -pthread -lmagic
 
+_OSTYPE!=uname -s
+
+.if ${_OSTYPE} == "FreeBSD"
+LDADD+=	-lexecinfo
+.endif
+
 beforeinstall:
 	mkdir -p $(DESTDIR)$(LIBDIR)
 

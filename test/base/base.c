@@ -355,7 +355,6 @@ test_prealloc(void)
 static void
 test_output(void)
 {
-	output_log();
 	output_bug();
 
 	if (0) {

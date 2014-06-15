@@ -23,7 +23,6 @@
 #include <syslog.h>
 
 extern int _peak_bug_priority;
-extern int _peak_log_priority;
 
 static inline void
 _peak_print(FILE *stream, const char *message, ...)
@@ -49,16 +48,9 @@ _peak_print(FILE *stream, const char *message, ...)
 } while (0)
 
 /* keep syslog style layout so we can switch on demand later */
-#define __peak_log(x, y, args...) do {					\
-	_peak_print(stdout, y, ##args);					\
-} while (0)
-
-/* additional wrapper with access to the format string */
 #define _peak_log(x, y, args...) do {					\
 	static const char *_msg = y;					\
-	if ((x) <= __sync_fetch_and_or(&_peak_log_priority, 0)) {	\
-		__peak_log(x, _msg, ##args);				\
-	}								\
+	_peak_print(stdout, _msg, ##args);				\
 } while (0)
 
 /* fast stdout/stderr access (handle with care) */
@@ -69,7 +61,7 @@ _peak_print(FILE *stream, const char *message, ...)
 #define BACKTRACE_SIGNAL	3
 #define BACKTRACE_MAX		128
 
-#if defined(__APPLE__) || defined(__linux__)
+#if defined(__APPLE__) || defined(__linux__) || defined(__FreeBSD__)
 #include <execinfo.h>
 
 static inline void
@@ -83,9 +75,9 @@ _peak_backtrace(const int skip)
 	backtrace_symbols_fd(&callstack[skip], frames, 2);
 	_peak_bug(LOG_EMERG, "======= stack trace end =======\n");
 }
-#else /* !__APPLE__ && !__linux__ */
+#else /* !__APPLE__ && !__linux__ && !__FreeBSD__ */
 #define _peak_backtrace(x)
-#endif /* __APPLE__ || __linux__ */
+#endif /* __APPLE__ || __linux__ || __FreeBSD__ */
 
 #undef BACKTRACE_MAX
 
@@ -160,10 +152,8 @@ _peak_backtrace(const int skip)
 } while (0)
 
 #define output_init()							\
-	int _peak_bug_priority = LOG_EMERG;				\
-	int _peak_log_priority = LOG_EMERG
+	int _peak_bug_priority = LOG_EMERG
 
-#define output_log()	output_bump(_peak_log_priority)
 #define output_bug()	output_bump(_peak_bug_priority)
 
 #endif /* !PEAK_OUTPUT_H */
