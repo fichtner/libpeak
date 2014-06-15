@@ -40,7 +40,6 @@ Basic directory layout
 ======================
 
 bin/		project binaries
-contrib/	third-party code
 include/	base headers
 lib/		specific modules
 regress/	test framework
@@ -51,8 +50,8 @@ test/		test binaries
 Building and running the code
 =============================
 
-The code builds fine on MacOS, OpenBSD, FreeBSD, DragonFly BSD and Linux
-(Ubuntu with pmake installed).  You break it, you fix it.
+The code builds fine on MacOS, OpenBSD, FreeBSD, DragonFly BSD and
+Linux as long as bmake (or pmake) is installed.
 
 Building the code:
 

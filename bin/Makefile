@@ -1,2 +1,4 @@
-.include "common.mk"
+SUBDIR=	netfuse \
+	peek
+
 .include <bsd.subdir.mk>

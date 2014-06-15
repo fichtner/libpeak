@@ -1,6 +1,4 @@
-BASEDIR=../..
-FILE=	$(BASEDIR)/test/load/load
-
+REGRESS_FILE=	load
 REGRESS_TARGET= run
 
-include $(BASEDIR)/share/mk/all.regress.mk
+.include <bsd.prog.mk>

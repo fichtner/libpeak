@@ -1,4 +1,6 @@
-MAKEOBJDIRPREFIX=/
-BASEDIR=${.CURDIR}/../..
-.include "common.mk"
+PROG=	base
+MAN=
+
+LDADD=	-lc -pthread
+
 .include <bsd.prog.mk>

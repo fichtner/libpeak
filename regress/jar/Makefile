@@ -1,6 +1,4 @@
-BASEDIR=../..
-FILE=	$(BASEDIR)/test/jar/jar
-
+REGRESS_FILE=	jar
 REGRESS_TARGET= run
 
-include $(BASEDIR)/share/mk/all.regress.mk
+.include <bsd.prog.mk>

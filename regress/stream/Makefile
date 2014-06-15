@@ -1,6 +1,4 @@
-BASEDIR=../..
-FILE=	$(BASEDIR)/test/stream/stream
-
+REGRESS_FILE=	stream
 REGRESS_TARGET= run
 
-include $(BASEDIR)/share/mk/all.regress.mk
+.include <bsd.prog.mk>

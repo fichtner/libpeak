@@ -1,2 +1,0 @@
-SUBDIR+=netfuse
-SUBDIR+=peek
