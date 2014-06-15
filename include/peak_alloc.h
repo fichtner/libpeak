@@ -213,10 +213,6 @@ peak_strdup(const char *s1)
 	size_t size;
 	char *s2;
 
-	if (!s1) {
-		return (NULL);
-	}
-
 	size = strsize(s1);
 	s2 = peak_malloc(size);
 	if (s2) {
