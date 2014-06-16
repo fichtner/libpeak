@@ -99,6 +99,9 @@ peak_packet_net(const struct peak_packet *self)
 	case IPPROTO_SCTP:
 		ret = "sctp";
 		break;
+	case IPPROTO_PIM:
+		ret = "pim";
+		break;
 	default:
 		ret = "xxx";
 		break;

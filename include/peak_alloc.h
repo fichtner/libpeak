@@ -216,7 +216,7 @@ peak_strdup(const char *s1)
 	size = strsize(s1);
 	s2 = peak_malloc(size);
 	if (s2) {
-		strncpy(s2, s1, size);
+		strcpy(s2, s1);
 	}
 
 	return (s2);

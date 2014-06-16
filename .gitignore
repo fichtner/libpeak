@@ -1,5 +1,7 @@
 *.[ado]
-*.[ps]o
+*.[psS]o
+*.so.*
 *.dylib
 *.gz
+*.manlint
 .depend
