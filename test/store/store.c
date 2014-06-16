@@ -42,8 +42,7 @@ test_store(const char *file, const unsigned int *len, const size_t count)
 	trace = peak_load_init(file);
 	assert(trace);
 
-	mktemp(template);
-	store = peak_store_init(template);
+	store = peak_store_init(mktemp(template));
 	assert(store >= 0);
 
 	for (i = 0; i < count; ++i) {
