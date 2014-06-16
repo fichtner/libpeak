@@ -72,12 +72,11 @@ peak_store_init(const char *file)
 	};
 	int fd;
 
-	fd = open(file, O_WRONLY | O_CREAT | O_TRUNC);
+	fd = open(file, O_WRONLY|O_CREAT|O_TRUNC,
+	    S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
 	if (fd < 0) {
 		goto peak_store_init_out;
 	}
-
-	chmod(file, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 
 	if (write(fd, &hdr, sizeof(hdr)) != sizeof(hdr)) {
 		goto peak_store_init_close;
