@@ -1,4 +1,5 @@
 .\" Copyright (c) 2002 Mike Barcroft <mike@FreeBSD.org>
+.\" Copyright (c) 2012-2014 Franco Fichtner <franco@packetwerk.com>
 .\" All rights reserved.
 .\"
 .\" Redistribution and use in source and binary forms, with or without
@@ -24,7 +25,7 @@
 .\"
 .\" $FreeBSD$
 .\"
-.Dd November 30, 2012
+.Dd June 17, 2014
 .Dt PEAK_TYPE 3
 .Os
 .Sh NAME
@@ -102,6 +103,14 @@ and
 .Fn le64dec
 functions encode and decode integers to/from byte strings on any alignment
 in big/little endian format.
+.Pp
+On
+.Nx
+and
+.Fx ,
+the native
+.Xr byteorder 9
+implementation is used instead.
 .Sh HISTORY
 The encode/decode functions first appeared in
 .Fx 5.1 .

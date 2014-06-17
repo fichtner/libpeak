@@ -35,19 +35,22 @@ test_type(void)
 	uint32_t test_val_32 = UNALIGNED_32_ORIG;
 	uint64_t test_val_64 = UNALIGNED_64_ORIG;
 
-	le16enc(&test_val_16, test_val_16);
-	assert(le16dec(&test_val_16) == bswap16(be16dec(&test_val_16)));
-	be16enc(&test_val_16, bswap16(UNALIGNED_16_ORIG));
+	peak_le16enc(&test_val_16, test_val_16);
+	assert(peak_le16dec(&test_val_16) ==
+	    peak_bswap16(peak_be16dec(&test_val_16)));
+	peak_be16enc(&test_val_16, peak_bswap16(UNALIGNED_16_ORIG));
 	assert(UNALIGNED_16_ORIG == test_val_16);
 
-	le32enc(&test_val_32, test_val_32);
-	assert(le32dec(&test_val_32) == bswap32(be32dec(&test_val_32)));
-	be32enc(&test_val_32, bswap32(UNALIGNED_32_ORIG));
+	peak_le32enc(&test_val_32, test_val_32);
+	assert(peak_le32dec(&test_val_32) ==
+	    peak_bswap32(peak_be32dec(&test_val_32)));
+	peak_be32enc(&test_val_32, peak_bswap32(UNALIGNED_32_ORIG));
 	assert(UNALIGNED_32_ORIG == test_val_32);
 
-	le64enc(&test_val_64, test_val_64);
-	assert(le64dec(&test_val_64) == bswap64(be64dec(&test_val_64)));
-	be64enc(&test_val_64, bswap64(UNALIGNED_64_ORIG));
+	peak_le64enc(&test_val_64, test_val_64);
+	assert(peak_le64dec(&test_val_64) ==
+	    peak_bswap64(peak_be64dec(&test_val_64)));
+	peak_be64enc(&test_val_64, peak_bswap64(UNALIGNED_64_ORIG));
 	assert(UNALIGNED_64_ORIG == test_val_64);
 
 	test_val_16 = 0;
@@ -86,7 +89,7 @@ test_net(void)
 	struct netaddr ip;
 	int i;
 
-	be32enc(&ipv4_addr, 0x11223344);
+	peak_be32enc(&ipv4_addr, 0x11223344);
 	netaddr4(&ip, ipv4_addr);
 	assert(!memcmp(&ipv4_addr, netto4(&ip), sizeof(ipv4_addr)));
 	assert(!netcmp(&ip, &ip4_ref));
@@ -114,7 +117,7 @@ test_net(void)
 	assert(netprefix(&ip, &ip6_ref, NET_PREFIX6(0)));
 
 	assert(netprefix(&ip4_ref, &ip6_ref, NET_PREFIX6(1)));
-	be32enc(&ipv4_addr, 0x11224433);
+	peak_be32enc(&ipv4_addr, 0x11224433);
 	netaddr4(&ip, ipv4_addr);
 	assert(!netprefix(&ip, &ip4_ref, NET_PREFIX4(16)));
 	assert(netprefix(&ip, &ip4_ref, NET_PREFIX4(17)));

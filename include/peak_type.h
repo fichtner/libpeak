@@ -1,5 +1,6 @@
 /*-
  * Copyright (c) 2002 Thomas Moestl <tmm@FreeBSD.org>
+ * Copyright (c) 2012-2014 Franco Fichtner <franco@packetwerk.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,28 +33,28 @@
 #include <stdint.h>
 
 static inline uint16_t
-bswap16(uint16_t u)
+peak_bswap16(uint16_t u)
 {
 	return ((u << 8) | (u >> 8));
 }
 
 #ifdef __builtin_bswap32
-#define bswap32(x)	__builtin_bswap32(x)
+#define peak_bswap32(x)	__builtin_bswap32(x)
 #else /* !__builtin_bswap32 */
 static inline uint32_t
-bswap32(uint32_t u)
+peak_bswap32(uint32_t u)
 {
-	return (((uint32_t)bswap16(u)) << 16) | bswap16(u >> 16);
+	return (((uint32_t)peak_bswap16(u)) << 16) | peak_bswap16(u >> 16);
 }
 #endif /* __builtin_bswap32 */
 
 #ifdef __builtin_bswap64
-#define bswap64(x)	__builtin_bswap64(x)
+#define peak_bswap64(x)	__builtin_bswap64(x)
 #else /* !__builtin_bswap64 */
 static inline uint64_t
-bswap64(uint64_t u)
+peak_bswap64(uint64_t u)
 {
-	return (((uint64_t)bswap32(u)) << 32) | bswap32(u >> 32);
+	return (((uint64_t)peak_bswap32(u)) << 32) | peak_bswap32(u >> 32);
 }
 #endif /* __builtin_bswap64 */
 
@@ -75,7 +76,7 @@ bswap64(uint64_t u)
 #endif /* __CHECKER__ */
 
 static inline uint16_t
-le16dec(const void *pp)
+peak_le16dec(const void *pp)
 {
 	const unsigned char *p = pp;
 
@@ -83,7 +84,7 @@ le16dec(const void *pp)
 }
 
 static inline void
-le16enc(void *pp, const uint16_t u)
+peak_le16enc(void *pp, const uint16_t u)
 {
 	unsigned char *p = pp;
 
@@ -92,7 +93,7 @@ le16enc(void *pp, const uint16_t u)
 }
 
 static inline uint32_t
-le32dec(const void *pp)
+peak_le32dec(const void *pp)
 {
 	const unsigned char *p = pp;
 
@@ -100,7 +101,7 @@ le32dec(const void *pp)
 }
 
 static inline void
-le32enc(void *pp, const uint32_t u)
+peak_le32enc(void *pp, const uint32_t u)
 {
 	unsigned char *p = pp;
 
@@ -111,24 +112,24 @@ le32enc(void *pp, const uint32_t u)
 }
 
 static inline uint64_t
-le64dec(const void *pp)
+peak_le64dec(const void *pp)
 {
 	const unsigned char *p = pp;
 
-	return (((uint64_t)le32dec(p + 4) << 32) | le32dec(p));
+	return (((uint64_t)peak_le32dec(p + 4) << 32) | peak_le32dec(p));
 }
 
 static inline void
-le64enc(void *pp, const uint64_t u)
+peak_le64enc(void *pp, const uint64_t u)
 {
 	unsigned char *p = pp;
 
-	le32enc(p, u);
-	le32enc(p + 4, u >> 32);
+	peak_le32enc(p, u);
+	peak_le32enc(p + 4, u >> 32);
 }
 
 static inline uint16_t
-be16dec(const void *pp)
+peak_be16dec(const void *pp)
 {
 	const unsigned char *p = pp;
 
@@ -136,7 +137,7 @@ be16dec(const void *pp)
 }
 
 static inline void
-be16enc(void *pp, const uint16_t u)
+peak_be16enc(void *pp, const uint16_t u)
 {
 	unsigned char *p = pp;
 
@@ -145,7 +146,7 @@ be16enc(void *pp, const uint16_t u)
 }
 
 static inline uint32_t
-be32dec(const void *pp)
+peak_be32dec(const void *pp)
 {
 	const unsigned char *p = pp;
 
@@ -153,7 +154,7 @@ be32dec(const void *pp)
 }
 
 static inline void
-be32enc(void *pp, const uint32_t u)
+peak_be32enc(void *pp, const uint32_t u)
 {
 	unsigned char *p = pp;
 
@@ -164,24 +165,44 @@ be32enc(void *pp, const uint32_t u)
 }
 
 static inline uint64_t
-be64dec(const void *pp)
+peak_be64dec(const void *pp)
 {
 	const unsigned char *p = pp;
 
-	return (((uint64_t)be32dec(p) << 32) | be32dec(p + 4));
+	return (((uint64_t)peak_be32dec(p) << 32) | peak_be32dec(p + 4));
 }
 
 static inline void
-be64enc(void *pp, const uint64_t u)
+peak_be64enc(void *pp, const uint64_t u)
 {
 	unsigned char *p = pp;
 
-	be32enc(p, u >> 32);
-	be32enc(p + 4, u);
+	peak_be32enc(p, u >> 32);
+	peak_be32enc(p + 4, u);
 }
 
 #define wrap16(x)	((uint16_t)(x) > UINT16_MAX / 2U)
 #define wrap32(x)	((uint32_t)(x) > UINT32_MAX / 2U)
 #define wrap64(x)	((uint64_t)(x) > UINT64_MAX / 2ULL)
+
+#if defined(__NetBSD__) || defined(__FreeBSD__)
+#include <sys/endian.h>
+#else /* !__NetBSD__ && !__FreeBSD__ */
+#define bswap16	peak_bswap16
+#define bswap32	peak_bswap32
+#define bswap64	peak_bswap64
+#define le16dec	peak_le16dec
+#define le16enc	peak_le16enc
+#define le32dec	peak_le32dec
+#define le32enc	peak_le32enc
+#define le64dec	peak_le64dec
+#define le64enc	peak_le64enc
+#define be16dec	peak_be16dec
+#define be16enc	peak_be16enc
+#define be32dec	peak_be32dec
+#define be32enc	peak_be32enc
+#define be64dec	peak_be64dec
+#define be64enc	peak_be64enc
+#endif /* __NetBSD__ || __FreeBSD__ */
 
 #endif /* !PEAK_TYPE_H */
