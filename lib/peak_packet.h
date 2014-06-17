@@ -90,11 +90,11 @@ struct peak_packet {
 	} net;
 	union {
 		unsigned char *raw;
-#if defined(__APPLE__) || defined(__OpenBSD__) || defined(__DragonFly__)
-		struct icmp *ih;
-#else /* !__APPLE__ && !__OpenBSD__ && !__DragonFly__*/
+#if defined(__FreeBSD__) || defined(__linux__)
 		struct icmphdr *ih;
-#endif /* __APPLE__ || __OpenBSD__ || __DragonFly__ */
+#else /* !__FreeBSD__ && !__linux__ */
+		struct icmp *ih;
+#endif /* __FreeBSD__ || __linux__ */
 		struct tcphdr *th;
 		struct udphdr *uh;
 	} flow;

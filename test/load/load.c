@@ -16,14 +16,14 @@
 
 #include <peak.h>
 
-#ifdef __OpenBSD__
+#if defined(__OpenBSD__) || defined(__NetBSD__)
 #include <sys/socket.h>
 #include <net/if.h>
 #include <netinet/in.h>
 #include <netinet/if_ether.h>
-#else /* !__OpenBSD__ */
+#else /* !__OpenBSD__ && !__NetBSD__ */
 #include <net/ethernet.h>
-#endif /* __OpenBSD__ */
+#endif /* __OpenBSD__ || __NetBSD__ */
 #include <assert.h>
 
 output_init();

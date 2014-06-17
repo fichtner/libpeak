@@ -16,15 +16,16 @@
  */
 
 #include <peak.h>
-#if defined(__OpenBSD__) || defined(__FreeBSD__) || defined(__DragonFly__)
+#if defined(__OpenBSD__) || defined(__NetBSD__)
 #include <sys/socket.h>
 #include <net/if.h>
 #include <netinet/in.h>
 #include <netinet/if_ether.h>
 #include <netinet/in_systm.h>
-#else /* !__OpenBSD__ && !__FreeBSD__ && !__DragonFly__ */
+#else /* !__OpenBSD__ && !__NetBSD__ */
 #include <net/ethernet.h>
-#endif /* __OpenBSD__ || __FreeBSD__ || __DragonFly__ */
+#endif /* __OpenBSD__ || __NetBSD__ */
+#include <netinet/in.h>
 #include <netinet/ip.h>
 #include <netinet/ip6.h>
 #include <netinet/ip_icmp.h>
