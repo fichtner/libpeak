@@ -308,51 +308,53 @@ test_alloc(void)
 static void
 test_prealloc(void)
 {
-	prealloc_t *test_mem = prealloc_initd(1, 8);
-	void *test_chunk = prealloc_gets(test_mem);
+	prealloc_t test_mem;
 
-	assert(test_chunk && !prealloc_gets(test_mem));
+	assert(prealloc_init(&test_mem, 1, 8));
+	void *test_chunk = prealloc_gets(&test_mem);
 
-	prealloc_puts(test_mem, test_chunk);
-	test_chunk = prealloc_gets(test_mem);
+	assert(test_chunk && !prealloc_gets(&test_mem));
 
-	assert(_prealloc_exit(test_mem));
+	prealloc_puts(&test_mem, test_chunk);
+	test_chunk = prealloc_gets(&test_mem);
 
-	prealloc_puts(test_mem, test_chunk);
-	prealloc_exitd(test_mem);
+	assert(_prealloc_exit(&test_mem));
 
-	test_mem = prealloc_initd(8, sizeof(uint64_t));
+	prealloc_puts(&test_mem, test_chunk);
+	prealloc_exit(&test_mem);
+
+	assert(prealloc_init(&test_mem, 8, sizeof(uint64_t)));
 
 	uint64_t *test_chunks[8];
 	unsigned int i;
 
 	for (i = 0; i < 8; ++i) {
-		test_chunks[i] = prealloc_gets(test_mem);
+		test_chunks[i] = prealloc_gets(&test_mem);
 
 		assert(test_chunks[i]);
 
 		*test_chunks[i] = i;
 
-		prealloc_put(test_mem, test_chunks[i]);
-		assert(prealloc_gets(test_mem) == test_chunks[i]);
+		prealloc_put(&test_mem, test_chunks[i]);
+		assert(prealloc_gets(&test_mem) == test_chunks[i]);
 
 		*test_chunks[i] = i;
 	}
 
-	assert(!prealloc_gets(test_mem));
+	assert(!prealloc_gets(&test_mem));
 
 	for (i = 0; i < 8; ++i) {
 		assert(i == *test_chunks[i]);
 
-		prealloc_puts(test_mem, test_chunks[i]);
+		prealloc_puts(&test_mem, test_chunks[i]);
 	}
 
-	assert(!prealloc_valid(test_mem, test_chunks));
+	assert(!prealloc_valid(&test_mem, test_chunks));
 
-	prealloc_exitd(test_mem);
+	prealloc_exit(&test_mem);
 
-	assert(!prealloc_initd(1, 151));
-	assert(!prealloc_initd(2, ~0ULL));
+	assert(!prealloc_init(&test_mem, 1, 151));
+	assert(!prealloc_init(&test_mem, 2, ~0ULL));
 }
 
 static void

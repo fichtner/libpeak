@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2012-2013 Franco Fichtner <franco@packetwerk.com>
+.\" Copyright (c) 2012-2014 Franco Fichtner <franco@packetwerk.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -13,52 +13,43 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd November 22, 2013
+.Dd June 18, 2014
 .Dt PEAK_PREALLOC 3
 .Os
 .Sh NAME
-.Nm prealloc_init ,
-.Nm prealloc_exit ,
-.Nm prealloc_initd ,
-.Nm prealloc_exitd ,
-.Nm prealloc_get ,
-.Nm prealloc_put ,
-.Nm prealloc_gets ,
-.Nm prealloc_puts ,
-.Nm prealloc_valid ,
 .Nm prealloc_empty ,
+.Nm prealloc_exit ,
+.Nm prealloc_get ,
+.Nm prealloc_gets ,
+.Nm prealloc_init ,
+.Nm prealloc_put ,
+.Nm prealloc_puts ,
+.Nm prealloc_size ,
 .Nm prealloc_used ,
-.Nm prealloc_size
-.Nd preallocated memory pool management
+.Nm prealloc_valid
+.Nd memory pool management
 .Sh SYNOPSIS
 .In peak.h
-.Ft unsigned int
-.Fo prealloc_init
-.Fa "prealloc_t *self"
-.Fa "size_t count" "size_t size"
-.Fc
+.Ft int
+.Fn prealloc_empty HEAD
 .Ft void
 .Fn prealloc_exit "prealloc_t *self"
-.Ft prealloc_t *
-.Fn prealloc_initd "size_t count" "size_t size"
-.Ft void
-.Fn prealloc_exitd "prealloc_t *self"
+.Ft unsigned int
+.Fn prealloc_init "prealloc_t *self" "size_t count" "size_t size"
 .Ft void *
 .Fn prealloc_get "prealloc_t *self"
-.Ft void
-.Fn prealloc_put "prealloc_t *self" "void *p"
 .Ft void *
 .Fn prealloc_gets "prealloc_t *self"
 .Ft void
+.Fn prealloc_put "prealloc_t *self" "void *p"
+.Ft void
 .Fn prealloc_puts "prealloc_t *self" "void *p"
-.Ft int
-.Fn prealloc_valid HEAD P
-.Ft int
-.Fn prealloc_empty HEAD
-.Ft size_t
-.Fn prealloc_used HEAD
 .Ft size_t
 .Fn prealloc_size HEAD
+.Ft size_t
+.Fn prealloc_used HEAD
+.Ft int
+.Fn prealloc_valid HEAD P
 .Sh DESCRIPTION
 The
 .Nm peak_prealloc
@@ -73,20 +64,19 @@ While a resize functionality is feasible, there is no use-case at the
 moment.
 .Pp
 The function pair
-.Fn prealloc_initd
-and
-.Fn prealloc_exitd
-create and destroy a dynamically allocated pool struct, while
 .Fn prealloc_init
 and
 .Fn prealloc_exit
-work on an externally provided
-.Vt prealloc_t .
-However, the actual memory pool is always allocated dynamically.
-Either memory pool can be operated by all following functions.
+initialise and destroy memory pool structure.
+Upon success,
+.Fn prealloc_init
+returns non-zero.
+Otherwise, zero is returned.
 A process-wide panic message followed by an
 .Xr abort 3
-are issued by all exit functions in case of lost elements.
+is issued by
+.Fn prealloc_exit
+in case of lost elements.
 .Pp
 The function pair
 .Fn prealloc_gets
@@ -103,6 +93,14 @@ and
 .Fn prealloc_put
 operate in lockless mode, in case the calling code is singlethreaded
 or has a higher locking mechanism already in place.
+Upon success, both
+.Fn prealloc_gets
+and
+.Fn prealloc_get
+return a pointer to the freshly claimed memory chunk.
+Otherwise,
+.Dv NULL
+is returned to indicate the memory pool is empty.
 .Pp
 A family of support macros are also available.
 .Fn prealloc_valid
@@ -122,25 +120,6 @@ returns the chunk size of the memory pool
 and
 .Fn prealloc_used
 returns the number of currently claimed chunks thereof.
-.Sh RETURN VALUES
-Upon success,
-.Fn prealloc_initd
-returns a pointer to the initialised memory pool.
-Otherwise,
-.Dv NULL
-is returned.
-.Fn prealloc_init
-returns non-zero if the given memory pool could be initalised.
-Otherwise, zero is returned.
-.Pp
-Similarly, upon success, both
-.Fn prealloc_gets
-and
-.Fn prealloc_get
-return a pointer to the freshly claimed memory chunk.
-Otherwise,
-.Dv NULL
-is returned to indicate the memory pool is empty.
 .Sh SEE ALSO
 .Xr peak_sys 3
 .Sh AUTHORS

@@ -122,22 +122,6 @@ prealloc_init(prealloc_t *self, size_t count, size_t size)
 	return (1);
 }
 
-static inline prealloc_t *
-prealloc_initd(size_t count, size_t size)
-{
-	prealloc_t *self = malloc(sizeof(*self));
-	if (!self) {
-		return (NULL);
-	}
-
-	if (!prealloc_init(self, count, size)) {
-		free(self);
-		return (NULL);
-	}
-
-	return (self);
-}
-
 static inline unsigned int
 _prealloc_exit(prealloc_t *self)
 {
@@ -160,11 +144,6 @@ _prealloc_exit(prealloc_t *self)
 		panic("missing chunks detected\n");			\
 		/* NOTREACHED */					\
 	}								\
-} while (0)
-
-#define prealloc_exitd(self) do {					\
-	prealloc_exit(self);						\
-	free(self);							\
 } while (0)
 
 #endif /* !PEAK_PREALLOC_H */
