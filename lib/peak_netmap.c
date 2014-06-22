@@ -236,7 +236,7 @@ _peak_netmap_init(struct peak_netmap_dev *me)
 		struct ifreq ifr;
 
 		bzero(&ifr, sizeof(ifr));
-		strncpy(ifr.ifr_name, me->ifname, sizeof(ifr.ifr_name));
+		strlcpy(ifr.ifr_name, me->ifname, sizeof(ifr.ifr_name));
 
 		if (ioctl(me->fd, SIOCGIFFLAGS, &ifr)) {
 			D("ioctl error on SIOCGIFFLAGS");
@@ -252,7 +252,7 @@ _peak_netmap_init(struct peak_netmap_dev *me)
 		}
 
 		bzero(&ifr, sizeof(ifr));
-		strncpy(ifr.ifr_name, me->ifname, sizeof(ifr.ifr_name));
+		strlcpy(ifr.ifr_name, me->ifname, sizeof(ifr.ifr_name));
 
 		if (ioctl(me->fd, SIOCGIFCAP, &ifr)) {
 			D("ioctl error on SIOCGIFCAP");

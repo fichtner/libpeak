@@ -81,7 +81,7 @@ struct peak_lis {
 LI_DESCRIBE_APP(dns)
 {
 	/* TCP: padded with 2 bytes of length */
-	const unsigned int padding =
+	const size_t padding =
 	    (packet->net_type == IPPROTO_TCP) * sizeof(uint16_t);
 	struct dns {
 		uint16_t id;
@@ -991,7 +991,7 @@ LI_DESCRIBE_APP(netbios_name_service)
 	 *  unsigned integer representing the length of
 	 *  the Name service packet."
 	 */
-	const unsigned int padding =
+	const size_t padding =
 	    (packet->net_type == IPPROTO_TCP) * sizeof(uint16_t);
 	struct netbios {
 		uint16_t name_trn_id;
@@ -1695,7 +1695,7 @@ LI_DESCRIBE_APP(xmpp)
 
 LI_DESCRIBE_APP(openvpn)
 {
-	const unsigned int padding =
+	const size_t padding =
 	    (packet->net_type == IPPROTO_TCP) * sizeof(uint16_t);
 	struct openvpn {
 		uint8_t opcode;

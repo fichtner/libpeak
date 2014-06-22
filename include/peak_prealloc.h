@@ -83,6 +83,9 @@ prealloc_puts(prealloc_t *self, void *p)
 static inline unsigned int
 prealloc_init(prealloc_t *self, size_t count, size_t size)
 {
+	struct peak_prealloc *e, *f;
+	size_t i;
+
 	bzero(self, sizeof(*self));
 
 	if (!count || !size) {
@@ -106,9 +109,7 @@ prealloc_init(prealloc_t *self, size_t count, size_t size)
 	self->mem_stop = ((unsigned char *)self->mem_start) +
 	    (count * size);
 
-	struct peak_prealloc *e = self->mem_start;
-	struct peak_prealloc *f;
-	size_t i;
+	e = self->mem_start;
 
 	SLIST_INIT(&self->free);
 	SLIST_INSERT_HEAD(&self->free, e, next);

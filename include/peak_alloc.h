@@ -21,7 +21,7 @@
 #include <string.h>
 
 #define ALLOC_CACHEALIGN(x)	ALLOC_ALIGN(x, ALLOC_CACHELINE)
-#define ALLOC_ALIGN(x, y)	((x) + (y) - (((x) % (y)) ? : (y)))
+#define ALLOC_ALIGN(x, y)	((x) + (y) - ((x) % (y) ? (x) % (y) : (y)))
 #define ALLOC_CACHELINE		64
 
 #define ALLOC_HEALTHY		0
