@@ -1,0 +1,101 @@
+.\"
+.\" Copyright (c) 2014 Tobias Boertitz <tobias@packetwerk.com>
+.\" Copyright (c) 2014 Franco Fichtner <franco@packetwerk.com>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd July 2, 2014
+.Dt PEAK_MAGIC 3
+.Os
+.Sh NAME
+.Nm peak_magic_desc ,
+.Nm peak_magic_exit ,
+.Nm peak_magic_get ,
+.Nm peak_magic_init ,
+.Nm peak_magic_name ,
+.Nm peak_magic_number
+.Nd libmagic wrapper
+.Sh SYNOPSIS
+.In peak.h
+.Ft const char *
+.Fn peak_magic_desc "const unsigned int number"
+.Ft void
+.Fn peak_magic_exit "struct peak_magic *self"
+.Ft unsigned int
+.Fo peak_magic_get
+.Fa "struct peak_magic *self"
+.Fa "const char *buf"
+.Fa "const size_t len"
+.Fc
+.Ft struct peak_magic *
+.Fn peak_magic_init void
+.Ft const char *
+.Fn peak_magic_name "const unsigned int number"
+.Ft unsigned int
+.Fn peak_magic_number "const char *name"
+.Sh DESCRIPTION
+The
+.Nm peak_magic
+module wraps the
+.Lb libmagic
+into a flexible API.
+The basic design goal is to group all possible results by
+MIME type and to represent them via unique identifiers
+.Pq Dv MAGIC_* .
+.Pp
+.Fn peak_magic_init
+must be called for each processing thread.
+The function returns a valid reference or
+.Dv NULL
+if the initialisation failed.
+A previously acquired reference is passed to
+.Fn peak_magic_exit
+to release its internal structures.
+.Pp
+.Fn peak_magic_get
+is called for each buffer to be analysed as described by
+.Va buf
+and
+.Va len .
+On successful execution
+.Fn peak_magic_get
+will return a unique MIME type number.
+Otherwise,
+.Dv MAGIC_PACKED_DATA
+is returned, idicating that the type could not be identified.
+.Pp
+Given a unique MIME type
+.Va number ,
+.Fn peak_magic_name
+returns a pointer to the corresponding MIME type string, or
+.Dv NULL
+if the type does not exist.
+.Fn peak_magic_desc
+will return a pointer to the description string in the same way.
+.Pp
+The function
+.Fn peak_magic_number
+will return the matching MIME type number to a given string
+.Va name .
+Otherwise,
+.Dv MAGIC_PACKED_DATA
+is returned to indicate the type is unknown.
+.Sh AUTHORS
+.An Tobias Boertitz Aq Mt tobias@packetwerk.com
+.An Franco Fichtner Aq Mt franco@packetwerk.com
+.Sh CAVEATS
+.Fn peak_magic_get
+requires data from the beginning of a file of up to 4096 bytes.
+Feeding smaller quantities usually works, but may not be as exact.
+Feeding buffers that are not at the beginning of a file most likely
+yield undefined behaviour.

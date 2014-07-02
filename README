@@ -8,6 +8,7 @@ tools written in C.  Currently, the available modules are:
 peak_jar:	context-based circular buffer
 peak_li:	lightweight inspection (DPI)
 peak_load:	PCAP/PCAPNG/ERF/NETMON file reader
+peak_magic:	libmagic MIME type detection wrapper
 peak_netmap:	simplified netmap(4) bindings
 peak_packet:	packet preprocessor
 peak_store:	PCAP file writer

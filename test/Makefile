@@ -3,6 +3,7 @@ SUBDIR=	base \
 	load \
 	store \
 	string \
+	magic \
 	jar \
 	stream
 

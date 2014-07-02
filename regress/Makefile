@@ -3,6 +3,7 @@ SUBDIR=	base \
 	store \
 	track \
 	string \
+	magic \
 	jar \
 	stream \
 	peek
