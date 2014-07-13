@@ -1,3 +1,5 @@
+# -*- makefile -*-
+
 all: $(REGRESS_TARGET)
 
 .SUFFIXES: .in

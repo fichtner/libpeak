@@ -1,7 +1,14 @@
-BINDIR=	/usr/local/sbin
+# -*- makefile -*-
 
-CFLAGS+=-g -m64 -std=gnu99 -Wall -Wextra
+BINDIR?=/usr/local/sbin
+
+WARNINGS_SET?=	HIGH
+WARNS?=		6
+
+CFLAGS+=-g -m64 -std=gnu99
 CFLAGS+=-I$(.CURDIR)/../../include -I$(.CURDIR)/../../lib
+
+LDADD+=	-L/usr/local/lib
 
 _OSTYPE!=uname -s
 

@@ -72,6 +72,7 @@
 #include "peak_hash.h"
 
 /* library headers */
+#include "peak_locate.h"
 #include "peak_load.h"
 #include "peak_store.h"
 #include "peak_netmap.h"

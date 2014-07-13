@@ -1,0 +1,93 @@
+.\"
+.\" Copyright (c) 2012-2013 Franco Fichtner <franco@packetwerk.com>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd October 17, 2013
+.Dt PEAK_LOCATE 3
+.Os
+.Sh NAME
+.Nm peak_locate_init ,
+.Nm peak_locate_exit ,
+.Nm peak_locate_me
+.Nd geolocate a network address
+.Sh SYNOPSIS
+.In peak.h
+.Ft void
+.Fn peak_locate_init "const char *file"
+.Ft const char *
+.Fn peak_locate_me "const struct netaddr *me"
+.Ft void
+.Fn peak_locate_exit void
+.Sh DESCRIPTION
+The
+.Nm peak_locate
+API provides a mechanism to retrieve the geolocation of a network
+address.
+The database is provided via a BLOB set, which has been converted
+from raw CSV files using
+.Xr geoconv 1
+earlier.
+The library itself is thread-safe.
+.Pp
+The supplied BLOB set is sorted and holds a number of data sets.
+This makes it possible to load the binary data as a whole and to
+run a binary search on top.
+To avoid mismatching ABI specifications from corrupting a running
+system, each BLOB set is protected by a file header storing a
+magic value, the ABI revision as well as the number of data sets in
+the file.
+The exposed data structures are:
+.Bd -literal -offset indent
+struct peak_locate_hdr {
+	uint64_t magic;
+	uint32_t revision;
+	uint32_t count;
+};
+
+struct peak_locate {
+	struct netaddr min;
+	struct netaddr max;
+	char location[8];
+};
+.Ed
+.Pp
+The
+.Nm peak_locate
+API can be initialised with
+.Fn peak_locate_init .
+The function takes the location of the binary file as an argument.
+If the argument is
+.Dv NULL ,
+an empty location database is created.
+.Pp
+Retrieving a geolocation for a given
+.Fa "struct netaddr *"
+is as easy as calling
+.Fn peak_locate_me .
+Upon successful completion
+.Fn peak_locate_me
+returns an abbreviated country string, if the geolocation for the given
+network address could be found.
+Otherwise,
+a pointer to the string
+.Dq XX
+is returned.
+.Pp
+A call to
+.Fn peak_locate_exit
+releases all internal references.
+.Sh SEE ALSO
+.Xr geoconv 1
+.Sh AUTHORS
+.An Franco Fichtner Aq Mt franco@packetwerk.com

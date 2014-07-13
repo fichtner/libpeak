@@ -3,6 +3,7 @@
 SUBDIR=	include \
 	lib \
 	test \
-	bin
+	bin \
+	config
 
 .include <bsd.subdir.mk>

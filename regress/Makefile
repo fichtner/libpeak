@@ -1,6 +1,7 @@
 SUBDIR=	base \
 	load \
 	store \
+	locate \
 	track \
 	string \
 	magic \
