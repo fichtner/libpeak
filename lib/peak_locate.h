@@ -32,8 +32,6 @@ struct peak_locate {
 	char location[8];
 };
 
-__BEGIN_DECLS
-
 static inline int
 peak_locate_cmp(const void *xx, const void *yy)
 {
@@ -52,7 +50,5 @@ peak_locate_cmp(const void *xx, const void *yy)
 const char	*peak_locate_me(const struct netaddr *);
 void		 peak_locate_init(const char *);
 void		 peak_locate_exit(void);
-
-__END_DECLS
 
 #endif /* !PEAK_LOCATE_H */
