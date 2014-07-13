@@ -30,6 +30,7 @@
 #ifndef PEAK_TYPE_H
 #define PEAK_TYPE_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 static inline uint16_t

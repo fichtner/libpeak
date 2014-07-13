@@ -42,41 +42,33 @@
 } while (0)
 
 #define ALLOC_PAD(name)		(sizeof(struct peak_##name##_head) +	\
-    sizeof(struct peak_alloc_magic))
-#define ALLOC_MAGIC(x)							\
-    (((struct peak_alloc_magic *)(x)) - 1)->magic
+    sizeof(uint64_t))
+#define ALLOC_MAGIC(x)		(((uint64_t *)(x)) - 1)
 #define ALLOC_HEAD(name, x)	(((struct peak_##name##_head *)(x)) - 1)
 #define ALLOC_USER(x)		(x)->user
 #define ALLOC_SIZE(x)		(x)->size
-#define ALLOC_TAIL(x)		((struct peak_alloc_magic *)		\
-    (((unsigned char *)ALLOC_USER(x)) + ALLOC_SIZE(x)))
+#define ALLOC_TAIL(x)		(ALLOC_USER(x) + ALLOC_SIZE(x))
 #define ALLOC_VALUE(name)	name##_VALUE
 
 #define ALLOC_INIT(name, x, y) do {					\
-	(x)->m.magic = ALLOC_VALUE(name);				\
 	ALLOC_SIZE(x) = y;						\
-	ALLOC_TAIL(x)->magic = ALLOC_VALUE(name);			\
+	le64enc(&(x)->magic, ALLOC_VALUE(name));			\
+	le64enc(ALLOC_TAIL(x), ALLOC_VALUE(name));			\
 } while (0)
-
-#define ALLOC_TAIL_OK(name, x)	(ALLOC_VALUE(name) == ALLOC_TAIL(x)->magic)
 
 #define malign_VALUE		0x9B97A6B5C4D3E2F1ull
 #define malloc_VALUE		0xD12E3D4C5B6A7989ull
 
-struct peak_alloc_magic {
-	uint64_t magic;
-};
-
 struct peak_malloc_head {
 	uint64_t size;
-	struct peak_alloc_magic m;
+	uint64_t magic;
 	uint8_t user[];
 };
 
 struct peak_malign_head {
 	uint64_t size;
 	uint64_t _0[6];
-	struct peak_alloc_magic m;
+	uint64_t magic;
 	uint8_t user[];
 };
 
@@ -96,7 +88,7 @@ _peak_mcheck_malloc(void *ptr)
 
 	h = ALLOC_HEAD(malloc, ptr);
 
-	if (!ALLOC_TAIL_OK(malloc, h)) {
+	if (ALLOC_VALUE(malloc) != le64dec(ALLOC_TAIL(h))) {
 		ret = ALLOC_OVERFLOW;
 	}
 
@@ -238,7 +230,7 @@ _peak_mcheck_malign(void *ptr)
 
 	h = ALLOC_HEAD(malign, ptr);
 
-	if (!ALLOC_TAIL_OK(malign, h)) {
+	if (ALLOC_VALUE(malign) != le64dec(ALLOC_TAIL(h))) {
 		ret = ALLOC_OVERFLOW;
 	}
 
@@ -283,7 +275,7 @@ __peak_free(void *ptr, const unsigned int really_free)
 		return (ret);
 	}
 
-	switch (ALLOC_MAGIC(ptr)) {
+	switch (le64dec(ALLOC_MAGIC(ptr))) {
 	case ALLOC_VALUE(malloc):
 		ret = _peak_mcheck_malloc(ptr);
 		if (really_free && !ret) {
