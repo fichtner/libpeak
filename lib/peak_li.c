@@ -17,9 +17,7 @@
  */
 
 #include <peak.h>
-#ifdef __OpenBSD__
 #include <sys/socket.h>
-#endif /* __OpenBSD__ */
 #include <netinet/in.h>
 
 #define LI_ISDIGIT(x)		(((x) >= '0') && ((x) <= '9'))
