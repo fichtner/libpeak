@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013 Franco Fichtner <franco@packetwerk.com>
+ * Copyright (c) 2012-2014 Franco Fichtner <franco@packetwerk.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -100,7 +100,8 @@ barrier_wait(barrier_t *barrier)
 		++barrier->count;
 		pthread_cond_wait(&barrier->cond, &barrier->mutex);
 	} else {
-		ret = 1;
+		/* return number of participating threads */
+		ret = barrier->threads + 1;
 	}
 	pthread_mutex_unlock(&barrier->mutex);
 
