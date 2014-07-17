@@ -179,7 +179,7 @@ netpkt_to_user(struct _peak_netmap *x)
 static inline void
 allocate_pool()
 {
-	bzero(self, sizeof(*self));
+	memset(self, 0, sizeof(*self));
 
 	prealloc_init(&self->pkt_pool, NETMAP_MAX,
 		      sizeof(struct _peak_netmap));
@@ -206,7 +206,7 @@ _peak_netmap_init(struct peak_netmap_dev *me)
 	}
 
 	/* Put the interface into netmap mode: */
-	bzero(&req, sizeof(req));
+	memset(&req, 0, sizeof(req));
 	req.nr_version = NETMAP_API;
 	req.nr_ringid = 0;
 	req.nr_flags = NR_REG_ALL_NIC;
@@ -235,7 +235,7 @@ _peak_netmap_init(struct peak_netmap_dev *me)
 		const unsigned int if_flags = IFF_UP | IFF_PPROMISC;
 		struct ifreq ifr;
 
-		bzero(&ifr, sizeof(ifr));
+		memset(&ifr, 0, sizeof(ifr));
 		strlcpy(ifr.ifr_name, me->ifname, sizeof(ifr.ifr_name));
 
 		if (ioctl(me->fd, SIOCGIFFLAGS, &ifr)) {
@@ -251,7 +251,7 @@ _peak_netmap_init(struct peak_netmap_dev *me)
 			goto error;
 		}
 
-		bzero(&ifr, sizeof(ifr));
+		memset(&ifr, 0, sizeof(ifr));
 		strlcpy(ifr.ifr_name, me->ifname, sizeof(ifr.ifr_name));
 
 		if (ioctl(me->fd, SIOCGIFCAP, &ifr)) {
@@ -349,7 +349,7 @@ _peak_netmap_claim(const unsigned int want_sw)
 				return (NULL);
 			}
 
-			bzero(packet, sizeof(*packet));
+			memset(packet, 0, sizeof(*packet));
 
 			i = ring->cur;
 			idx = ring->slot[i].buf_idx;
@@ -575,7 +575,7 @@ peak_netmap_attach(const char *ifname)
 
 	devno = self->lastdev++; /* allocate it */
 
-	bzero(&self->dev[devno], sizeof(self->dev[devno]));
+	memset(&self->dev[devno], 0, sizeof(self->dev[devno]));
 	strlcpy(self->dev[devno].ifname, ifname, sizeof(self->dev[devno].ifname));
 	if (_peak_netmap_init(&self->dev[devno])) {
 		self->lastdev--; /* deallocate it */

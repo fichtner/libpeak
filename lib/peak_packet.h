@@ -21,10 +21,6 @@
 #define IFNAMSIZ	16
 #endif /* !IFNAMSIZ */
 
-#ifndef IPPROTO_IPV4
-#define IPPROTO_IPV4	IPPROTO_IPIP
-#endif /* !IPPROTO_IPV4 */
-
 #ifndef IPPROTO_OSPFIGP
 #define IPPROTO_OSPFIGP	89
 #endif /* !IPPROTO_OSPFIGP */
@@ -48,6 +44,10 @@
 #ifndef IPPROTO_SHIM6
 #define IPPROTO_SHIM6	140
 #endif /* IPPROTO_SHIM6 */
+
+#ifndef LINKTYPE_NULL
+#define LINKTYPE_NULL		0
+#endif	/* !LINKTYPE_NULL */
 
 #ifndef LINKTYPE_ETHERNET
 #define LINKTYPE_ETHERNET	1
@@ -115,6 +115,7 @@ struct peak_packet {
 	uint16_t app_len;
 	uint16_t flow_sport;
 	uint16_t flow_dport;
+	uint32_t link_type;
 };
 
 unsigned int	 peak_packet_parse(struct peak_packet *, void *,

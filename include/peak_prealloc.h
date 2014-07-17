@@ -86,7 +86,7 @@ prealloc_init(prealloc_t *self, size_t count, size_t size)
 	struct peak_prealloc *e, *f;
 	size_t i;
 
-	bzero(self, sizeof(*self));
+	memset(self, 0, sizeof(*self));
 
 	if (!count || !size) {
 		return (0);

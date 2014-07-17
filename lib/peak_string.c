@@ -121,7 +121,7 @@ peak_string_add(struct peak_strings *root, const unsigned int result,
 		return (0);
 	}
 
-	bzero(ref, sizeof(*ref));
+	memset(ref, 0, sizeof(*ref));
 
 	for (i = 0; i < len; ++i) {
 		if (buf[i] == '?') {

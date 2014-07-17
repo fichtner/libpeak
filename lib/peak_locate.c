@@ -51,7 +51,9 @@ void
 peak_locate_exit(void)
 {
 	free(self->mem);
-	bzero(self, sizeof(*self));
+
+	self->mem = NULL;
+	self->count = 0;
 }
 
 void
@@ -98,7 +100,7 @@ peak_locate_init(const char *file)
 		goto peak_locate_init_out;
 	}
 
-	mem = calloc(count, sizeof(*mem));
+	mem = reallocarray(NULL, count, sizeof(*mem));
 	if (!mem) {
 		alert("memory allocation failed\n");
 		goto peak_locate_init_out;

@@ -71,7 +71,7 @@ typedef struct {
 } while (0)
 
 #define TIMESLICE_INIT(clock) do {					\
-	bzero(clock, sizeof(timeslice_t));				\
+	memset(clock, 0, sizeof(timeslice_t));				\
 } while (0)
 
 #endif /* !PEAK_TIMESLICE_H */

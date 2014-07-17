@@ -242,8 +242,9 @@ unsigned int
 peak_packet_parse(struct peak_packet *self, void *buf, unsigned int len,
     unsigned int type)
 {
-	bzero(self, sizeof(*self));
+	memset(self, 0, sizeof(*self));
 
+	self->link_type = type;
 	self->mac.raw = buf;
 	self->mac_len = len;
 

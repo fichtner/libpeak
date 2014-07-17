@@ -159,7 +159,7 @@ peak_jar_pack_again:
 	peak_jar_repair(self, context);
 
 	/* initialise data header and copy data */
-	bzero(data, sizeof(*data));
+	memset(data, 0, sizeof(*data));
 	memcpy(data->buf, buf, len);
 	data->serial = head->serial;
 	data->len = len;
@@ -209,7 +209,7 @@ peak_jar_peek(struct peak_jars *self, struct peak_jar *context,
 unsigned int
 peak_jar_init(struct peak_jars *self, size_t size)
 {
-	bzero(self, sizeof(*self));
+	memset(self, 0, sizeof(*self));
 
 	if (size & 0x7 || size < 128) {
 		return (0);

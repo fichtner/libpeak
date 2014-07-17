@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd April 27, 2014
+.Dd July 16, 2014
 .Dt PEAK_TIMESLICE 3
 .Os
 .Sh NAME
@@ -81,7 +81,6 @@ Then,
 .Fn TIMESLICE_CALIBRATE
 is used to adjust the internal monotonic clock to start at zero,
 which is quite handy for initial timeouts in other libraries.
-(Note that seconds are normalised, not sub-seconds.)
 .Pp
 To advance the clocks the caller invokes
 .Fn TIMESLICE_ADVANCE

@@ -78,7 +78,7 @@ entry	: ip_str ip_str ip_raw ip_raw loc {
 			exit(1);
 		}
 
-		bzero(elm, sizeof(*elm));
+		memset(elm, 0, sizeof(*elm));
 		memcpy(elm->data.location, $5, sizeof(elm->data.location));
 		elm->data.min = $1;
 		elm->data.max = $2;

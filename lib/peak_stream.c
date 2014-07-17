@@ -194,7 +194,7 @@ peak_stream_get(struct peak_streams *self)
 		panic("no more stream references available\n");
 	}
 
-	bzero(ret, sizeof(*ret));
+	memset(ret, 0, sizeof(*ret));
 
 	return (ret);
 }

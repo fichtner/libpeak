@@ -396,7 +396,7 @@ peak_load_init(const char *file)
 				goto peak_load_init_close;
 			}
 
-			bzero(&base, sizeof(base));
+			memset(&base, 0, sizeof(base));
 
 			/* convert to time_t */
 			base.tm_year = hdr.start_year - 1900;

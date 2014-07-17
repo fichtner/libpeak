@@ -62,7 +62,7 @@ peak_track_acquire(struct peak_tracks *self, const struct peak_track *ref)
 		panic("flow pool empty\n");
 	}
 
-	bzero(flow, sizeof(*flow));
+	memset(flow, 0, sizeof(*flow));
 	memcpy(flow, ref, TRACK_SIZE(ref));
 
 	if (unlikely(RB_INSERT(peak_track_tree, &self->flows, flow))) {

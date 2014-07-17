@@ -39,6 +39,10 @@
 #define likely(exp)	__builtin_expect(!!(exp), 1)
 #endif /* !likely */
 
+#ifndef __aligned
+#define __aligned(x)	__attribute__((aligned(x)))
+#endif /* !__aligned */
+
 #ifndef __packed
 #define __packed	__attribute__((__packed__))
 #endif /* !__packed */

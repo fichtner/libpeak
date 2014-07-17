@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Franco Fichtner <franco@packetwerk.com>
+ * Copyright (c) 2013-2014 Franco Fichtner <franco@packetwerk.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -28,7 +28,7 @@ test_track(void)
 	struct peak_track _flow;
 	struct peak_track *flow;
 
-	bzero(&packet, sizeof(packet));
+	memset(&packet, 0, sizeof(packet));
 
 	netaddr4(&usr1, 0);
 	netaddr4(&usr2, 1);
