@@ -152,12 +152,27 @@ finalise(const char *plain_fn)
 	close(fd);
 }
 
+static void
+usage(void)
+{
+	extern char *__progname;
+
+	perr("usage: %s file ...\n", __progname);
+
+	exit(EXIT_FAILURE);
+}
+
 int
 main(int argc, char **argv)
 {
 	const char *fn = NULL;
 	struct geo_helper *elm;
 	int i;
+
+	if (argc <= 1) {
+		usage();
+		/* NOTREACHED */
+	}
 
 	if (!prealloc_init(&geo_mem, 150000, sizeof(*elm))) {
 		perr("could not allocate memory\n");
