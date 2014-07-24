@@ -1,0 +1,145 @@
+.\"
+.\" Copyright (c) 2014 Franco Fichtner <franco@packetwerk.com>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd July 24, 2014
+.Dt PEAK_TRANSFER 3
+.Os
+.Sh NAME
+.Nm peak_transfer_attach ,
+.Nm peak_transfer_claim ,
+.Nm peak_transfer_detach ,
+.Nm peak_transfer_divert ,
+.Nm peak_transfer_drop ,
+.Nm peak_transfer_forward ,
+.Nm peak_transfer_lock ,
+.Nm peak_transfer_unlock
+.Nd packet transport interface
+.Sh SYNOPSIS
+.In peak.h
+.Ft unsigned int
+.Fn peak_transfer_attach "const char *ifname"
+.Ft struct peak_transfer *
+.Fn peak_transfer_claim "int timeout" "const unsigned int want_sw"
+.Ft unsigned int
+.Fn peak_transfer_detach "const char *ifname"
+.Ft unsigned int
+.Fn peak_transfer_drop "struct peak_transfer *packet"
+.Ft unsigned int
+.Fn peak_transfer_forward "struct peak_transfer *packet"
+.Ft unsigned int
+.Fn peak_transfer_divert "struct peak_transfer *packet" "const char *ifname"
+.Ft void
+.Fn peak_transfer_lock void
+.Ft void
+.Fn peak_transfer_unlock void
+.Sh DESCRIPTION
+The
+.Nm peak_transfer
+API provides an interface for packet transport mechanisms such as
+.Xr bpf 4
+or
+.Xr netmap 4 .
+It can be used to unify the packet transfer operations into one
+single implementation.
+.Pp
+The dynamic interface management is handled via the
+.Fn peak_transfer_attach
+and
+.Fn peak_transfer_detach
+function pair.
+The
+.Va ifname
+parameter must be a string holding the interface name.
+Both functions return zero, if the operation was successful.
+Otherwise, a non-zero value is returned.
+.Pp
+The
+.Fn peak_transfer_lock
+and
+.Fn peak_transfer_unlock
+functions pairs can be used to guard the API against premature
+interface attach and detach.
+It's recommended to provide glitch-free operation of claim and
+friends \(em especially when separate threads handle interface
+configuration and receive/transmit.
+.Pp
+The
+.Fn peak_transfer_claim
+function claims ownership of a packet internally bound to
+a specific hidden implementation.
+If
+.Va timeout
+is greater than zero, it specifies a maximum interval
+(in milliseconds) to wait for incoming packets.
+If
+.Va timeout
+is zero, then
+.Fn peak_transfer_claim
+will return without blocking.
+If the value of
+.Va timeout
+is \-1, the call blocks indefinitely.
+The function returns
+.Dv NULL
+on errors or an expired timeout.
+Otherwise, a pointer to the claimed packet reference is returned.
+.Pp
+Externally,
+.Vt struct peak_transfer
+is used to provide the caller with all the information regarding
+the claimed packet.
+The structure must be provided by the caller and is defined
+as follows:
+.Bd -literal -offset indent
+struct peak_transfer {
+	struct peak_timeval ts;
+	const char *ifname;
+	void *private_data;
+	unsigned int len;
+	unsigned int ll;
+	void *buf;
+};
+.Ed
+.Pp
+The
+.Fn peak_transfer_forward
+function releases the previously claimed
+.Va packet
+and moves it over to the host stack or the interface,
+whichever was the original destination of the packet.
+.Pp
+The
+.Fn peak_transfer_drop
+function releases the previously claimed
+.Va packet
+and issues it to be dropped.
+This operation cannot fail.
+.Pp
+The
+.Fn peak_transfer_divert
+function releases the previously claimed
+.Va packet
+and moves it to the specified interface
+.Va ifname
+using a zero-copy technique.
+Upon success, the function returns zero.
+Otherwise, non-zero is returned indicating that the packet could not
+be transmitted via the specified interface.
+The user must call the function again later or drop the packet.
+.Sh SEE ALSO
+.Xr bpf 4 ,
+.Xr netmap 4
+.Sh AUTHORS
+.An Franco Fichtner Aq Mt franco@packetwerk.com

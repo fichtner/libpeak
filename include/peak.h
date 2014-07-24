@@ -74,6 +74,7 @@
 #include "peak_page.h"
 #include "peak_net.h"
 #include "peak_hash.h"
+#include "peak_transfer.h"
 
 /* library headers */
 #include "peak_locate.h"
