@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd April 26, 2014
+.Dd July 24, 2014
 .Dt PEAK_NETMAP 3
 .Os
 .Sh NAME
@@ -30,16 +30,19 @@
 .In peak.h
 .Ft unsigned int
 .Fn peak_netmap_attach "const char *ifname"
-.Ft struct peak_netmap *
-.Fn peak_netmap_claim "int timeout" "const unsigned int want_sw"
+.Ft struct peak_transfer *
+.Fo peak_netmap_claim
+.Fa "struct peak_transfer *packet" "int timeout"
+.Fa "const unsigned int want_sw"
+.Fc
 .Ft unsigned int
 .Fn peak_netmap_detach "const char *ifname"
 .Ft unsigned int
-.Fn peak_netmap_drop "struct peak_netmap *packet"
+.Fn peak_netmap_drop "struct peak_transfer *packet"
 .Ft unsigned int
-.Fn peak_netmap_forward "struct peak_netmap *packet"
+.Fn peak_netmap_forward "struct peak_transfer *packet"
 .Ft unsigned int
-.Fn peak_netmap_divert "struct peak_netmap *packet" "const char *ifname"
+.Fn peak_netmap_divert "struct peak_transfer *packet" "const char *ifname"
 .Ft void
 .Fn peak_netmap_lock void
 .Ft void
@@ -105,19 +108,12 @@ In theory, claiming multiple packets at once is possible
 as long as all the internal pools have the capacity.
 However, it is wise not to stress this part of the implementation.
 Externally,
-.Vt struct peak_netmap
+.Vt struct peak_transfer
 is used to provide the caller with all the information regarding
 the claimed packet.
-The structure is defined as follows:
-.Bd -literal -offset indent
-struct peak_netmap {
-	struct peak_timeval ts;
-	const char *ifname;
-	unsigned int len;
-	unsigned int ll;
-	void *buf;
-};
-.Ed
+See
+.Xr peak_transfer 3
+for details.
 .Pp
 The
 .Fn peak_netmap_forward
@@ -149,7 +145,7 @@ Otherwise, non-zero is returned indicating that the packet could not
 be transmitted via the specified interface.
 The user must call the function again later or drop the packet.
 .Sh SEE ALSO
-.Xr fuse 1 ,
+.Xr peak_transfer 3 ,
 .Xr netmap 4
 .Sh AUTHORS
 .An Franco Fichtner Aq Mt franco@packetwerk.com

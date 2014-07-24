@@ -40,7 +40,8 @@ int
 main(int argc, char **argv)
 {
 #ifdef __FreeBSD__
-	struct peak_netmap *pkt;
+	struct peak_transfer *pkt;
+	struct peak_transfer _pkt;
 #endif /* __FreeBSD__ */
 	const char *dev0, *dev1;
 
@@ -73,7 +74,7 @@ main(int argc, char **argv)
 	peak_netmap_lock();
 
 	while (loop) {
-		pkt = peak_netmap_claim(200, 0);
+		pkt = peak_netmap_claim(&_pkt, 200, 0);
 		if (pkt) {
 			if (peak_netmap_divert(pkt,
 			    !strcmp(dev0, pkt->ifname) ? dev1 : dev0)) {

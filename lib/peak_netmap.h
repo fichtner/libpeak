@@ -19,40 +19,26 @@
 #define PEAK_NETMAP_H
 
 #ifdef __FreeBSD__
+
 #include <net/if.h>
 #include <net/netmap.h>
-#endif /* __FreeBSD__ */
 
-struct peak_netmap {
-	struct peak_timeval ts;
-	const char *ifname;
-	unsigned int len;
-	unsigned int ll;
-	void *buf;
-};
+#if !defined(NETMAP_API) || NETMAP_API < 11
+#error need NETMAP_API >= 11
+#endif
 
-#if defined(__FreeBSD__) && defined(NETMAP_API) && (NETMAP_API >= 11)
+extern const struct peak_transfers transfer_netmap;
 
-unsigned int		 peak_netmap_divert(struct peak_netmap *,
+unsigned int		 peak_netmap_divert(struct peak_transfer *,
 			     const char *);
-struct peak_netmap	*peak_netmap_claim(int, const unsigned int);
-unsigned int		 peak_netmap_forward(struct peak_netmap *);
-unsigned int		 peak_netmap_drop(struct peak_netmap *);
+struct peak_transfer	*peak_netmap_claim(struct peak_transfer *,
+			     int, const unsigned int);
+unsigned int		 peak_netmap_forward(struct peak_transfer *);
+unsigned int		 peak_netmap_drop(struct peak_transfer *);
 unsigned int		 peak_netmap_attach(const char *);
 unsigned int		 peak_netmap_detach(const char *);
 void			 peak_netmap_unlock(void);
 void			 peak_netmap_lock(void);
-
-#else /* !__FreeBSD__ */
-
-#define peak_netmap_divert(x, y)	1
-#define peak_netmap_claim(x, y)		NULL
-#define peak_netmap_forward(x)		do { (void)(x); } while (0)
-#define peak_netmap_drop(x)		do { (void)(x); } while (0)
-#define peak_netmap_attach(x)		1
-#define peak_netmap_detach(x)		do { (void)(x); } while (0)
-#define peak_netmap_unlock()		do { } while (0)
-#define peak_netmap_lock()		do { } while (0)
 
 #endif /* __FreeBSD__ */
 
