@@ -40,8 +40,7 @@ int
 main(int argc, char **argv)
 {
 #ifdef __FreeBSD__
-	struct peak_transfer *pkt;
-	struct peak_transfer _pkt;
+	struct peak_netmap *pkt;
 #endif /* __FreeBSD__ */
 	const char *dev0, *dev1;
 
