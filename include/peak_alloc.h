@@ -323,6 +323,7 @@ __peak_free(void *ptr, const unsigned int really_free)
 #define malign		peak_malign
 #define malloc		peak_malloc
 #define calloc		peak_calloc
+#undef strdup		/* Linux, geez */
 #define strdup		peak_strdup
 #define mcheck		peak_mcheck
 #define free		peak_free
