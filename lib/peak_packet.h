@@ -33,9 +33,11 @@
 #define IPPROTO_L2TP	115
 #endif /* !IPPROTO_L2TP */
 
+#ifndef linux
 #ifndef IPPROTO_SCTP
 #define IPPROTO_SCTP	132
 #endif /* IPPROTO_SCTP */
+#endif /* !linux */
 
 #ifndef IPPROTO_HIP
 #define IPPROTO_HIP	139
