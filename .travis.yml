@@ -1,5 +1,5 @@
 install:
-  - sudo apt-get install -qq build-essential pmake cppcheck rats sparse
+  - sudo apt-get install -qq build-essential pmake cppcheck rats sparse file
 script: pmake NOLINT=
 after_success:
   - cd regress && pmake && cd ..
