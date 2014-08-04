@@ -67,7 +67,11 @@ peak_packet_net(const struct peak_packet *self)
 	case IPPROTO_IGMP:
 		ret = "igmp";
 		break;
+#ifndef linux
 	case IPPROTO_IPV4:
+#else /* linux */
+	case IPPROTO_IPIP:
+#endif /* !linux */
 		ret = "ipv4";
 		break;
 	case IPPROTO_TCP:
