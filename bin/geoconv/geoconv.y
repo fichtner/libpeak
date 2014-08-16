@@ -155,7 +155,7 @@ finalise(const char *plain_fn)
 static void
 usage(void)
 {
-	fprintf(stderr, "usage: %s file ...\n", getprogname());
+	fprintf(stderr, "usage: geoconv file ...\n");
 	exit(EXIT_FAILURE);
 }
 
@@ -165,8 +165,6 @@ main(int argc, char **argv)
 	const char *fn = NULL;
 	struct geo_helper *elm;
 	int i;
-
-	setprogname(argv[0]);
 
 	if (argc <= 1) {
 		usage();

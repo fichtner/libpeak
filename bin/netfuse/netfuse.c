@@ -32,20 +32,14 @@ netfuse_signal(int sig)
 static void
 usage(void)
 {
-	fprintf(stderr, "usage: %s dev0 dev1\n", getprogname());
+	fprintf(stderr, "usage: netfuse dev0 dev1\n");
 	exit(EXIT_FAILURE);
 }
 
 int
 main(int argc, char **argv)
 {
-#ifdef __FreeBSD__
-	struct peak_transfer *pkt;
-	struct peak_transfer _pkt;
-#endif /* __FreeBSD__ */
-	const char *dev0, *dev1;
-
-	setprogname(argv[0]);
+	(void)argv;
 
 	if (argc < 3) {
 		usage();
@@ -56,10 +50,14 @@ main(int argc, char **argv)
 
 	output_bug();
 
+#if defined(__FreeBSD__) && defined(NETMAP_API) && NETMAP_API >= 11
+	struct peak_transfer *pkt;
+	struct peak_transfer _pkt;
+	const char *dev0, *dev1;
+
 	dev0 = argv[1];
 	dev1 = argv[2];
 
-#ifdef __FreeBSD__
 	if (peak_netmap_attach(dev0)) {
 		perr("could not attach to %s\n", dev0);
 		return (1);

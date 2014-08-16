@@ -108,7 +108,7 @@ peek_packet(struct peak_tracks *peek, const timeslice_t *timer,
 static void
 usage(void)
 {
-	fprintf(stderr, "usage: %s [-AafNnt] file\n", getprogname());
+	fprintf(stderr, "usage: peek [-AafNnt] file\n");
 	exit(EXIT_FAILURE);
 }
 
@@ -119,8 +119,6 @@ main(int argc, char **argv)
 	struct peak_load *trace;
 	timeslice_t timer;
 	int c;
-
-	setprogname(argv[0]);
 
 	while ((c = getopt(argc, argv, "AafNnt")) != -1) {
 		switch (c) {

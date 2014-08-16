@@ -63,12 +63,6 @@
 #define XOR(a,b)	(!!(a)+!!(b)==1)
 #endif /* !XOR */
 
-#ifdef linux
-#define setprogname(x)	do { peak_prog = x; } while (0)
-#define getprogname()	peak_prog
-static const char *peak_prog;
-#endif /* !linux */
-
 /* base headers */
 #include "peak_type.h"
 #include "peak_sys.h"
