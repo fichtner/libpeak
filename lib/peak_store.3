@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd February 2, 2014
+.Dd August 28, 2014
 .Dt PEAK_STORE 3
 .Os
 .Sh NAME
@@ -31,7 +31,8 @@
 .Fo peak_store_packet
 .Fa "int fd" "const void *buf"
 .Fa "const unsigned int len"
-.Fa "const int64_t ts_ms"
+.Fa "const int64_t tv_sec"
+.Fa "const int64_t tv_usec"
 .Fc
 .Sh DESCRIPTION
 The

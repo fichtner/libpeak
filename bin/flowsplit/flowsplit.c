@@ -134,8 +134,8 @@ main(int argc, char **argv)
 			}
 
 			peak_store_packet(fds[ret % file_count],
-			    trace->buf, trace->len, trace->ll,
-			    trace->ts.tv_sec);
+			    trace->buf, trace->len, trace->ts.tv_sec,
+			    trace->ts.tv_usec);
 		} while (peak_load_packet(trace));
 	}
 
