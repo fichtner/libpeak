@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2013-2014 Franco Fichtner <franco@packetwerk.com>
  * Copyright (c) 2014 Masoud Chelongar <masoud@packetwerk.com>
+ * Copyright (c) 2014 Tobias Boertitz <tobias@packetwerk.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -184,11 +185,13 @@ test_string_fila(void)
 static void
 test_string_multiple(void)
 {
-	const char *text = "Lorem ipsum dolor sit amet, "
+	const char *text1 = "Lorem ipsum dolor sit amet, "
 	    "consetetur sadipscing elitr, sed diam nonumy "
 	    "eirmod tempor invidunt ut labore et dolore "
 	    "magna aliquyam erat, sed diam voluptua.";
-	const unsigned int result[] = { 1, 6, 2, 5, 2, 5, 4 };
+	const char *text2 = "";
+	const unsigned int result1[] = { 7, 1, 6, 2, 5, 2, 5, 4 };
+	const unsigned int result2[] = { 7, 8 };
 	STASH_DECLARE(stash, unsigned int, 10);
 	struct peak_strings *root;
 	unsigned int *ret, i = 0;
@@ -196,7 +199,6 @@ test_string_multiple(void)
 	root = peak_string_init();
 	assert(root);
 
-	assert(0 == peak_string_add(root, 1, " ipsum ", 0, STRING_LOOSE));
 	assert(0 == peak_string_add(root, 1, NULL, 1, STRING_LOOSE));
 	assert(1 == peak_string_add(root, 1, " ipsum ", 7, STRING_LOOSE));
 	assert(2 == peak_string_add(root, 2, ", sed", 5, STRING_LOOSE));
@@ -204,13 +206,22 @@ test_string_multiple(void)
 	assert(4 == peak_string_add(root, 4, ".", 1, STRING_LOOSE));
 	assert(5 == peak_string_add(root, 5, "diam ", 4, STRING_LOOSE));
 	assert(6 == peak_string_add(root, 6, "dolor sit amet,", 15, STRING_LOOSE));
+	assert(7 == peak_string_add(root, 7, "", 0, STRING_LOOSE));
+	assert(8 == peak_string_add(root, 8, " ipsum ", 0, STRING_EXACT));
+	assert(9 == peak_string_add(root, 9, " erat ", 8, STRING_LOOSE));
 
-	peak_string_find(root, text, strlen(text), stash);
-
-	assert(STASH_COUNT(stash) == lengthof(result));
-
+	peak_string_find(root, text1, strlen(text1), stash);
+	assert(STASH_COUNT(stash) == lengthof(result1));
 	STASH_FOREACH(ret, stash) {
-		assert(*ret == result[i++]);
+		assert(*ret == result1[i++]);
+	}
+
+	i = 0;
+	STASH_CLEAR(stash);
+	peak_string_find(root, text2, strlen(text2), stash);
+	assert(STASH_COUNT(stash) == lengthof(result2));
+	STASH_FOREACH(ret, stash) {
+		assert(*ret == result2[i++]);
 	}
 
 	peak_string_exit(root);

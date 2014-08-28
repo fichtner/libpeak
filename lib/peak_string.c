@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2013-2014 Franco Fichtner <franco@packetwerk.com>
  * Copyright (c) 2014 Masoud Chelongar <masoud@packetwerk.com>
+ * Copyright (c) 2014 Tobias Boertitz <tobias@packetwerk.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -30,13 +31,11 @@ PAGE_DECLARE(_peak_strings, struct peak_strings, 5);
 #define STRING_FREE(x, y)	free(y)
 #define STRING_WILDCARD		257
 
-static void
-_peak_string_find(struct peak_strings *node, const char *buf,
-    const size_t len, const unsigned int start, stash_t stash)
+static unsigned int
+peak_string_match(const struct peak_strings *node, const size_t len,
+    const unsigned int start, stash_t stash)
 {
 	STASH_REBUILD(temp, unsigned int, stash);
-	struct peak_strings stackptr(ref);
-	struct peak_strings *found;
 
 	if (node->result[STRING_LOOSE]) {
 		/*
@@ -59,9 +58,15 @@ _peak_string_find(struct peak_strings *node, const char *buf,
 		STASH_PUSH(&node->result[STRING_EXACT], temp);
 	}
 
-	if (!len) {
-		return;
-	}
+	return !len;
+}
+
+static void
+_peak_string_find(struct peak_strings *node, const char *buf,
+    const size_t len, const unsigned int start, stash_t stash)
+{
+	struct peak_strings stackptr(ref);
+	struct peak_strings *found;
 
 	/*
 	 * search for literal character inside input buffer
@@ -70,6 +75,9 @@ _peak_string_find(struct peak_strings *node, const char *buf,
 
 	found = PAGE_FIND(node->next, ref, STRING_CMP);
 	if (found) {
+		if (peak_string_match(found, len - 1, start, stash)) {
+			return;
+		}
 		_peak_string_find(found, buf + 1, len - 1, start, stash);
 	}
 
@@ -80,9 +88,11 @@ _peak_string_find(struct peak_strings *node, const char *buf,
 
 	found = PAGE_FIND(node->next, ref, STRING_CMP);
 	if (found) {
+		if (peak_string_match(found, len - 1, start, stash)) {
+			return;
+		}
 		_peak_string_find(found, buf + 1, len - 1, start, stash);
 	}
-
 }
 
 void
@@ -90,6 +100,10 @@ peak_string_find(struct peak_strings *root, const char *buf,
     const size_t len, stash_t stash)
 {
 	size_t i;
+
+	if (peak_string_match(root, len, 1, stash)) {
+		return;
+	}
 
 	for (i = 0; i < len; ++i) {
 		/*
@@ -109,11 +123,7 @@ peak_string_add(struct peak_strings *root, const unsigned int result,
 	struct peak_strings *node = root;
 	unsigned int i;
 
-	if (!buf || !len) {
-		/*
-		 * Don't allow empty matches.  This may sound
-		 * paranoid, but, trust me, they will sneak in.
-		 */
+	if (!buf) {
 		return (0);
 	}
 
