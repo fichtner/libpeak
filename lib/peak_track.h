@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Franco Fichtner <franco@packetwerk.com>
+ * Copyright (c) 2013-2014 Franco Fichtner <franco@packetwerk.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -41,7 +41,7 @@ struct peak_track {
 	(flow)->type = (packet)->net_type;				\
 } while (0)
 
-struct peak_tracks	*peak_track_init(const size_t);
+struct peak_tracks	*peak_track_init(const size_t, const unsigned int);
 struct peak_track	*peak_track_acquire(struct peak_tracks *,
 			    const struct peak_track *);
 void			 peak_track_exit(struct peak_tracks *);

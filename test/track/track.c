@@ -33,7 +33,7 @@ test_track(void)
 	netaddr4(&usr1, 0);
 	netaddr4(&usr2, 1);
 
-	tracker = peak_track_init(2);
+	tracker = peak_track_init(2, 0);
 	assert(tracker);
 
 	packet.net_saddr = usr1;

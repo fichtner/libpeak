@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2013 Franco Fichtner <franco@packetwerk.com>
+.\" Copyright (c) 2013-2014 Franco Fichtner <franco@packetwerk.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd October 25, 2013
+.Dd August 27, 2014
 .Dt PEAK_TRACK 3
 .Os
 .Sh NAME
@@ -32,7 +32,10 @@
 .Ft void
 .Fn peak_track_exit "stuct peak_tracks *self"
 .Ft struct peak_tracks *
-.Fn peak_track_init "const size_t max_flows"
+.Fo peak_track_init
+.Fa "const size_t max_flows"
+.Fa "const unsigned int no_timeout"
+.Fc
 .Fn TRACK_KEY FLOW PACKET
 .Sh DESCRIPTION
 The
@@ -58,6 +61,13 @@ The
 API needs to be initialised with
 .Fn peak_track_init
 before it can be used.
+Setting
+.Va no_timeout
+to non-zero causes
+.Fn peak_track_acquire
+to fail when
+.Va max_flows
+has been reached.
 Upon successful completion the function returns a pointer to an initialised
 flow tracker structure.
 Otherwise,

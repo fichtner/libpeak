@@ -90,7 +90,7 @@ peek_packet(struct peak_tracks *peek, const timeslice_t *timer,
 
 	flow = peak_track_acquire(peek, &_flow);
 	if (!flow) {
-		panic("tracker should never be empty\n");
+		panic("tracker is empty\n");
 	}
 
 	{
@@ -173,7 +173,7 @@ main(int argc, char **argv)
 		panic("cannot init file loader\n");
 	}
 
-	peek = peak_track_init(1000);
+	peek = peak_track_init(10000, 1);
 	if (!peek) {
 		panic("cannot init flow tracker\n");
 	}

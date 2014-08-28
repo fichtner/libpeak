@@ -28,6 +28,7 @@ RB_HEAD(peak_track_tree, peak_track);
 struct peak_tracks {
 	struct peak_track_tree flows;
 	TAILQ_HEAD(, peak_track) tos;
+	unsigned int no_timeout;
 	prealloc_t mem;
 };
 
@@ -51,6 +52,9 @@ peak_track_acquire(struct peak_tracks *self, const struct peak_track *ref)
 	}
 
 	if (prealloc_empty(&self->mem)) {
+		if (self->no_timeout) {
+			return (NULL);
+		}
 		flow = TAILQ_FIRST(&self->tos);
 		TAILQ_REMOVE(&self->tos, flow, tq_to);
 		RB_REMOVE(peak_track_tree, &self->flows, flow);
@@ -76,10 +80,9 @@ peak_track_acquire(struct peak_tracks *self, const struct peak_track *ref)
 }
 
 struct peak_tracks *
-peak_track_init(const size_t max_flows)
+peak_track_init(const size_t max_flows, const unsigned int no_timeout)
 {
 	struct peak_tracks *self = calloc(1, sizeof(*self));
-
 	if (!self) {
 		return (NULL);
 	}
@@ -90,6 +93,7 @@ peak_track_init(const size_t max_flows)
 		return (NULL);
 	}
 
+	self->no_timeout = no_timeout;
 	TAILQ_INIT(&self->tos);
 	RB_INIT(&self->flows);
 
