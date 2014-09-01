@@ -38,8 +38,8 @@ test_string_single(void)
 	assert(STASH_EMPTY(stash));
 
 	/* deduplicate strings */
-	assert(1 == peak_string_add(root, 1, "test", 4, STRING_LOOSE));
-	assert(1 == peak_string_add(root, 2, "test", 4, STRING_LOOSE));
+	assert(1 == peak_string_add(root, 1, "test", 4, 0));
+	assert(1 == peak_string_add(root, 2, "test", 4, 0));
 
 	/* finds nothing */
 	peak_string_find(root, NULL, 0, stash);
@@ -77,7 +77,7 @@ test_string_single(void)
 }
 
 static void
-test_string_fi(void)
+test_string_left(void)
 {
 	STASH_DECLARE(stash, unsigned int, 10);
 	struct peak_strings *root;
@@ -112,7 +112,7 @@ test_string_wildcard(void)
 	root = peak_string_init();
 	assert(root);
 
-	assert(1 == peak_string_add(root, 1, "t?st", 4, STRING_LOOSE));
+	assert(1 == peak_string_add(root, 1, "t?st", 4, 0));
 
 	/* finds nothing */
 	peak_string_find(root, "string tst", 10, stash);
@@ -131,7 +131,43 @@ test_string_wildcard(void)
 }
 
 static void
-test_string_la(void)
+test_string_nocase(void)
+{
+	STASH_DECLARE(stash, unsigned int, 10);
+	struct peak_strings *root;
+	unsigned int *ret;
+
+	root = peak_string_init();
+	assert(root);
+
+	assert(1 == peak_string_add(root, 1, "aToZ", 4, STRING_NOCASE));
+
+	/* single match */
+	peak_string_find(root, "atoz", 4, stash);
+	assert((ret = STASH_POP(stash)));
+	assert(*ret == 1);
+	assert(STASH_EMPTY(stash));
+	STASH_CLEAR(stash);
+
+	/* multiple (sub)matches */
+	peak_string_find(root, "aToz AtOZ ATOzatOz aTO", 21, stash);
+	assert((ret = STASH_POP(stash)));
+	assert(*ret == 1);
+	assert((ret = STASH_POP(stash)));
+	assert(*ret == 1);
+	assert((ret = STASH_POP(stash)));
+	assert(*ret == 1);
+	assert((ret = STASH_POP(stash)));
+	assert(*ret == 1);
+	assert(STASH_EMPTY(stash));
+	STASH_CLEAR(stash);
+
+	peak_string_exit(NULL);
+	peak_string_exit(root);
+}
+
+static void
+test_string_right(void)
 {
 	STASH_DECLARE(stash, unsigned int, 10);
 	struct peak_strings *root;
@@ -157,7 +193,7 @@ test_string_la(void)
 }
 
 static void
-test_string_fila(void)
+test_string_exact(void)
 {
 	STASH_DECLARE(stash, unsigned int, 10);
 	struct peak_strings *root;
@@ -166,7 +202,8 @@ test_string_fila(void)
 	root = peak_string_init();
 	assert(root);
 
-	assert(1 == peak_string_add(root, 1, "test", 4, STRING_EXACT));
+	assert(1 == peak_string_add(root, 1, "test", 4,
+	    STRING_LEFT|STRING_RIGHT));
 
 	/* finds nothing */
 	peak_string_find(root, "test string test", 16, stash);
@@ -199,16 +236,17 @@ test_string_multiple(void)
 	root = peak_string_init();
 	assert(root);
 
-	assert(0 == peak_string_add(root, 1, NULL, 1, STRING_LOOSE));
-	assert(1 == peak_string_add(root, 1, " ipsum ", 7, STRING_LOOSE));
-	assert(2 == peak_string_add(root, 2, ", sed", 5, STRING_LOOSE));
-	assert(3 == peak_string_add(root, 3, ", sef ", 5, STRING_LOOSE));
-	assert(4 == peak_string_add(root, 4, ".", 1, STRING_LOOSE));
-	assert(5 == peak_string_add(root, 5, "diam ", 4, STRING_LOOSE));
-	assert(6 == peak_string_add(root, 6, "dolor sit amet,", 15, STRING_LOOSE));
-	assert(7 == peak_string_add(root, 7, "", 0, STRING_LOOSE));
-	assert(8 == peak_string_add(root, 8, " ipsum ", 0, STRING_EXACT));
-	assert(9 == peak_string_add(root, 9, " erat ", 8, STRING_LOOSE));
+	assert(0 == peak_string_add(root, 1, NULL, 1, 0));
+	assert(1 == peak_string_add(root, 1, " ipsum ", 7, 0));
+	assert(2 == peak_string_add(root, 2, ", sed", 5, 0));
+	assert(3 == peak_string_add(root, 3, ", sef ", 5, 0));
+	assert(4 == peak_string_add(root, 4, ".", 1, 0));
+	assert(5 == peak_string_add(root, 5, "diam ", 4, 0));
+	assert(6 == peak_string_add(root, 6, "dolor sit amet,", 15, 0));
+	assert(7 == peak_string_add(root, 7, "", 0, 0));
+	assert(8 == peak_string_add(root, 8, " ipsum ", 0,
+	    STRING_LEFT|STRING_RIGHT));
+	assert(9 == peak_string_add(root, 9, " erat ", 8, 0));
 
 	peak_string_find(root, text1, strlen(text1), stash);
 	assert(STASH_COUNT(stash) == lengthof(result1));
@@ -235,9 +273,10 @@ main(void)
 	test_string_single();
 	test_string_multiple();
 	test_string_wildcard();
-	test_string_fi();
-	test_string_la();
-	test_string_fila();
+	test_string_nocase();
+	test_string_left();
+	test_string_right();
+	test_string_exact();
 
 	pout("ok\n");
 

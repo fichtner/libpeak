@@ -18,9 +18,47 @@
 
 #include <peak.h>
 
+enum {
+	STRING_METHOD_LOOSE,
+	STRING_METHOD_LEFT,
+	STRING_METHOD_RIGHT,
+	STRING_METHOD_EXACT,
+	STRING_METHOD_MAX	/* last element */
+};
+
+static const int string_nocase[256] = {
+	/* uninitialised fields are set to zero... */
+	['a'] = 257, ['A'] = 257,
+	['b'] = 258, ['B'] = 258,
+	['c'] = 259, ['C'] = 259,
+	['d'] = 260, ['D'] = 260,
+	['e'] = 261, ['E'] = 261,
+	['f'] = 262, ['F'] = 262,
+	['g'] = 263, ['G'] = 263,
+	['h'] = 264, ['H'] = 264,
+	['i'] = 265, ['I'] = 265,
+	['j'] = 266, ['J'] = 266,
+	['k'] = 267, ['K'] = 267,
+	['l'] = 268, ['L'] = 268,
+	['m'] = 269, ['M'] = 269,
+	['n'] = 270, ['N'] = 270,
+	['o'] = 271, ['O'] = 271,
+	['p'] = 272, ['P'] = 272,
+	['q'] = 273, ['Q'] = 273,
+	['r'] = 274, ['R'] = 274,
+	['s'] = 275, ['S'] = 275,
+	['t'] = 276, ['T'] = 276,
+	['u'] = 277, ['U'] = 277,
+	['v'] = 278, ['V'] = 278,
+	['w'] = 279, ['W'] = 279,
+	['x'] = 280, ['X'] = 280,
+	['y'] = 281, ['Y'] = 281,
+	['z'] = 282, ['Z'] = 282,
+};
+
 struct peak_strings {
 	struct _peak_strings *next;
-	unsigned int result[STRING_MAX];
+	unsigned int result[STRING_METHOD_MAX];
 	int character;
 };
 
@@ -29,7 +67,7 @@ PAGE_DECLARE(_peak_strings, struct peak_strings, 5);
 #define STRING_CMP(x, y)	((x)->character - (y)->character)
 #define STRING_ALLOC(x, y)	malloc(y)
 #define STRING_FREE(x, y)	free(y)
-#define STRING_WILDCARD		257
+#define STRING_WILDCARD		256
 
 static unsigned int
 peak_string_match(const struct peak_strings *node, const size_t len,
@@ -37,25 +75,25 @@ peak_string_match(const struct peak_strings *node, const size_t len,
 {
 	STASH_REBUILD(temp, unsigned int, stash);
 
-	if (node->result[STRING_LOOSE]) {
+	if (node->result[STRING_METHOD_LOOSE]) {
 		/*
 		 * There is no need for duplicated matches, but
 		 * we'll do it anyway, e.g. "test test" produces
 		 * two results of the same value.
 		 */
-		STASH_PUSH(&node->result[STRING_LOOSE], temp);
+		STASH_PUSH(&node->result[STRING_METHOD_LOOSE], temp);
 	}
 
-	if (start && node->result[STRING_LEFT]) {
-		STASH_PUSH(&node->result[STRING_LEFT], temp);
+	if (start && node->result[STRING_METHOD_LEFT]) {
+		STASH_PUSH(&node->result[STRING_METHOD_LEFT], temp);
 	}
 
-	if (!len && node->result[STRING_RIGHT]) {
-		STASH_PUSH(&node->result[STRING_RIGHT], temp);
+	if (!len && node->result[STRING_METHOD_RIGHT]) {
+		STASH_PUSH(&node->result[STRING_METHOD_RIGHT], temp);
 	}
 
-	if (!len && start && node->result[STRING_EXACT]) {
-		STASH_PUSH(&node->result[STRING_EXACT], temp);
+	if (!len && start && node->result[STRING_METHOD_EXACT]) {
+		STASH_PUSH(&node->result[STRING_METHOD_EXACT], temp);
 	}
 
 	return !len;
@@ -93,6 +131,21 @@ _peak_string_find(struct peak_strings *node, const char *buf,
 		}
 		_peak_string_find(found, buf + 1, len - 1, start, stash);
 	}
+
+	/*
+	 * search for case insensitive character inside input buffer
+	 */
+	ref->character = string_nocase[(unsigned char)*buf];
+
+	if (ref->character) {
+		found = PAGE_FIND(node->next, ref, STRING_CMP);
+		if (found) {
+			if (peak_string_match(found, len - 1, start, stash)) {
+				return;
+			}
+			_peak_string_find(found, buf + 1, len - 1, start, stash);
+		}
+	}
 }
 
 void
@@ -117,17 +170,13 @@ peak_string_find(struct peak_strings *root, const char *buf,
 
 int
 peak_string_add(struct peak_strings *root, const unsigned int result,
-    const char *buf, const size_t len, const unsigned int method)
+    const char *buf, const size_t len, const unsigned int flags)
 {
 	struct peak_strings stackptr(ref);
 	struct peak_strings *node = root;
-	unsigned int i;
+	unsigned int i, method;
 
 	if (!buf) {
-		return (0);
-	}
-
-	if (method >= STRING_MAX) {
 		return (0);
 	}
 
@@ -142,6 +191,13 @@ peak_string_add(struct peak_strings *root, const unsigned int result,
 				++i;
 			}
 			ref->character = (unsigned char)buf[i];
+
+			if (flags & STRING_NOCASE) {
+				int nocase = string_nocase[ref->character];
+				if (nocase) {
+					ref->character = nocase;
+				}
+			}
 		}
 
 		/*
@@ -152,6 +208,16 @@ peak_string_add(struct peak_strings *root, const unsigned int result,
 		if (!node) {
 			return (0);
 		}
+	}
+
+	if ((flags & STRING_LEFT) && (flags & STRING_RIGHT)) {
+		method = STRING_METHOD_EXACT;
+	} else if (flags & STRING_LEFT) {
+		method = STRING_METHOD_LEFT;
+	} else if (flags & STRING_RIGHT) {
+		method = STRING_METHOD_RIGHT;
+	} else {
+		method = STRING_METHOD_LOOSE;
 	}
 
 	if (!node->result[method]) {

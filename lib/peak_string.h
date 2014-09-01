@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2013-2014 Franco Fichtner <franco@packetwerk.com>
  * Copyright (c) 2014 Masoud Chelongar <masoud@packetwerk.com>
+ * Copyright (c) 2014 Tobias Boertitz <tobias@packetwerk.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -18,13 +19,9 @@
 #ifndef PEAK_STRING_H
 #define PEAK_STRING_H
 
-enum {
-	STRING_LOOSE,
-	STRING_LEFT,
-	STRING_RIGHT,
-	STRING_EXACT,
-	STRING_MAX	/* last element */
-};
+#define STRING_LEFT	0x01
+#define STRING_RIGHT	0x02
+#define STRING_NOCASE	0x04
 
 struct peak_strings	*peak_string_init(void);
 void			 peak_string_find(struct peak_strings *,

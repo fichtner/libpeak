@@ -14,7 +14,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd April 6, 2014
+.Dd August 30, 2014
 .Dt PEAK_STRING 3
 .Os
 .Sh NAME
@@ -31,7 +31,7 @@
 .Fa "const unsigned int result"
 .Fa "const char *buf"
 .Fa "const size_t len"
-.Fa "const unsigned int method"
+.Fa "const unsigned int flags"
 .Fc
 .Ft void
 .Fn peak_string_exit "struct peak_strings *root"
@@ -76,16 +76,16 @@ On success, the function returns the new or previous result.
 If a memory allocation failed, zero is returned.
 Please note that a result of zero is reserved and must not be used.
 .Pp
-The first matching
-.Va method ,
-.Dv STRING_LOOSE
-will find all matches along the input string.
+The optional matching
+.Va flags
+are:
 .Dv STRING_LEFT
-will find the matches at the beginning of the input string.
+(anchor search at the beginning of the string),
 .Dv STRING_RIGHT
-will find all matches at the end of the input string.
-.Dv STRING_EXACT
-will only find an exact match of the input string.
+(anchor search at the end if a string)
+and
+.Dv STRING_NOCASE
+(do a case-insensitive string matching).
 .Pp
 The wildcard character
 .Sq ?\&
