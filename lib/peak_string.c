@@ -19,7 +19,7 @@
 #include <peak.h>
 
 enum {
-	STRING_METHOD_LOOSE,
+	STRING_METHOD_FLOATING,
 	STRING_METHOD_LEFT,
 	STRING_METHOD_RIGHT,
 	STRING_METHOD_EXACT,
@@ -75,24 +75,24 @@ peak_string_match(const struct peak_strings *node, const size_t len,
 {
 	STASH_REBUILD(temp, unsigned int, stash);
 
-	if (node->result[STRING_METHOD_LOOSE]) {
+	if (node->result[STRING_METHOD_FLOATING]) {
 		/*
 		 * There is no need for duplicated matches, but
 		 * we'll do it anyway, e.g. "test test" produces
 		 * two results of the same value.
 		 */
-		STASH_PUSH(&node->result[STRING_METHOD_LOOSE], temp);
+		STASH_PUSH(&node->result[STRING_METHOD_FLOATING], temp);
 	}
 
-	if (start && node->result[STRING_METHOD_LEFT]) {
+	if (node->result[STRING_METHOD_LEFT] && start) {
 		STASH_PUSH(&node->result[STRING_METHOD_LEFT], temp);
 	}
 
-	if (!len && node->result[STRING_METHOD_RIGHT]) {
+	if (node->result[STRING_METHOD_RIGHT] && !len) {
 		STASH_PUSH(&node->result[STRING_METHOD_RIGHT], temp);
 	}
 
-	if (!len && start && node->result[STRING_METHOD_EXACT]) {
+	if (node->result[STRING_METHOD_EXACT] && start && !len) {
 		STASH_PUSH(&node->result[STRING_METHOD_EXACT], temp);
 	}
 
@@ -217,7 +217,7 @@ peak_string_add(struct peak_strings *root, const unsigned int result,
 	} else if (flags & STRING_RIGHT) {
 		method = STRING_METHOD_RIGHT;
 	} else {
-		method = STRING_METHOD_LOOSE;
+		method = STRING_METHOD_FLOATING;
 	}
 
 	if (!node->result[method]) {
