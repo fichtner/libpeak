@@ -118,7 +118,7 @@ peak_malloc(size_t size)
 }
 
 /*
- * This is sqrt(SIZE_MAX+1), as s1*s2 <= SIZE_MAX
+ * This is sqrt(SIZE_MAX+1); notice that s1*s2 <= SIZE_MAX
  * if both s1 < MUL_NO_OVERFLOW and s2 < MUL_NO_OVERFLOW
  */
 #define MUL_NO_OVERFLOW (1UL << (sizeof(size_t) * 4))
@@ -128,6 +128,7 @@ peak_calloc(size_t count, size_t size)
 {
 	void *ptr;
 
+	/* if count*size is larger than SIZE_MAX, just return NULL */
 	if ((count >= MUL_NO_OVERFLOW || size >= MUL_NO_OVERFLOW) &&
 	    count > 0 && SIZE_MAX / count < size) {
 		return (NULL);
@@ -182,6 +183,7 @@ _peak_realloc(void *ptr, size_t size)
 static inline void *
 _peak_reallocarray(void *ptr, size_t count, size_t size)
 {
+	/* if count*size is larger than SIZE_MAX, just return NULL */
 	if ((count >= MUL_NO_OVERFLOW || size >= MUL_NO_OVERFLOW) &&
 	    count > 0 && SIZE_MAX / count < size) {
 		return (NULL);
@@ -246,6 +248,7 @@ peak_malign(size_t count, size_t size)
 		return (NULL);
 	}
 
+	/* if count*size is larger than SIZE_MAX, just return NULL */
 	if ((count >= MUL_NO_OVERFLOW || size >= MUL_NO_OVERFLOW) &&
 	    count > 0 && SIZE_MAX / count < size) {
 		return (NULL);
@@ -339,6 +342,7 @@ malign(size_t count, size_t size)
 		return (NULL);
 	}
 
+	/* if count*size is larger than SIZE_MAX, just return NULL */
 	if ((count >= MUL_NO_OVERFLOW || size >= MUL_NO_OVERFLOW) &&
 	    count > 0 && SIZE_MAX / count < size) {
 		return (NULL);
@@ -362,6 +366,7 @@ malign(size_t count, size_t size)
 static inline void *
 reallocarray(void *ptr, size_t count, size_t size)
 {
+	/* if count*size is larger than SIZE_MAX, just return NULL */
 	if ((count >= MUL_NO_OVERFLOW || size >= MUL_NO_OVERFLOW) &&
 	    count > 0 && SIZE_MAX / count < size) {
 		return (NULL);
