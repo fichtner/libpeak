@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd April 23, 2013
+.Dd September 13, 2014
 .Dt PEAK_PACKET 3
 .Os
 .Sh NAME
@@ -52,9 +52,10 @@ with
 and
 .Va type
 describing the location, size, and link type of the packet.
-For now, the only link layer types known to
+The link layer types known to
 .Nm peak_packet
 are
+.Dv LINKTYPE_NULL ,
 .Dv LINKTYPE_ETHERNET
 and
 .Dv LINKTYPE_LINUX_SLL .

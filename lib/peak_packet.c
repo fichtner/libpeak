@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2012-2014 Franco Fichtner <franco@packetwerk.com>
  * Copyright (c) 2014 Ulrich Klein <ulrich@packetwerk.com>
+ * Copyright (c) 2014 Alexey Saushev <alexey@packetwerk.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -253,6 +254,19 @@ peak_packet_parse(struct peak_packet *self, void *buf, unsigned int len,
 	self->mac_len = len;
 
 	switch (type) {
+	case LINKTYPE_NULL:
+		/*
+		 * BSD loopback
+		 *
+		 * NetBSD prepends 4 octets containing address family
+		 * in host format (little-endian on i386-amd64), yet
+		 * FreeBSD doesn't prepend anything.
+		 *
+		 * XXX decapsulate and assume IP for now
+		 */
+		self->mac_type = ETHERTYPE_IP;
+		self->net.raw = self->mac.raw;
+		break;
 	case LINKTYPE_ETHERNET: {
 		uint16_t m_type = be16dec(&self->mac.eth->ether_type);
 		if (m_type == ETHERTYPE_VLAN) {
@@ -347,7 +361,8 @@ peak_packet_parse(struct peak_packet *self, void *buf, unsigned int len,
 			return (1);
 		}
 		/*
-		 * XXX ICMP handling is naive.  Pimp features.
+		 * XXX ICMP handling is naive.
+		 * Pimp features.
 		 * Also need to add ICMPv6.
 		 */
 		self->app_len = self->flow_len - ICMP_MINLEN;

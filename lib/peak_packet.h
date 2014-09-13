@@ -103,21 +103,34 @@ struct peak_packet {
 	union {
 		unsigned char *raw;
 	} app;
+
+	/* Layer 1 (physical) decapsulation data */
+	uint32_t link_type;
+	uint32_t link_pad;
+
+	/* Layer 2 (data link) decapsulation data */
 	uint32_t mac_len;
 	uint16_t mac_type;
 	uint16_t mac_vlan;
+
+	/* Layer 3 (network) decapsulation data */
 	struct netaddr net_saddr;
 	struct netaddr net_daddr;
 	uint16_t net_family;
 	uint16_t net_len;
 	uint8_t net_hlen;
 	uint8_t net_type;
+	uint16_t net_pad;
+
+	/* Layer 4 (transport) decapsulation data */
 	uint16_t flow_hlen;
 	uint16_t flow_len;
-	uint16_t app_len;
 	uint16_t flow_sport;
 	uint16_t flow_dport;
-	uint32_t link_type;
+
+	/* Layer 7 (application) decapsulation data */
+	uint16_t app_len;
+	uint16_t app_pad[3];
 };
 
 unsigned int	 peak_packet_parse(struct peak_packet *, void *,
