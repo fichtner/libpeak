@@ -76,6 +76,21 @@
 #include <sys/cpuset.h> /* cpu_set */
 #include <net/if_dl.h>  /* LLADDR */
 
+#if !defined(NETMAP_API) || NETMAP_API < 11
+
+const struct peak_transfers transfer_netmap = {
+	.attach = peak_transfer_attach,
+	.lock = peak_transfer_lock,
+	.claim = peak_transfer_claim,
+	.divert = peak_transfer_divert,
+	.forward = peak_transfer_forward,
+	.drop = peak_transfer_drop,
+	.unlock = peak_transfer_unlock,
+	.detach = peak_transfer_detach,
+};
+
+#else
+
 const struct peak_transfers transfer_netmap = {
 	.attach = peak_netmap_attach,
 	.lock = peak_netmap_lock,
@@ -613,3 +628,5 @@ peak_netmap_unlock(void)
 {
 	netmap_unlock();
 }
+
+#endif

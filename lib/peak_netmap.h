@@ -23,11 +23,9 @@
 #include <net/if.h>
 #include <net/netmap.h>
 
-#if !defined(NETMAP_API) || NETMAP_API < 11
-#error need NETMAP_API >= 11
-#endif
-
 extern const struct peak_transfers transfer_netmap;
+
+#if defined(NETMAP_API) && NETMAP_API >= 11
 
 unsigned int		 peak_netmap_divert(struct peak_transfer *,
 			     const char *);
@@ -39,6 +37,8 @@ unsigned int		 peak_netmap_attach(const char *);
 unsigned int		 peak_netmap_detach(const char *);
 void			 peak_netmap_unlock(void);
 void			 peak_netmap_lock(void);
+
+#endif
 
 #endif /* __FreeBSD__ */
 
