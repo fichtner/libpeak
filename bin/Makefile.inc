@@ -17,4 +17,7 @@ LDADD+=	-lexecinfo
 .endif
 
 beforeinstall:
-	mkdir -p $(DESTDIR)$(BINDIR)
+	@mkdir -p $(DESTDIR)$(BINDIR)
+	@for section in $(SECTIONS); do \
+		mkdir -p $(DESTDIR)$(MANDIR)$$section; \
+	done

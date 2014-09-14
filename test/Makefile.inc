@@ -1,6 +1,6 @@
 # -*- makefile -*-
 
-BINDIR?=/usr/test
+BINDIR?=/usr/local/test
 
 WARNINGS_SET?=	MEDIUM
 WARNS?=		6

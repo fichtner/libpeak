@@ -1,9 +1,8 @@
 PROG=		magic
 MAN=
 
-LDADD=	-lc -pthread
+LDADD=	-lc -pthread -lmagic
 LDADD+=	$(.CURDIR)/../../lib/libpeak.a
-LDADD+=	-lmagic
 
 DPADD=	$(.CURDIR)/../../lib/libpeak.a
 

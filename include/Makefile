@@ -3,8 +3,8 @@ MAN=	peak_alloc.3 peak_hash.3 peak_net.3 peak_output.3 \
 	peak_timeslice.3 peak_type.3 peak_transfer.3
 
 beforeinstall:
-.for section in $(MAN:E:O:u)
-	mkdir -p $(DESTDIR)$(MANDIR)$(section)
-.endfor
+	@for section in $(SECTIONS); do \
+		mkdir -p $(DESTDIR)$(MANDIR)$$section; \
+	done
 
 .include <bsd.prog.mk>
