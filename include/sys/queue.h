@@ -36,7 +36,7 @@
 #define	_SYS_QUEUE_H_
 
 /*
- * This file defines five types of data structures: singly-linked lists, 
+ * This file defines five types of data structures: singly-linked lists,
  * lists, simple queues, tail queues, and circular queues.
  *
  *
@@ -95,15 +95,15 @@
 struct name {								\
 	struct type *slh_first;	/* first element */			\
 }
- 
+
 #define	SLIST_HEAD_INITIALIZER(head)					\
 	{ NULL }
- 
+
 #define SLIST_ENTRY(type)						\
 struct {								\
 	struct type *sle_next;	/* next element */			\
 }
- 
+
 /*
  * Singly-linked List access methods.
  */
@@ -391,11 +391,11 @@ struct {								\
 	if (((elm)->field.sqx_next = XSIMPLEQ_XOR(head,			\
 	    (elm)->field.sqx_next)->field.sqx_next)			\
 	    == XSIMPLEQ_XOR(head, NULL))				\
-		(head)->sqx_last = 					\
+		(head)->sqx_last =					\
 		    XSIMPLEQ_XOR(head, &(elm)->field.sqx_next);		\
 } while (0)
 
-		    
+
 /*
  * Tail queue definitions.
  */
@@ -414,8 +414,8 @@ struct {								\
 	struct type **tqe_prev;	/* address of previous next element */	\
 }
 
-/* 
- * tail queue access methods 
+/*
+ * tail queue access methods
  */
 #define	TAILQ_FIRST(head)		((head)->tqh_first)
 #define	TAILQ_END(head)			NULL
@@ -535,7 +535,7 @@ struct {								\
 }
 
 /*
- * Circular queue access methods 
+ * Circular queue access methods
  */
 #define	CIRCLEQ_FIRST(head)		((head)->cqh_first)
 #define	CIRCLEQ_LAST(head)		((head)->cqh_last)
@@ -563,7 +563,7 @@ struct {								\
 
 #define	CIRCLEQ_FOREACH_REVERSE_SAFE(var, head, headname, field, tvar)	\
 	for ((var) = CIRCLEQ_LAST(head, headname);			\
-	    (var) != CIRCLEQ_END(head) && 				\
+	    (var) != CIRCLEQ_END(head) &&				\
 	    ((tvar) = CIRCLEQ_PREV(var, headname, field), 1);		\
 	    (var) = (tvar))
 

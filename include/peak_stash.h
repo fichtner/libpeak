@@ -53,7 +53,7 @@ struct peak_stash_##name {						\
 	_ret;								\
 })
 
-#define STASH_POP(name) ({	 					\
+#define STASH_POP(name) ({						\
 	typeof(&(name)->values[0]) _ret = NULL;				\
 	if (likely(!STASH_EMPTY(name))) {				\
 		_ret = &(name)->values[--(name)->index];		\

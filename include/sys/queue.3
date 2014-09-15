@@ -531,7 +531,7 @@ SLIST_INSERT_AFTER(n1, n2, entries);
 SLIST_FOREACH(np, &head, entries)	/* Forward traversal. */
 	np-> ...
 
-while (!SLIST_EMPTY(&head)) {	 	/* Delete. */
+while (!SLIST_EMPTY(&head)) {		/* Delete. */
 	n1 = SLIST_FIRST(&head);
 	SLIST_REMOVE_HEAD(&head, entries);
 	free(n1);
