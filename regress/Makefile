@@ -7,6 +7,7 @@ SUBDIR=	base \
 	magic \
 	jar \
 	stream \
-	peek
+	peek \
+	packet
 
 .include <bsd.subdir.mk>
