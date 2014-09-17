@@ -2,12 +2,12 @@ SUBDIR=	base \
 	load \
 	store \
 	locate \
+	packet \
 	track \
 	string \
 	magic \
 	jar \
 	stream \
-	peek \
-	packet
+	peek
 
 .include <bsd.subdir.mk>

@@ -15,10 +15,10 @@
  */
 
 #include <peak.h>
-
-#if defined(__OpenBSD__) || defined(__NetBSD__)
 #include <sys/socket.h>
+#if defined(__OpenBSD__) || defined(__NetBSD__)
 #include <net/if.h>
+#include <netinet/in.h>
 #include <netinet/if_ether.h>
 #else /* !__OpenBSD__ && !__NetBSD__ */
 #include <net/ethernet.h>
