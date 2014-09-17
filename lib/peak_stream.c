@@ -20,7 +20,7 @@
     (void *)((x)->page_mem + ((y) * (x)->page_size))
 #define STREAM_TAIL(x, y)						\
     (void *)((uint8_t *)(y) + (x)->page_size - sizeof((y)->magic2))
-#define STREAM_CMP(x, y) 	((x)->index - (y)->index)
+#define STREAM_CMP(x, y)	((x)->index - (y)->index)
 #define STREAM_MAGIC		0xEF05BA06CD07FA08ull
 #define STREAM_ERROR		-1
 

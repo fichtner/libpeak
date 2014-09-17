@@ -444,7 +444,7 @@ LI_DESCRIBE_APP(pop3)
 		"AUTH",
 	};
 
-	LI_EXCLUDE_PORT(21); 	/* ftp */
+	LI_EXCLUDE_PORT(21);	/* ftp */
 	LI_EXCLUDE_PORT(194);	/* irc */
 	LI_EXCLUDE_PORT(6667);	/* irc */
 
@@ -941,9 +941,9 @@ LI_DESCRIBE_APP(radius)
 	}
 
 	switch (ptr->code) {
-	case 1: 	/* Access-Request */
-	case 2: 	/* Accept-Request */
-	case 3: 	/* Reject-Request */
+	case 1:		/* Access-Request */
+	case 2:		/* Accept-Request */
+	case 3:		/* Reject-Request */
 	case 4:		/* Accounting-Requst */
 	case 5:		/* Accounting-Response */
 	case 11:	/* Access-Challenge */
