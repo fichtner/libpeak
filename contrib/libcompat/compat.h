@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2013 Masoud Chelongar <masoud@packetwerk.com>
- * Copyright (c) 2013-2014 Franco Fichtner <franco@packetwerk.com>
- * Copyright (c) 2014 Tobias Boertitz <tobias@packetwerk.com>
+ * Copyright (c) 2014 Franco Fichtner <franco@packetwerk.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,19 +14,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef PEAK_REGEX_H
-#define PEAK_REGEX_H
+#ifndef COMPAT_H
+#define COMPAT_H
 
-#define REGEX_NOCASE	0x01
+#include "explicit_bzero.h"
+#include "md5.h"
+#include "strlcpy.h"
+#include "strlcat.h"
 
-struct peak_regexes	*peak_regex_init(void);
-const char		*peak_regex_parse(const char *, const size_t,
-			     const unsigned int);
-int			 peak_regex_add(struct peak_regexes *,
-			     const unsigned int, const char *,
-			     const size_t, const unsigned int);
-void			 peak_regex_find(struct peak_regexes *,
-			     const char *, const size_t, stash_t);
-void			 peak_regex_exit(struct peak_regexes *);
-
-#endif /* !PEAK_REGEX_H */
+#endif /* !COMPAT_H */

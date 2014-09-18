@@ -1,6 +1,7 @@
 # respect build order here!
 
 SUBDIR=	include \
+	contrib \
 	lib \
 	test \
 	bin \

@@ -17,6 +17,7 @@
  */
 
 #include <peak.h>
+#include <compat.h>
 #include <pcre.h>
 
 struct peak_regexes {
@@ -84,7 +85,7 @@ peak_regex_add(struct peak_regexes *root, const unsigned int result,
 
 	/*
 	 * Put the string on the stack in order to get
-	 * proper string termination going. This is
+	 * proper string termination going.  This is
 	 * because strings may not be null-terminated
 	 * and pcre_compile(3) can't cope with that.
 	 */
