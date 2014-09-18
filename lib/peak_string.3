@@ -14,7 +14,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd September 1, 2014
+.Dd September 18, 2014
 .Dt PEAK_STRING 3
 .Os
 .Sh NAME
@@ -72,7 +72,7 @@ and
 The value of
 .Va result
 is stored on the leaf node.
-On success, the function returns the new or previous result.
+On success, the function returns the new or the previous result.
 If a memory allocation failed, zero is returned.
 Please note that a result of zero is reserved and must not be used.
 .Pp
@@ -89,7 +89,7 @@ and
 .Pp
 The wildcard character
 .Sq ?\&
-can be used insde
+can be used inside
 .Va buf
 to match any single character.
 To search for a literal
