@@ -5,6 +5,7 @@ SUBDIR=	base \
 	packet \
 	track \
 	string \
+	regex \
 	magic \
 	jar \
 	stream \

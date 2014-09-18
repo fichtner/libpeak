@@ -5,6 +5,7 @@ SUBDIR=	base \
 	packet \
 	locate \
 	string \
+	regex \
 	jar \
 	stream \
 	magic \

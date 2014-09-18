@@ -1,0 +1,114 @@
+.\"
+.\" Copyright (c) 2013-2014 Franco Fichtner <franco@packetwerk.com>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd September 4, 2014
+.Dt PEAK_REGEX 3
+.Os
+.Sh NAME
+.Nm peak_regex_add ,
+.Nm peak_regex_exit ,
+.Nm peak_regex_find ,
+.Nm peak_regex_init ,
+.Nm peak_regex_parse
+.Nd regular expression search
+.Sh SYNOPSIS
+.In peak.h
+.Ft int
+.Fo peak_regex_add
+.Fa "struct peak_regexes *root"
+.Fa "const unsigned int result"
+.Fa "const char *buf"
+.Fa "const size_t len"
+.Fa "const unsigned int flags"
+.Fc
+.Ft void
+.Fn peak_regex_exit "struct peak_regexes *root"
+.Ft void
+.Fo peak_regex_find
+.Fa "struct peak_regexes *root"
+.Fa "const char *buf"
+.Fa "const size_t len"
+.Fa "stash_t stash"
+.Fc
+.Ft struct peak_regexes *
+.Fn peak_regex_init void
+.Ft const char *
+.Fo peak_regex_parse
+.Fa "const char *buf"
+.Fa "const size_t len"
+.Fa "const unsigned int flags"
+.Fc
+.Sh DESCRIPTION
+The
+.Nm peak_regex
+API functions provide a regular expression search by wrapping
+.Xr pcre 3 .
+The search list is constructed as a linked list of regular expressions.
+.Pp
+The functions
+.Fn peak_regex_init
+and
+.Fn peak_regex_exit
+create and destroy a search list, respectively.
+.Fn peak_regex_init
+returns a pointer to the list, or
+.Dv NULL
+if the memory allocation failed.
+.Pp
+The function
+.Fn peak_regex_add
+inserts a regular expression into the list pointed to by
+.Va root
+according to
+.Va buf
+and
+.Va len .
+.Va flags
+may be set to
+.Dv REGEX_NOCASE
+to indicate case-insensitive matching, or set to zero
+for the default matching behaviour.
+The value of
+.Va result
+is stored on the same node.
+On success, the function returns the selected value.
+If a memory allocation failed, zero is returned.
+Please note that a result of zero is reserved and must not be used.
+.Pp
+The function
+.Fn peak_regex_find
+takes a text to search in and finds all matching regular expressions
+in the list.
+To return the matches,
+.Va stash
+is used by calling
+.Fn STASH_PUSH
+for each matching result code.
+.Pp
+The function
+.Fn peak_regex_parse
+can be used to test if a pattern is valid.
+It works exactly like
+.Fn peak_regex_add ,
+but will not store the regular expression for later evaluation.
+If successful, the function returns
+.Dv NULL .
+Otherwise, a string containing the approriate error message is returned.
+.Sh SEE ALSO
+.Xr pcre 3 ,
+.Xr peak_stash 3
+.Sh AUTHORS
+.An Masoud Chelongar Aq Mt masoud@packetwerk.com
+.An Tobias Boertitz Aq Mt tobias@packetwerk.com

@@ -86,5 +86,6 @@
 #include "peak_packet.h"
 #include "peak_li.h"
 #include "peak_magic.h"
+#include "peak_regex.h"
 #include "peak_string.h"
 #include "peak_track.h"
