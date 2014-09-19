@@ -3,7 +3,7 @@ libpeak -- network-related library glue
 
 This library consists of several modules and generic base headers
 designed around the daily needs of network packet-related userland
-tools written in C.  Currently, the available modules are:
+tools written in C.  The available modules are:
 
 peak_jar:	context-based circular buffer
 peak_li:	lightweight inspection (DPI)
@@ -15,21 +15,34 @@ peak_packet:	packet preprocessor
 peak_store:	PCAP file writer
 peak_stream:	stream memory allocator
 peak_string:	full-text string search
+peak_regex:	full-text regex (pcre) search
 peak_track:	rudimentary flow tracker
+
+The available binaries are:
+
+flowsplit(1)	split a PCAP trace file into smaller
+		connection-based chunks (think SplitCap)
+
+geoconv(1)	compile geolocation info into a binary file
+
+netfuse(1)	bridge two network interfaces using netmap(4)
+
+peek(1)		run a PCAP trace through lightweight DPI
 
 There's also a bunch of arch-independent base headers, which offer
 simple memory pools, runtime allocation wrappers, network address
 mapping, some hashes, output macros, spinlock/barrier wrappers,
 and so forth.
 
-A good introduction to the code would be its man pages.  The first of
-them being peek(1).
+A good introduction to the code would be its man pages.  We take
+good care of them, so please look at them first.
 
 Licensing and contributions
 ===========================
 
 The library has been developed by Packetwerk and is released under the
-ISC license (see COPYING for details).
+ISC license (see COPYING for details).  We advocate open licensing and
+are happy to help in any way we can.  Let us know!
 
 Feel free to fork or contribute back.  To do so, use GitHub or send
 your patches to us via email.  Contributions can also be made in the
@@ -52,8 +65,12 @@ test/		test binaries
 Building and running the code
 =============================
 
-The code builds fine on MacOS, OpenBSD, FreeBSD, DragonFly BSD and
-Linux as long as bmake (or pmake) is installed.
+The code builds fine on MacOS, NetBSD, OpenBSD, FreeBSD, DragonFly BSD
+and Linux.  The following packes must be installed:
+
+* libmagic (development variety)
+* bmake or pmake (non-BSD)
+* pcre
 
 Building the code:
 
