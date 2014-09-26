@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2012-2014 Franco Fichtner <franco@packetwerk.com>
+ * Copyright (c) 2014 Thomas Siegmund <thomas@packetwerk.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,6 +17,9 @@
 
 #ifndef PEAK_NET_H
 #define PEAK_NET_H
+
+#include <arpa/inet.h>
+#include <sys/socket.h>
 
 struct netaddr {
 	union {
@@ -105,5 +109,11 @@ netprefix(const struct netaddr *x, const struct netaddr *y, unsigned int yp)
 	return ((x->u.byte[i] & prefix[yp]) -
 	    (y->u.byte[i] & prefix[yp]));
 }
+
+#define netprint(x) ({							 \
+	const int _nf = netprefix(x, &net_in64, 96) ? AF_INET6 : AF_INET;\
+	(inet_ntop(_nf, ((_nf == AF_INET) ? netto4(x) : netto6(x)),	 \
+	    (char [INET6_ADDRSTRLEN]) {}, INET6_ADDRSTRLEN));		 \
+})
 
 #endif /* !PEAK_NET_H */

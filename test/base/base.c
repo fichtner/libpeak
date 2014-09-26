@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2012-2014 Franco Fichtner <franco@packetwerk.com>
+ * Copyright (c) 2014 Thomas Siegmund <thomas@packetwerk.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -69,6 +70,8 @@ test_type(void)
 static void
 test_net(void)
 {
+	#define IP4_REF_STR	"17.34.51.68"
+	#define IP6_REF_STR	"fe80::1240:f3ff:fea6:d762"
 	const struct netaddr ip4_ref = {
 		.u.byte = {
 			0x00, 0x00, 0x00, 0x00,
@@ -121,6 +124,17 @@ test_net(void)
 	netaddr4(&ip, ipv4_addr);
 	assert(!netprefix(&ip, &ip4_ref, NET_PREFIX4(16)));
 	assert(netprefix(&ip, &ip4_ref, NET_PREFIX4(17)));
+
+	assert(!strcmp(netprint(&ip4_ref), IP4_REF_STR));
+	assert(!strcmp(netprint(&ip6_ref), IP6_REF_STR));
+	assert(strcmp(netprint(&ip6_ref), IP4_REF_STR));
+	assert(strcmp(netprint(&ip4_ref), IP6_REF_STR));
+	netaddr4(&ip, ip4_ref.u.dword[3]);
+	ip.u.byte[15]++;
+	assert(strcmp(netprint(&ip), IP4_REF_STR));
+	netaddr6(&ip, ip6_ref.u.byte);
+	ip.u.byte[15]++;
+	assert(strcmp(netprint(&ip), IP6_REF_STR));
 }
 
 struct interval {

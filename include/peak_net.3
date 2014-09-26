@@ -1,5 +1,6 @@
 .\"
 .\" Copyright (c) 2012-2014 Franco Fichtner <franco@packetwerk.com>
+.\" Copyright (c) 2014 Thomas Siegmund <thomas@packetwerk.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -13,7 +14,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd February 24, 2014
+.Dd September 25, 2014
 .Dt PEAK_NET 3
 .Os
 .Sh NAME
@@ -55,6 +56,8 @@
 .Fn netto4 "const struct netaddr *x"
 .Ft void *
 .Fn netto6 "const struct netaddr *x"
+.Ft const char *
+.Fn netprint "const struct netaddr *x"
 .Sh DESCRIPTION
 The
 .Nm peak_net
@@ -121,5 +124,16 @@ and
 .Fn netto6
 return a pointer to the location of the respective address in network
 order.
+.Pp
+The function
+.Fn netprint
+returns a pointer to a string representation of the given address
+.Va x ,
+or
+.Dv NULL
+if the conversion failed.
+The buffer is created on the stack and is thus thread-safe,
+but also expires upon returning to the parent caller as the
+stack is released.
 .Sh AUTHORS
 .An Franco Fichtner Aq Mt franco@packetwerk.com
