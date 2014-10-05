@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2013-2014 Franco Fichtner <franco@packetwerk.com>
+ * Copyright (c) 2014 Thomas Siegmund <thomas@packetwerk.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -86,6 +87,8 @@ unsigned int	 peak_li_test(const struct peak_packet *,
 		     const unsigned int);
 unsigned int	 peak_li_get(const struct peak_packet *);
 const char	*peak_li_name(const unsigned int);
+const char	*peak_li_pretty(const unsigned int);
+const char	*peak_li_desc(const unsigned int);
 unsigned int	 peak_li_number(const char *);
 
 static inline unsigned int

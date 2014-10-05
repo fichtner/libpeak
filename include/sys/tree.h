@@ -268,7 +268,9 @@ void name##_SPLAY_MINMAX(struct name *head, int __comp) \
 		}							\
 	}								\
 	SPLAY_ASSEMBLE(head, &__node, __left, __right, field);		\
-}
+}									\
+									\
+struct foo
 
 #define SPLAY_NEGINF	-1
 #define SPLAY_INF	1
@@ -709,7 +711,9 @@ name##_RB_MINMAX(struct name *head, int val)				\
 			tmp = RB_RIGHT(tmp, field);			\
 	}								\
 	return (parent);						\
-}
+}									\
+									\
+struct foo
 
 #define RB_NEGINF	-1
 #define RB_INF	1

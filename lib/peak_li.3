@@ -13,18 +13,22 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd March 1, 2014
+.Dd October 2, 2014
 .Dt PEAK_LI 3
 .Os
 .Sh NAME
+.Nm peak_li_desc ,
 .Nm peak_li_get ,
 .Nm peak_li_merge ,
 .Nm peak_li_name ,
 .Nm peak_li_number ,
+.Nm peak_li_pretty ,
 .Nm peak_li_test
 .Nd lightweight inspection
 .Sh SYNOPSIS
 .In peak.h
+.Ft const char *
+.Fn peak_li_desc "const unsigned int number"
 .Ft unsigned int
 .Fn peak_li_get "const struct peak_packet *packet"
 .Ft unsigned int
@@ -33,6 +37,8 @@
 .Fn peak_li_name "const unsigned int number"
 .Ft unsigned int
 .Fn peak_li_number "const char *name"
+.Ft const char *
+.Fn peak_li_pretty "const unsigned int number"
 .Ft unsigned int
 .Fo peak_li_test
 .Fa "const struct peak_packet *packet"
@@ -102,6 +108,11 @@ Thus
 .Fn peak_li_name
 can be invoked to return a human-readable identifier string descibing
 the actual application.
+.Fn peak_li_pretty
+and
+.Fn peak_li_desc
+return a human-readable string with the full application name or
+its description, respectively.
 Similarly, the
 .Fn peak_li_number
 function translates an application string into the respective application
