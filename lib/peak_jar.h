@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013 Franco Fichtner <franco@packetwerk.com>
+ * Copyright (c) 2012-2014 Franco Fichtner <franco@packetwerk.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -45,7 +45,9 @@ typedef unsigned int (*peak_jar_fun) (void *, void *, size_t len);
 
 void		peak_jar_pack(struct peak_jars *, struct peak_jar *,
 		    const void *, const size_t);
-void		peak_jar_peek(struct peak_jars *, struct peak_jar *,
+unsigned int	peak_jar_fifo(struct peak_jars *, struct peak_jar *,
+		    peak_jar_fun, void *);
+unsigned int	peak_jar_lifo(struct peak_jars *, struct peak_jar *,
 		    peak_jar_fun, void *);
 unsigned int	peak_jar_init(struct peak_jars *, size_t);
 void		peak_jar_exit(struct peak_jars *);

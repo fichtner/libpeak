@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2012-2013 Franco Fichtner <franco@packetwerk.com>
+.\" Copyright (c) 2012-2014 Franco Fichtner <franco@packetwerk.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -13,14 +13,15 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd March 3, 2013
+.Dd October 12, 2014
 .Dt PEAK_JAR 3
 .Os
 .Sh NAME
 .Nm peak_jar_init ,
 .Nm peak_jar_exit ,
-.Nm peak_jar_pack ,
-.Nm peak_jar_peek
+.Nm peak_jar_fifo ,
+.Nm peak_jar_lifo ,
+.Nm peak_jar_pack
 .Nd circular data context buffer
 .Sh SYNOPSIS
 .In peak.h
@@ -28,19 +29,26 @@
 .Fn peak_jar_init "struct peak_jars *self" "size_t size"
 .Ft void
 .Fn peak_jar_exit "struct peak_jars *self"
+.Ft unsigned int
+.Fo peak_jar_fifo
+.Fa "struct peak_jars *self"
+.Fa "struct peak_jar *context"
+.Fa "peak_jar_fun callback"
+.Fa "void *userdata"
+.Fc
+.Ft unsigned int
+.Fo peak_jar_lifo
+.Fa "struct peak_jars *self"
+.Fa "struct peak_jar *context"
+.Fa "peak_jar_fun callback"
+.Fa "void *userdata"
+.Fc
 .Ft void
 .Fo peak_jar_pack
 .Fa "struct peak_jars *self"
 .Fa "struct peak_jar *context"
 .Fa "const void *buf"
 .Fa "const size_t len"
-.Fc
-.Ft void
-.Fo peak_jar_peek
-.Fa "struct peak_jars *self"
-.Fa "struct peak_jar *context"
-.Fa "peak_jar_fun callback"
-.Fa "void *userdata"
 .Fc
 .Ft unsigned int
 .Fo peak_jar_fun
@@ -51,9 +59,9 @@
 .Sh DESCRIPTION
 The
 .Nm peak_jar
-API provides a mechanism to store and retrieve FIFO-like data in a
-single circular buffer, which is held together by any number of
-arbitrary context structures.
+API provides a mechanism to store and retrieve FIFO or LIFO-like
+data in a single circular buffer, which is held together by any
+number of arbitrary context structures.
 This way it is possible to retrieve a chronological history for a
 single context as memory in the circular buffer permits.
 Old data is silently cleaned up to make room for new data.
@@ -82,7 +90,10 @@ and
 functions create and destroy the internal state of a given
 .Vt struct peak_jars * ,
 respectively.
-That's about it.
+Upon successful completion
+.Fn peak_jar_init
+returns non-zero.
+Otherwise, zero is returned.
 .Pp
 The
 .Fn peak_jar_pack
@@ -90,10 +101,17 @@ function stores data in a given context.
 It also garbage-collects the circular buffer as needed.
 .Pp
 The
-.Fn peak_jar_peek
+.Fn peak_jar_fifo
 function retrieves the currently stored data in chronological order
 by invoking the supplied callback for each BLOB.
-The callback can decide what to do next by returning one of the
+Similarly, the
+.Fn peak_jar_lifo
+function retrieves the currently stored data in reverse chronological
+order.
+Both functions return zero, when there are no more pending stored
+buffers.
+Otherwise, non-zero is returned.
+The callback must decide what to do next by returning one of the
 following values:
 .Bl -tag -width "JAR_RETURN"
 .It Dv JAR_RETURN
@@ -106,11 +124,6 @@ continues to go through the remaining data.
 This causes the current data to remain in the context and continues
 to go through the remaining data.
 .El
-.Sh RETURN VALUES
-Upon successful completion
-.Fn peak_jar_init
-returns non-zero.
-Otherwise, zero is returned.
 .Sh AUTHORS
 .An Franco Fichtner Aq Mt franco@packetwerk.com
 .Sh CAVEATS
@@ -124,12 +137,13 @@ This minimises the load, but may free a lot of data at once.
 The library is not intended for multithreading.
 However, if you do have such an interesting use-case, you need to
 make sure of the following: for
-.Fn peak_jar_pack
+.Fn peak_jar_pack ,
+.Fn peak_jar_fifo
 and
-.Fn peak_jar_peek ,
+.Fn peak_jar_lifo ,
 access to
 .Va self
-must always be serialised.
+must be serialised.
 Furthermore,
 .Va context
 should be unique in nature and access must also be serialised.

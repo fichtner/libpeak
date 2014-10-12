@@ -182,20 +182,20 @@ peak_jar_pack_again:
 	head->count += 1;
 }
 
-void
-peak_jar_peek(struct peak_jars *self, struct peak_jar *context,
+unsigned int
+peak_jar_fifo(struct peak_jars *self, struct peak_jar *context,
     peak_jar_fun callback, void *userdata)
 {
-	struct peak_jar_data *data;
+	struct peak_jar_data *data, *temp;
 
 	/* amend all invalid references in the context */
 	peak_jar_repair(self, context);
 
 	/* invoke callback for all data in the context */
-	TAILQ_FOREACH(data, &context->datas, entry) {
+	TAILQ_FOREACH_SAFE(data, &context->datas, entry, temp) {
 		switch (callback(userdata, data->buf, data->len)) {
 		case JAR_RETURN:
-			return;
+			goto peak_jar_fifo_out;
 		case JAR_DROP:
 			TAILQ_REMOVE(&context->datas, data, entry);
 			/* FALLTHROUGH */
@@ -204,6 +204,39 @@ peak_jar_peek(struct peak_jars *self, struct peak_jar *context,
 			break;
 		}
 	}
+
+peak_jar_fifo_out:
+
+	return (!TAILQ_EMPTY(&context->datas));
+}
+
+unsigned int
+peak_jar_lifo(struct peak_jars *self, struct peak_jar *context,
+    peak_jar_fun callback, void *userdata)
+{
+	struct peak_jar_data *data, *temp;
+
+	/* amend all invalid references in the context */
+	peak_jar_repair(self, context);
+
+	/* invoke callback for all data in the context */
+	TAILQ_FOREACH_REVERSE_SAFE(data, &context->datas,
+	    peak_jar_user, entry, temp) {
+		switch (callback(userdata, data->buf, data->len)) {
+		case JAR_RETURN:
+			goto peak_jar_lifo_out;
+		case JAR_DROP:
+			TAILQ_REMOVE(&context->datas, data, entry);
+			/* FALLTHROUGH */
+		case JAR_KEEP:
+		default:
+			break;
+		}
+	}
+
+peak_jar_lifo_out:
+
+	return (!TAILQ_EMPTY(&context->datas));
 }
 
 unsigned int
