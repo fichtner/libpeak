@@ -123,22 +123,18 @@ prealloc_init(prealloc_t *self, size_t count, size_t size)
 	return (1);
 }
 
-static inline unsigned int
-_prealloc_exit(prealloc_t *self)
-{
-	if (!self) {
-		return (0);
-	}
-
-	if (prealloc_used(self)) {
-		return (1);
-	}
-
-	spin_exit(&self->lock);
-	free(self->mem_start);
-
-	return (0);
-}
+#define _prealloc_exit(self) ({						\
+	unsigned int _ret = 0;						\
+	if (self) {							\
+		if (prealloc_used(self)) {				\
+			_ret = 1;					\
+		} else {						\
+			spin_exit(&(self)->lock);			\
+			free((self)->mem_start);			\
+		}							\
+	}								\
+	(_ret);								\
+})
 
 #define prealloc_exit(self) do {					\
 	if (_prealloc_exit(self)) {					\
