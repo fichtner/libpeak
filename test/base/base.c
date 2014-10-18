@@ -144,6 +144,28 @@ test_net(void)
 	assert(!strcmp(portprint(65536), ""));
 }
 
+static void
+test_token(void)
+{
+	struct peak_token bucket;
+
+	peak_token_init(&bucket, 100);
+
+	assert(peak_token_credit(&bucket, 50, 0));
+	assert(peak_token_credit(&bucket, 50, 0));
+	assert(!peak_token_credit(&bucket, 50, 0));
+	assert(!peak_token_credit(&bucket, 1, 0));
+	assert(_peak_token_credit(&bucket, 50, 1000));
+	assert(_peak_token_credit(&bucket, 75, 1000));
+	assert(!_peak_token_credit(&bucket, 1, 1000));
+	assert(_peak_token_credit(&bucket, 25, 1500));
+	assert(_peak_token_credit(&bucket, 0, 2000));
+	assert(peak_token_credit(&bucket, 50, 1000));
+	assert(!peak_token_credit(&bucket, 1, 1000));
+
+	peak_token_exit(&bucket);
+}
+
 struct interval {
 	int left;
 	int right;
@@ -616,6 +638,7 @@ main(void)
 
 	test_type();
 	test_net();
+	test_token();
 	test_stash();
 	test_alloc();
 	test_prealloc();

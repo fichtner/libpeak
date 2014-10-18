@@ -1,0 +1,78 @@
+.\"
+.\" Copyright (c) 2014 Franco Fichtner <franco@packetwerk.com>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd October 12, 2014
+.Dt PEAK_TOKEN 3
+.Os
+.Sh NAME
+.Nm peak_token_credit ,
+.Nm _peak_token_credit ,
+.Nm peak_token_exit ,
+.Nm peak_token_init
+.Nd token slot machine
+.Sh SYNOPSIS
+.In peak.h
+.Ft unsigned int
+.Fo peak_token_credit
+.Fa "struct peak_token *self"
+.Fa "const int64_t want"
+.Fa "const int64_t ts_ms"
+.Fc
+.Ft unsigned int
+.Fo _peak_token_credit
+.Fa "struct peak_token *self"
+.Fa "const int64_t want"
+.Fa "const int64_t ts_ms"
+.Fc
+.Ft void
+.Fn peak_token_exit "struct peak_token *self"
+.Ft void
+.Fn peak_token_init "struct peak_token *self" "const int64_t max"
+.Sh DESCRIPTION
+The
+.Nm peak_token
+API provides simple means to operate shared and private token
+bucktes bound to millisecond resolution.
+.Pp
+The functions
+.Fn peak_token_init
+and
+.Fn peak_token_exit
+initialise or destroy a token bucket, respectively.
+.Va max
+may be any unit-per-second value of the caller's choosing.
+The memory of
+.Vt struct peak_token
+must be provided externally.
+.Pp
+The
+.Fn peak_token_credit
+function updates the bucket's balance according to how much time
+passed in milliseconds through the absolute timestamp
+.Va ts_ms .
+If no time has passed or time ran backwards, the balance is left
+as is.
+Afterwards,
+.Va want
+is substracted from the bucket's balance if sufficient credits are
+available and the function returns non-zero.
+Otherwise, zero is returned.
+.Pp
+The
+.Fn _peak_token_credit
+function operates like its sibling, but does not use the internal
+mutex to serialise access.
+.Sh AUTHORS
+.An Franco Fichtner Aq Mt franco@packetwerk.com
