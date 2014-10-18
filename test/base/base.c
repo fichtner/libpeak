@@ -135,6 +135,13 @@ test_net(void)
 	netaddr6(&ip, ip6_ref.u.byte);
 	ip.u.byte[15]++;
 	assert(strcmp(netprint(&ip), IP6_REF_STR));
+
+	assert(!strcmp(portprint(0), ""));
+	assert(!strcmp(portprint(-1), ""));
+	assert(!strcmp(portprint(1), ":1"));
+	assert(!strcmp(portprint(12345), ":12345"));
+	assert(!strcmp(portprint(65535), ":65535"));
+	assert(!strcmp(portprint(65536), ""));
 }
 
 struct interval {

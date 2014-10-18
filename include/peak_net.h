@@ -110,10 +110,20 @@ netprefix(const struct netaddr *x, const struct netaddr *y, unsigned int yp)
 	    (y->u.byte[i] & prefix[yp]));
 }
 
-#define netprint(x) ({							 \
+#define netprint(x) ({							\
 	const int _nf = netprefix(x, &net_in64, 96) ? AF_INET6 : AF_INET;\
-	(inet_ntop(_nf, ((_nf == AF_INET) ? netto4(x) : netto6(x)),	 \
-	    (char [INET6_ADDRSTRLEN]) {}, INET6_ADDRSTRLEN));		 \
+	(inet_ntop(_nf, ((_nf == AF_INET) ? netto4(x) : netto6(x)),	\
+	    (char [INET6_ADDRSTRLEN]) {}, INET6_ADDRSTRLEN));		\
+})
+
+#define NET_PORTSTRLEN	8
+
+#define portprint(y) ({							\
+	char _port[NET_PORTSTRLEN] = "";				\
+	if (likely((y) && !((y) & ~0xFFFF))) {				\
+		snprintf(_port, sizeof(_port), ":%hu", (uint16_t)y);	\
+	}								\
+	(_port);							\
 })
 
 #endif /* !PEAK_NET_H */

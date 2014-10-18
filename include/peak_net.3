@@ -14,7 +14,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd September 25, 2014
+.Dd October 18, 2014
 .Dt PEAK_NET 3
 .Os
 .Sh NAME
@@ -26,8 +26,10 @@
 .Nm netcmp4 ,
 .Nm netcmp6 ,
 .Nm netprefix ,
+.Nm netprint ,
 .Nm netto4 ,
-.Nm netto6
+.Nm netto6 ,
+.Nm portprint
 .Nd coherent network address mapping
 .Sh SYNOPSIS
 .In peak.h
@@ -52,12 +54,14 @@
 .Fc
 .Fn NET_PREFIX4 PREFIX
 .Fn NET_PREFIX6 PREFIX
+.Ft const char *
+.Fn netprint "const struct netaddr *x"
 .Ft void *
 .Fn netto4 "const struct netaddr *x"
 .Ft void *
 .Fn netto6 "const struct netaddr *x"
 .Ft const char *
-.Fn netprint "const struct netaddr *x"
+.Fn portprint "uint16_t x"
 .Sh DESCRIPTION
 The
 .Nm peak_net
@@ -135,5 +139,11 @@ if the conversion failed.
 The buffer is created on the stack and is thus thread-safe,
 but also expires upon returning to the parent caller as the
 stack is released.
+Similarly, the function
+.Fn portprint
+returns a pointer to a string representation of the given port.
+If the port is valid, it returns the string
+.Sq :port .
+Otherwise, an empty string is returned.
 .Sh AUTHORS
 .An Franco Fichtner Aq Mt franco@packetwerk.com
