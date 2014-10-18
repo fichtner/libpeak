@@ -26,6 +26,8 @@ enum {
 	USE_IP_LEN,
 	USE_IP_TYPE,
 	USE_TIME,
+	USE_SRC,
+	USE_DST,
 	USE_MAX		/* last element */
 };
 
@@ -59,10 +61,19 @@ peek_report(const struct peak_packet *packet, const struct peak_track *flow,
 		case USE_IP_TYPE:
 			pout("ip_type: %hhu", packet->net_type);
 			break;
+		case USE_SRC:
+			pout("src: %s%s", netprint(&packet->net_saddr),
+			    portprint(packet->flow_sport));
+			break;
+		case USE_DST:
+			pout("dst: %s%s", netprint(&packet->net_daddr),
+			    portprint(packet->flow_dport));
+			break;
 		case USE_TIME: {
 			char tsbuf[40];
-			pout("time: %s", strftime(tsbuf, sizeof(tsbuf),
-			    "%a %F %T", &timer->gmt) ? tsbuf : "???");
+			pout("time: %s.%06ld", strftime(tsbuf, sizeof(tsbuf),
+			    "%a %F %T", &timer->gmt) ? tsbuf : "???",
+			    timer->tv.tv_usec);
 			break;
 		}
 		default:
@@ -108,7 +119,7 @@ peek_packet(struct peak_tracks *peek, const timeslice_t *timer,
 static void
 usage(void)
 {
-	fprintf(stderr, "usage: peek [-AafNnt] file\n");
+	fprintf(stderr, "usage: peek [-AadfNnst] file\n");
 	exit(EXIT_FAILURE);
 }
 
@@ -120,13 +131,16 @@ main(int argc, char **argv)
 	timeslice_t timer;
 	int c;
 
-	while ((c = getopt(argc, argv, "AafNnt")) != -1) {
+	while ((c = getopt(argc, argv, "AadfNnst")) != -1) {
 		switch (c) {
 		case 'A':
 			use_print[use_count++] = USE_APP_LEN;
 			break;
 		case 'a':
 			use_print[use_count++] = USE_APP;
+			break;
+		case 'd':
+			use_print[use_count++] = USE_DST;
 			break;
 		case 'f':
 			use_print[use_count++] = USE_FLOW;
@@ -136,6 +150,9 @@ main(int argc, char **argv)
 			break;
 		case 'n':
 			use_print[use_count++] = USE_IP_TYPE;
+			break;
+		case 's':
+			use_print[use_count++] = USE_SRC;
 			break;
 		case 't':
 			use_print[use_count++] = USE_TIME;
@@ -161,11 +178,13 @@ main(int argc, char **argv)
 
 	if (!use_count) {
 		/* set the default output (as used by tests) */
+		use_print[use_count++] = USE_TIME;
 		use_print[use_count++] = USE_FLOW;
 		use_print[use_count++] = USE_IP_TYPE;
 		use_print[use_count++] = USE_IP_LEN;
+		use_print[use_count++] = USE_SRC;
+		use_print[use_count++] = USE_DST;
 		use_print[use_count++] = USE_APP;
-		use_print[use_count++] = USE_TIME;
 	}
 
 	trace = peak_load_init(argv[0]);

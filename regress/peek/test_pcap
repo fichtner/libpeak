@@ -1,60 +1,60 @@
-flow: 0, ip_type: 17, ip_len: 62, app: dns, time: Mon 2009-10-05 06:06:07
-flow: 0, ip_type: 17, ip_len: 128, app: dns, time: Mon 2009-10-05 06:06:07
-flow: 1, ip_type: 6, ip_len: 48, app: unknown, time: Mon 2009-10-05 06:06:07
-flow: 1, ip_type: 6, ip_len: 48, app: unknown, time: Mon 2009-10-05 06:06:07
-flow: 1, ip_type: 6, ip_len: 40, app: unknown, time: Mon 2009-10-05 06:06:07
-flow: 1, ip_type: 6, ip_len: 221, app: smtp, time: Mon 2009-10-05 06:06:08
-flow: 1, ip_type: 6, ip_len: 49, app: smtp, time: Mon 2009-10-05 06:06:08
-flow: 1, ip_type: 6, ip_len: 40, app: smtp, time: Mon 2009-10-05 06:06:08
-flow: 1, ip_type: 6, ip_len: 177, app: smtp, time: Mon 2009-10-05 06:06:08
-flow: 1, ip_type: 6, ip_len: 52, app: smtp, time: Mon 2009-10-05 06:06:08
-flow: 1, ip_type: 6, ip_len: 58, app: smtp, time: Mon 2009-10-05 06:06:08
-flow: 1, ip_type: 6, ip_len: 70, app: smtp, time: Mon 2009-10-05 06:06:08
-flow: 1, ip_type: 6, ip_len: 58, app: smtp, time: Mon 2009-10-05 06:06:09
-flow: 1, ip_type: 6, ip_len: 58, app: smtp, time: Mon 2009-10-05 06:06:09
-flow: 1, ip_type: 6, ip_len: 70, app: smtp, time: Mon 2009-10-05 06:06:09
-flow: 1, ip_type: 6, ip_len: 76, app: smtp, time: Mon 2009-10-05 06:06:09
-flow: 1, ip_type: 6, ip_len: 48, app: smtp, time: Mon 2009-10-05 06:06:09
-flow: 1, ip_type: 6, ip_len: 79, app: smtp, time: Mon 2009-10-05 06:06:09
-flow: 1, ip_type: 6, ip_len: 54, app: smtp, time: Mon 2009-10-05 06:06:10
-flow: 1, ip_type: 6, ip_len: 46, app: smtp, time: Mon 2009-10-05 06:06:10
-flow: 1, ip_type: 6, ip_len: 96, app: smtp, time: Mon 2009-10-05 06:06:10
-flow: 1, ip_type: 6, ip_len: 1500, app: smtp, time: Mon 2009-10-05 06:06:10
-flow: 1, ip_type: 6, ip_len: 1500, app: smtp, time: Mon 2009-10-05 06:06:10
-flow: 1, ip_type: 6, ip_len: 1500, app: smtp, time: Mon 2009-10-05 06:06:10
-flow: 1, ip_type: 6, ip_len: 1500, app: smtp, time: Mon 2009-10-05 06:06:10
-flow: 2, ip_type: 1, ip_len: 576, app: icmp, time: Mon 2009-10-05 06:06:10
-flow: 1, ip_type: 6, ip_len: 1492, app: smtp, time: Mon 2009-10-05 06:06:10
-flow: 2, ip_type: 1, ip_len: 576, app: icmp, time: Mon 2009-10-05 06:06:10
-flow: 2, ip_type: 1, ip_len: 576, app: icmp, time: Mon 2009-10-05 06:06:10
-flow: 2, ip_type: 1, ip_len: 576, app: icmp, time: Mon 2009-10-05 06:06:10
-flow: 1, ip_type: 6, ip_len: 40, app: smtp, time: Mon 2009-10-05 06:06:11
-flow: 1, ip_type: 6, ip_len: 1492, app: smtp, time: Mon 2009-10-05 06:06:11
-flow: 1, ip_type: 6, ip_len: 1492, app: smtp, time: Mon 2009-10-05 06:06:11
-flow: 1, ip_type: 6, ip_len: 40, app: smtp, time: Mon 2009-10-05 06:06:11
-flow: 1, ip_type: 6, ip_len: 1492, app: smtp, time: Mon 2009-10-05 06:06:11
-flow: 1, ip_type: 6, ip_len: 1492, app: smtp, time: Mon 2009-10-05 06:06:11
-flow: 1, ip_type: 6, ip_len: 40, app: smtp, time: Mon 2009-10-05 06:06:11
-flow: 1, ip_type: 6, ip_len: 1492, app: smtp, time: Mon 2009-10-05 06:06:11
-flow: 1, ip_type: 6, ip_len: 1492, app: smtp, time: Mon 2009-10-05 06:06:11
-flow: 1, ip_type: 6, ip_len: 40, app: smtp, time: Mon 2009-10-05 06:06:11
-flow: 1, ip_type: 6, ip_len: 1492, app: smtp, time: Mon 2009-10-05 06:06:11
-flow: 1, ip_type: 6, ip_len: 1492, app: smtp, time: Mon 2009-10-05 06:06:11
-flow: 1, ip_type: 6, ip_len: 40, app: smtp, time: Mon 2009-10-05 06:06:11
-flow: 1, ip_type: 6, ip_len: 1492, app: smtp, time: Mon 2009-10-05 06:06:11
-flow: 1, ip_type: 6, ip_len: 69, app: smtp, time: Mon 2009-10-05 06:06:11
-flow: 1, ip_type: 6, ip_len: 40, app: smtp, time: Mon 2009-10-05 06:06:11
-flow: 1, ip_type: 6, ip_len: 40, app: smtp, time: Mon 2009-10-05 06:06:11
-flow: 1, ip_type: 6, ip_len: 40, app: smtp, time: Mon 2009-10-05 06:06:12
-flow: 1, ip_type: 6, ip_len: 40, app: smtp, time: Mon 2009-10-05 06:06:12
-flow: 1, ip_type: 6, ip_len: 40, app: smtp, time: Mon 2009-10-05 06:06:12
-flow: 1, ip_type: 6, ip_len: 40, app: smtp, time: Mon 2009-10-05 06:06:12
-flow: 1, ip_type: 6, ip_len: 68, app: smtp, time: Mon 2009-10-05 06:06:12
-flow: 1, ip_type: 6, ip_len: 40, app: smtp, time: Mon 2009-10-05 06:06:12
-flow: 1, ip_type: 6, ip_len: 46, app: smtp, time: Mon 2009-10-05 06:06:14
-flow: 1, ip_type: 6, ip_len: 40, app: smtp, time: Mon 2009-10-05 06:06:14
-flow: 1, ip_type: 6, ip_len: 88, app: smtp, time: Mon 2009-10-05 06:06:15
-flow: 1, ip_type: 6, ip_len: 40, app: smtp, time: Mon 2009-10-05 06:06:15
-flow: 1, ip_type: 6, ip_len: 40, app: smtp, time: Mon 2009-10-05 06:06:15
-flow: 1, ip_type: 6, ip_len: 40, app: smtp, time: Mon 2009-10-05 06:06:15
-flow: 3, ip_type: 17, ip_len: 229, app: netbios, time: Mon 2009-10-05 06:06:16
+time: Mon 2009-10-05 06:06:07.492060, flow: 0, ip_type: 17, ip_len: 62, src: 10.10.1.4:56166, dst: 10.10.1.1:53, app: dns
+time: Mon 2009-10-05 06:06:07.526085, flow: 0, ip_type: 17, ip_len: 128, src: 10.10.1.1:53, dst: 10.10.1.4:56166, app: dns
+time: Mon 2009-10-05 06:06:07.529046, flow: 1, ip_type: 6, ip_len: 48, src: 10.10.1.4:1470, dst: 74.53.140.153:25, app: unknown
+time: Mon 2009-10-05 06:06:07.875996, flow: 1, ip_type: 6, ip_len: 48, src: 74.53.140.153:25, dst: 10.10.1.4:1470, app: unknown
+time: Mon 2009-10-05 06:06:07.876028, flow: 1, ip_type: 6, ip_len: 40, src: 10.10.1.4:1470, dst: 74.53.140.153:25, app: unknown
+time: Mon 2009-10-05 06:06:08.219663, flow: 1, ip_type: 6, ip_len: 221, src: 74.53.140.153:25, dst: 10.10.1.4:1470, app: smtp
+time: Mon 2009-10-05 06:06:08.224809, flow: 1, ip_type: 6, ip_len: 49, src: 10.10.1.4:1470, dst: 74.53.140.153:25, app: smtp
+time: Mon 2009-10-05 06:06:08.565386, flow: 1, ip_type: 6, ip_len: 40, src: 74.53.140.153:25, dst: 10.10.1.4:1470, app: smtp
+time: Mon 2009-10-05 06:06:08.566183, flow: 1, ip_type: 6, ip_len: 177, src: 74.53.140.153:25, dst: 10.10.1.4:1470, app: smtp
+time: Mon 2009-10-05 06:06:08.568729, flow: 1, ip_type: 6, ip_len: 52, src: 10.10.1.4:1470, dst: 74.53.140.153:25, app: smtp
+time: Mon 2009-10-05 06:06:08.911081, flow: 1, ip_type: 6, ip_len: 58, src: 74.53.140.153:25, dst: 10.10.1.4:1470, app: smtp
+time: Mon 2009-10-05 06:06:08.911655, flow: 1, ip_type: 6, ip_len: 70, src: 10.10.1.4:1470, dst: 74.53.140.153:25, app: smtp
+time: Mon 2009-10-05 06:06:09.253544, flow: 1, ip_type: 6, ip_len: 58, src: 74.53.140.153:25, dst: 10.10.1.4:1470, app: smtp
+time: Mon 2009-10-05 06:06:09.254118, flow: 1, ip_type: 6, ip_len: 58, src: 10.10.1.4:1470, dst: 74.53.140.153:25, app: smtp
+time: Mon 2009-10-05 06:06:09.613798, flow: 1, ip_type: 6, ip_len: 70, src: 74.53.140.153:25, dst: 10.10.1.4:1470, app: smtp
+time: Mon 2009-10-05 06:06:09.614414, flow: 1, ip_type: 6, ip_len: 76, src: 10.10.1.4:1470, dst: 74.53.140.153:25, app: smtp
+time: Mon 2009-10-05 06:06:09.956765, flow: 1, ip_type: 6, ip_len: 48, src: 74.53.140.153:25, dst: 10.10.1.4:1470, app: smtp
+time: Mon 2009-10-05 06:06:09.957250, flow: 1, ip_type: 6, ip_len: 79, src: 10.10.1.4:1470, dst: 74.53.140.153:25, app: smtp
+time: Mon 2009-10-05 06:06:10.319708, flow: 1, ip_type: 6, ip_len: 54, src: 74.53.140.153:25, dst: 10.10.1.4:1470, app: smtp
+time: Mon 2009-10-05 06:06:10.320203, flow: 1, ip_type: 6, ip_len: 46, src: 10.10.1.4:1470, dst: 74.53.140.153:25, app: smtp
+time: Mon 2009-10-05 06:06:10.661679, flow: 1, ip_type: 6, ip_len: 96, src: 74.53.140.153:25, dst: 10.10.1.4:1470, app: smtp
+time: Mon 2009-10-05 06:06:10.692743, flow: 1, ip_type: 6, ip_len: 1500, src: 10.10.1.4:1470, dst: 74.53.140.153:25, app: smtp
+time: Mon 2009-10-05 06:06:10.692786, flow: 1, ip_type: 6, ip_len: 1500, src: 10.10.1.4:1470, dst: 74.53.140.153:25, app: smtp
+time: Mon 2009-10-05 06:06:10.692804, flow: 1, ip_type: 6, ip_len: 1500, src: 10.10.1.4:1470, dst: 74.53.140.153:25, app: smtp
+time: Mon 2009-10-05 06:06:10.692823, flow: 1, ip_type: 6, ip_len: 1500, src: 10.10.1.4:1470, dst: 74.53.140.153:25, app: smtp
+time: Mon 2009-10-05 06:06:10.695115, flow: 2, ip_type: 1, ip_len: 576, src: 192.168.1.1, dst: 10.10.1.4, app: icmp
+time: Mon 2009-10-05 06:06:10.695170, flow: 1, ip_type: 6, ip_len: 1492, src: 10.10.1.4:1470, dst: 74.53.140.153:25, app: smtp
+time: Mon 2009-10-05 06:06:10.695623, flow: 2, ip_type: 1, ip_len: 576, src: 192.168.1.1, dst: 10.10.1.4, app: icmp
+time: Mon 2009-10-05 06:06:10.696248, flow: 2, ip_type: 1, ip_len: 576, src: 192.168.1.1, dst: 10.10.1.4, app: icmp
+time: Mon 2009-10-05 06:06:10.696634, flow: 2, ip_type: 1, ip_len: 576, src: 192.168.1.1, dst: 10.10.1.4, app: icmp
+time: Mon 2009-10-05 06:06:11.104941, flow: 1, ip_type: 6, ip_len: 40, src: 74.53.140.153:25, dst: 10.10.1.4:1470, app: smtp
+time: Mon 2009-10-05 06:06:11.104972, flow: 1, ip_type: 6, ip_len: 1492, src: 10.10.1.4:1470, dst: 74.53.140.153:25, app: smtp
+time: Mon 2009-10-05 06:06:11.104998, flow: 1, ip_type: 6, ip_len: 1492, src: 10.10.1.4:1470, dst: 74.53.140.153:25, app: smtp
+time: Mon 2009-10-05 06:06:11.469723, flow: 1, ip_type: 6, ip_len: 40, src: 74.53.140.153:25, dst: 10.10.1.4:1470, app: smtp
+time: Mon 2009-10-05 06:06:11.469759, flow: 1, ip_type: 6, ip_len: 1492, src: 10.10.1.4:1470, dst: 74.53.140.153:25, app: smtp
+time: Mon 2009-10-05 06:06:11.469814, flow: 1, ip_type: 6, ip_len: 1492, src: 10.10.1.4:1470, dst: 74.53.140.153:25, app: smtp
+time: Mon 2009-10-05 06:06:11.494167, flow: 1, ip_type: 6, ip_len: 40, src: 74.53.140.153:25, dst: 10.10.1.4:1470, app: smtp
+time: Mon 2009-10-05 06:06:11.494181, flow: 1, ip_type: 6, ip_len: 1492, src: 10.10.1.4:1470, dst: 74.53.140.153:25, app: smtp
+time: Mon 2009-10-05 06:06:11.494199, flow: 1, ip_type: 6, ip_len: 1492, src: 10.10.1.4:1470, dst: 74.53.140.153:25, app: smtp
+time: Mon 2009-10-05 06:06:11.834595, flow: 1, ip_type: 6, ip_len: 40, src: 74.53.140.153:25, dst: 10.10.1.4:1470, app: smtp
+time: Mon 2009-10-05 06:06:11.834628, flow: 1, ip_type: 6, ip_len: 1492, src: 10.10.1.4:1470, dst: 74.53.140.153:25, app: smtp
+time: Mon 2009-10-05 06:06:11.834655, flow: 1, ip_type: 6, ip_len: 1492, src: 10.10.1.4:1470, dst: 74.53.140.153:25, app: smtp
+time: Mon 2009-10-05 06:06:11.858301, flow: 1, ip_type: 6, ip_len: 40, src: 74.53.140.153:25, dst: 10.10.1.4:1470, app: smtp
+time: Mon 2009-10-05 06:06:11.858316, flow: 1, ip_type: 6, ip_len: 1492, src: 10.10.1.4:1470, dst: 74.53.140.153:25, app: smtp
+time: Mon 2009-10-05 06:06:11.858334, flow: 1, ip_type: 6, ip_len: 69, src: 10.10.1.4:1470, dst: 74.53.140.153:25, app: smtp
+time: Mon 2009-10-05 06:06:11.881223, flow: 1, ip_type: 6, ip_len: 40, src: 74.53.140.153:25, dst: 10.10.1.4:1470, app: smtp
+time: Mon 2009-10-05 06:06:11.905583, flow: 1, ip_type: 6, ip_len: 40, src: 74.53.140.153:25, dst: 10.10.1.4:1470, app: smtp
+time: Mon 2009-10-05 06:06:12.200179, flow: 1, ip_type: 6, ip_len: 40, src: 74.53.140.153:25, dst: 10.10.1.4:1470, app: smtp
+time: Mon 2009-10-05 06:06:12.222746, flow: 1, ip_type: 6, ip_len: 40, src: 74.53.140.153:25, dst: 10.10.1.4:1470, app: smtp
+time: Mon 2009-10-05 06:06:12.246844, flow: 1, ip_type: 6, ip_len: 40, src: 74.53.140.153:25, dst: 10.10.1.4:1470, app: smtp
+time: Mon 2009-10-05 06:06:12.248291, flow: 1, ip_type: 6, ip_len: 40, src: 74.53.140.153:25, dst: 10.10.1.4:1470, app: smtp
+time: Mon 2009-10-05 06:06:12.248789, flow: 1, ip_type: 6, ip_len: 68, src: 74.53.140.153:25, dst: 10.10.1.4:1470, app: smtp
+time: Mon 2009-10-05 06:06:12.387595, flow: 1, ip_type: 6, ip_len: 40, src: 10.10.1.4:1470, dst: 74.53.140.153:25, app: smtp
+time: Mon 2009-10-05 06:06:14.763825, flow: 1, ip_type: 6, ip_len: 46, src: 10.10.1.4:1470, dst: 74.53.140.153:25, app: smtp
+time: Mon 2009-10-05 06:06:14.764576, flow: 1, ip_type: 6, ip_len: 40, src: 10.10.1.4:1470, dst: 74.53.140.153:25, app: smtp
+time: Mon 2009-10-05 06:06:15.105467, flow: 1, ip_type: 6, ip_len: 88, src: 74.53.140.153:25, dst: 10.10.1.4:1470, app: smtp
+time: Mon 2009-10-05 06:06:15.105999, flow: 1, ip_type: 6, ip_len: 40, src: 74.53.140.153:25, dst: 10.10.1.4:1470, app: smtp
+time: Mon 2009-10-05 06:06:15.106015, flow: 1, ip_type: 6, ip_len: 40, src: 10.10.1.4:1470, dst: 74.53.140.153:25, app: smtp
+time: Mon 2009-10-05 06:06:15.106759, flow: 1, ip_type: 6, ip_len: 40, src: 74.53.140.153:25, dst: 10.10.1.4:1470, app: smtp
+time: Mon 2009-10-05 06:06:16.690444, flow: 3, ip_type: 17, ip_len: 229, src: 10.10.1.20:138, dst: 10.10.1.255:138, app: netbios

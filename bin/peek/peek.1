@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd June 23, 2014
+.Dd October 18, 2014
 .Dt PEEK 1
 .Os
 .Sh NAME
@@ -31,7 +31,7 @@ network capture (trace) files in PCAP or ERF format.
 The output of the utility is one line per packet and can be customised
 using the command line options.
 The default is
-.Sq Fl fNnat .
+.Sq Fl tfNnsda .
 .Pp
 The options are as follows:
 .Bl -tag -width ".Fl A" -offset indent
@@ -42,6 +42,8 @@ Display the detected application.
 See
 .Xr peak_li 3
 for more details.
+.It Fl d
+Display the destination address and port number (if available).
 .It Fl f
 Display the unique flow number.
 See
@@ -51,6 +53,8 @@ for more details.
 Display the IP length.
 .It Fl n
 Display the IP type.
+.It Fl s
+Display the source address and port number (if available).
 .It Fl t
 Display the timestamp.
 .El

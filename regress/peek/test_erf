@@ -1,19 +1,19 @@
-flow: 0, ip_type: 6, ip_len: 60, app: unknown, time: Fri 2003-08-22 02:07:40
-flow: 0, ip_type: 6, ip_len: 44, app: unknown, time: Fri 2003-08-22 02:07:41
-flow: 0, ip_type: 6, ip_len: 40, app: unknown, time: Fri 2003-08-22 02:07:41
-flow: 0, ip_type: 6, ip_len: 693, app: http, time: Fri 2003-08-22 02:07:41
-flow: 0, ip_type: 6, ip_len: 40, app: http, time: Fri 2003-08-22 02:07:41
-flow: 0, ip_type: 6, ip_len: 1452, app: http, time: Fri 2003-08-22 02:07:41
-flow: 0, ip_type: 6, ip_len: 40, app: http, time: Fri 2003-08-22 02:07:41
-flow: 0, ip_type: 6, ip_len: 1452, app: http, time: Fri 2003-08-22 02:07:41
-flow: 0, ip_type: 6, ip_len: 40, app: http, time: Fri 2003-08-22 02:07:41
-flow: 0, ip_type: 6, ip_len: 375, app: http, time: Fri 2003-08-22 02:07:41
-flow: 0, ip_type: 6, ip_len: 40, app: http, time: Fri 2003-08-22 02:07:41
-flow: 0, ip_type: 6, ip_len: 693, app: http, time: Fri 2003-08-22 02:07:41
-flow: 0, ip_type: 6, ip_len: 40, app: http, time: Fri 2003-08-22 02:07:41
-flow: 0, ip_type: 6, ip_len: 1452, app: http, time: Fri 2003-08-22 02:07:41
-flow: 0, ip_type: 6, ip_len: 244, app: http, time: Fri 2003-08-22 02:07:41
-flow: 0, ip_type: 6, ip_len: 40, app: http, time: Fri 2003-08-22 02:07:41
-flow: 0, ip_type: 6, ip_len: 40, app: http, time: Fri 2003-08-22 02:07:44
-flow: 0, ip_type: 6, ip_len: 40, app: http, time: Fri 2003-08-22 02:07:44
-flow: 0, ip_type: 6, ip_len: 40, app: http, time: Fri 2003-08-22 02:07:44
+time: Fri 2003-08-22 02:07:40.839169, flow: 0, ip_type: 6, ip_len: 60, src: 192.168.1.57:32811, dst: 216.239.57.99:80, app: unknown
+time: Fri 2003-08-22 02:07:41.026561, flow: 0, ip_type: 6, ip_len: 44, src: 216.239.57.99:80, dst: 192.168.1.57:32811, app: unknown
+time: Fri 2003-08-22 02:07:41.026612, flow: 0, ip_type: 6, ip_len: 40, src: 192.168.1.57:32811, dst: 216.239.57.99:80, app: unknown
+time: Fri 2003-08-22 02:07:41.026728, flow: 0, ip_type: 6, ip_len: 693, src: 192.168.1.57:32811, dst: 216.239.57.99:80, app: http
+time: Fri 2003-08-22 02:07:41.224116, flow: 0, ip_type: 6, ip_len: 40, src: 216.239.57.99:80, dst: 192.168.1.57:32811, app: http
+time: Fri 2003-08-22 02:07:41.235784, flow: 0, ip_type: 6, ip_len: 1452, src: 216.239.57.99:80, dst: 192.168.1.57:32811, app: http
+time: Fri 2003-08-22 02:07:41.235965, flow: 0, ip_type: 6, ip_len: 40, src: 192.168.1.57:32811, dst: 216.239.57.99:80, app: http
+time: Fri 2003-08-22 02:07:41.237646, flow: 0, ip_type: 6, ip_len: 1452, src: 216.239.57.99:80, dst: 192.168.1.57:32811, app: http
+time: Fri 2003-08-22 02:07:41.237823, flow: 0, ip_type: 6, ip_len: 40, src: 192.168.1.57:32811, dst: 216.239.57.99:80, app: http
+time: Fri 2003-08-22 02:07:41.237969, flow: 0, ip_type: 6, ip_len: 375, src: 216.239.57.99:80, dst: 192.168.1.57:32811, app: http
+time: Fri 2003-08-22 02:07:41.238036, flow: 0, ip_type: 6, ip_len: 40, src: 192.168.1.57:32811, dst: 216.239.57.99:80, app: http
+time: Fri 2003-08-22 02:07:41.238181, flow: 0, ip_type: 6, ip_len: 693, src: 192.168.1.57:32811, dst: 216.239.57.99:80, app: http
+time: Fri 2003-08-22 02:07:41.422227, flow: 0, ip_type: 6, ip_len: 40, src: 216.239.57.99:80, dst: 192.168.1.57:32811, app: http
+time: Fri 2003-08-22 02:07:41.435854, flow: 0, ip_type: 6, ip_len: 1452, src: 216.239.57.99:80, dst: 192.168.1.57:32811, app: http
+time: Fri 2003-08-22 02:07:41.436071, flow: 0, ip_type: 6, ip_len: 244, src: 216.239.57.99:80, dst: 192.168.1.57:32811, app: http
+time: Fri 2003-08-22 02:07:41.436132, flow: 0, ip_type: 6, ip_len: 40, src: 192.168.1.57:32811, dst: 216.239.57.99:80, app: http
+time: Fri 2003-08-22 02:07:44.661432, flow: 0, ip_type: 6, ip_len: 40, src: 192.168.1.57:32811, dst: 216.239.57.99:80, app: http
+time: Fri 2003-08-22 02:07:44.832127, flow: 0, ip_type: 6, ip_len: 40, src: 216.239.57.99:80, dst: 192.168.1.57:32811, app: http
+time: Fri 2003-08-22 02:07:44.832167, flow: 0, ip_type: 6, ip_len: 40, src: 192.168.1.57:32811, dst: 216.239.57.99:80, app: http
