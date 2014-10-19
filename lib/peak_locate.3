@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2012-2013 Franco Fichtner <franco@packetwerk.com>
+.\" Copyright (c) 2012-2014 Franco Fichtner <franco@packetwerk.com>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd October 17, 2013
+.Dd October 18, 2014
 .Dt PEAK_LOCATE 3
 .Os
 .Sh NAME
@@ -23,28 +23,28 @@
 .Nd geolocate a network address
 .Sh SYNOPSIS
 .In peak.h
-.Ft void
+.Ft struct peak_locates *
 .Fn peak_locate_init "const char *file"
 .Ft const char *
-.Fn peak_locate_me "const struct netaddr *me"
+.Fn peak_locate_me "struct peak_locates *self" "const struct netaddr *me"
 .Ft void
-.Fn peak_locate_exit void
+.Fn peak_locate_exit "struct peak_locates *self"
 .Sh DESCRIPTION
 The
 .Nm peak_locate
 API provides a mechanism to retrieve the geolocation of a network
 address.
-The database is provided via a BLOB set, which has been converted
+The database is provided via a binary set, which has been converted
 from raw CSV files using
 .Xr geoconv 1
 earlier.
-The library itself is thread-safe.
+The library is thread-safe.
 .Pp
-The supplied BLOB set is sorted and holds a number of data sets.
+The supplied binary set is sorted and holds a number of data sets.
 This makes it possible to load the binary data as a whole and to
-run a binary search on top.
+directly invoke a binary search.
 To avoid mismatching ABI specifications from corrupting a running
-system, each BLOB set is protected by a file header storing a
+system, each binary set is protected by a file header storing a
 magic value, the ABI revision as well as the number of data sets in
 the file.
 The exposed data structures are:
@@ -69,7 +69,12 @@ API can be initialised with
 The function takes the location of the binary file as an argument.
 If the argument is
 .Dv NULL ,
-an empty location database is created.
+the default location database is loaded.
+If a default database could not be found, an empty database is
+returned.
+Otherwise,
+.Dv NULL
+is returned.
 .Pp
 Retrieving a geolocation for a given
 .Fa "struct netaddr *"
@@ -86,7 +91,12 @@ is returned.
 .Pp
 A call to
 .Fn peak_locate_exit
-releases all internal references.
+releases all internal references of the specified database.
+.Sh FILES
+.Bl -tag -width ".Pa /usr/local/var/peak/locate.bin" -compact
+.It Pa /usr/local/var/peak/locate.bin
+The default location of the geolocation database file.
+.El
 .Sh SEE ALSO
 .Xr geoconv 1
 .Sh AUTHORS

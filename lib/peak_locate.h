@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013 Franco Fichtner <franco@packetwerk.com>
+ * Copyright (c) 2012-2014 Franco Fichtner <franco@packetwerk.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -47,8 +47,9 @@ peak_locate_cmp(const void *xx, const void *yy)
 	return (0);
 }
 
-const char	*peak_locate_me(const struct netaddr *);
-void		 peak_locate_init(const char *);
-void		 peak_locate_exit(void);
+struct peak_locates	*peak_locate_init(const char *);
+void			 peak_locate_exit(struct peak_locates *);
+const char		*peak_locate_me(struct peak_locates *,
+			     const struct netaddr *);
 
 #endif /* !PEAK_LOCATE_H */

@@ -18,115 +18,121 @@
 #include <peak.h>
 #include <unistd.h>
 
-static struct peak_locates {
+#define LOCATE_DEFAULT	"/usr/local/var/peak/locate.bin"
+
+struct peak_locates {
 	struct peak_locate *mem;
 	size_t count;
-} locate_self;
-
-static struct peak_locates *const self = &locate_self;
+};
 
 const char *
-peak_locate_me(const struct netaddr *me)
+peak_locate_me(struct peak_locates *self, const struct netaddr *me)
 {
 	struct peak_locate *elm;
 	struct peak_locate ref;
+	const char *ret = "XX";
 
-	/*
-	 * We know min and max match, but locatecmp
-	 * doesn't know about it, so pass it on.
-	 */
-	ref.min = *me;
-	ref.max = *me;
+	if (self) {
+		/*
+		 * We know min and max match, but locatecmp
+		 * doesn't know about it, so pass it on.
+		 */
+		ref.min = *me;
+		ref.max = *me;
 
-	elm = bsearch(&ref, self->mem, self->count,
-	    sizeof(*self->mem), peak_locate_cmp);
-	if (!elm) {
-		return ("XX");
+		elm = bsearch(&ref, self->mem, self->count,
+		    sizeof(*self->mem), peak_locate_cmp);
+		if (elm) {
+			ret = elm->location;
+		}
 	}
 
-	return (elm->location);
+	return (ret);
 }
 
 void
-peak_locate_exit(void)
+peak_locate_exit(struct peak_locates *self)
 {
-	free(self->mem);
-
-	self->mem = NULL;
-	self->count = 0;
+	if (self) {
+		free(self->mem);
+		free(self);
+	}
 }
 
-void
+struct peak_locates *
 peak_locate_init(const char *file)
 {
 	struct peak_locate_hdr hdr;
-	unsigned int inserted = 0;
-	struct peak_locate *mem;
+	struct peak_locates *ret;
 	struct peak_locate ref;
 	unsigned int i;
-	size_t count;
 	int fd;
 
+	ret = malloc(sizeof(*ret));
+	if (!ret) {
+		alert("could not allocate memory\n");
+		return (NULL);
+	}
+
+	ret->mem = NULL;
+	ret->count = 0;
+
 	if (!file) {
-		/* reset the location database */
-		peak_locate_exit();
-		return;
+		file = LOCATE_DEFAULT;
 	}
 
 	fd = open(file, O_RDONLY);
 	if (fd < 0) {
-		alert("file failed to open (skipped)\n");
-		return;
+		warning("could not open file `%s'\n", file);
+		return (ret);
 	}
 
 	if (read(fd, &hdr, sizeof(hdr)) != sizeof(hdr)) {
-		alert("file header not available (skipped)\n");
+		warning("file header not available\n");
 		goto peak_locate_init_out;
 	}
 
 	if (hdr.magic != LOCATE_MAGIC) {
-		alert("file magic mismatch (skipped)\n");
+		warning("file magic mismatch\n");
 		goto peak_locate_init_out;
 	}
 
 	if (hdr.revision != LOCATE_REVISION) {
-		alert("file revision mismatch: got %u, want %u "
-		    "(skipped)\n", hdr.revision, LOCATE_REVISION);
+		warning("file revision mismatch: got %u, want %u\n",
+		    hdr.revision, LOCATE_REVISION);
 		goto peak_locate_init_out;
 	}
 
-	count = hdr.count;
-	if (!count) {
+	if (!hdr.count) {
 		goto peak_locate_init_out;
 	}
 
-	mem = reallocarray(NULL, count, sizeof(*mem));
-	if (!mem) {
-		alert("memory allocation failed\n");
+	ret->mem = reallocarray(NULL, hdr.count, sizeof(*ret->mem));
+	if (!ret->mem) {
+		warning("memory allocation failed\n");
 		goto peak_locate_init_out;
 	}
 
-	for (i = 0; i < count; ++i) {
+	for (i = 0; i < hdr.count; ++i) {
 		if (read(fd, &ref, sizeof(ref)) != sizeof(ref)) {
-			alert("file not complete (skipped)\n");
-			free(mem);
+			warning("file not complete\n");
+			free(ret->mem);
+			ret->mem = NULL;
 			goto peak_locate_init_out;
 		}
 
-		memcpy(&mem[i], &ref, sizeof(ref));
-		++inserted;
+		memcpy(&ret->mem[i], &ref, sizeof(ref));
 	}
 
-	/* swap old and new values */
-	peak_locate_exit();
-	self->count = count;
-	self->mem = mem;
+	ret->count = hdr.count;
 
 peak_locate_init_out:
 
 	close(fd);
 
-	if (inserted) {
-		alert("successfully loaded %u locations\n", inserted);
+	if (ret->count) {
+		warning("successfully loaded %u locations\n", hdr.count);
 	}
+
+	return (ret);
 }
