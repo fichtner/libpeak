@@ -13,22 +13,31 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd October 18, 2014
+.Dd October 19, 2014
 .Dt PEAK_LOCATE 3
 .Os
 .Sh NAME
-.Nm peak_locate_init ,
+.Nm peak_locate_desc ,
 .Nm peak_locate_exit ,
-.Nm peak_locate_me
+.Nm peak_locate_get ,
+.Nm peak_locate_init ,
+.Nm peak_locate_name ,
+.Nm peak_locate_number
 .Nd geolocate a network address
 .Sh SYNOPSIS
 .In peak.h
-.Ft struct peak_locates *
-.Fn peak_locate_init "const char *file"
 .Ft const char *
-.Fn peak_locate_me "struct peak_locates *self" "const struct netaddr *me"
+.Fn peak_locate_desc "const unsigned int number"
 .Ft void
 .Fn peak_locate_exit "struct peak_locates *self"
+.Ft const char *
+.Fn peak_locate_get "struct peak_locates *self" "const struct netaddr *me"
+.Ft const char *
+.Ft struct peak_locates *
+.Fn peak_locate_init "const char *file"
+.Fn peak_locate_name "const unsigned int number"
+.Ft unsigned int
+.Fn peak_locate_number "const char *name"
 .Sh DESCRIPTION
 The
 .Nm peak_locate
@@ -79,9 +88,9 @@ is returned.
 Retrieving a geolocation for a given
 .Fa "struct netaddr *"
 is as easy as calling
-.Fn peak_locate_me .
+.Fn peak_locate_get .
 Upon successful completion
-.Fn peak_locate_me
+.Fn peak_locate_get
 returns an abbreviated country string, if the geolocation for the given
 network address could be found.
 Otherwise,
@@ -92,6 +101,23 @@ is returned.
 A call to
 .Fn peak_locate_exit
 releases all internal references of the specified database.
+.Pp
+Given a valid location
+.Va number ,
+.Fn peak_locate_name
+returns a pointer to the corresponding ISO 3166 country code, or
+.Dv NULL
+if the country code does not exist.
+.Fn peak_locate_desc
+will return a pointer to the unabbreviated country name in the same way.
+.Pp
+The function
+.Fn peak_locate_number
+will return the matching number to a given ISO 3166 country code
+.Va name .
+Otherwise,
+.Dv LOCATE_UNKNOWN
+is returned to indicate the country code is invalid.
 .Sh FILES
 .Bl -tag -width ".Pa /usr/local/var/peak/locate.bin" -compact
 .It Pa /usr/local/var/peak/locate.bin

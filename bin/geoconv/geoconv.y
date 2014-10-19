@@ -57,7 +57,7 @@ RB_GENERATE_STATIC(geo_tree, geo_helper, entry, locatecmp);
 %}
 %union {
 	struct netaddr addr;
-	char loc[8];
+	unsigned int loc;
 }
 %token <addr> IPV4_STR IPV6_STR
 %token <loc> LOC_SHORT
@@ -72,20 +72,23 @@ line	: /* empty */
 	;
 
 entry	: ip_str ip_str ip_raw ip_raw loc {
-		struct geo_helper *elm = prealloc_get(&geo_mem);
-		if (!elm) {
-			perr("too many entries\n");
-			exit(1);
-		}
+		if ($5) {
+			struct geo_helper *elm = prealloc_get(&geo_mem);
+			if (!elm) {
+				perr("too many entries\n");
+				exit(1);
+			}
 
-		memset(elm, 0, sizeof(*elm));
-		memcpy(elm->data.location, $5, sizeof(elm->data.location));
-		elm->data.min = $1;
-		elm->data.max = $2;
+			memset(elm, 0, sizeof(*elm));
 
-		if (RB_INSERT(geo_tree, &geo_head, elm)) {
-			perr("found duplicated entry\n");
-			exit(1);
+			elm->data.location = $5;
+			elm->data.min = $1;
+			elm->data.max = $2;
+
+			if (RB_INSERT(geo_tree, &geo_head, elm)) {
+				perr("found duplicated entry\n");
+				exit(1);
+			}
 		}
 	}
 	;
@@ -102,7 +105,7 @@ ip_raw	: '"' IP_RAW '"' ','
 	;
 
 loc	: '"' LOC_SHORT '"' ',' '"' LOC_LONG '"' {
-		memcpy($$, $2, sizeof($$));
+		$$ = $2;
 	}
 	;
 %%

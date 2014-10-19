@@ -23,6 +23,22 @@
 output_init();
 
 static void
+test_mapping(void)
+{
+	unsigned int i, number;
+	const char *name;
+
+	for (i = LOCATE_UNKNOWN; i < LOCATE_MAX; ++i) {
+		/* all protocols have names... */
+		name = peak_locate_name(i);
+		assert(name);
+		/* ...and a unique number */
+		number = peak_locate_number(name);
+		assert(i == number);
+	}
+}
+
+static void
 test_locate(void)
 {
 	struct peak_locates *db;
@@ -32,8 +48,7 @@ test_locate(void)
 	assert(db);
 
 	netaddr4(&test_ip, inet_addr("88.74.143.194"));
-	assert(!strcmp(peak_locate_me(db, &test_ip), "XX"));
-	assert(!strcmp(peak_locate_me(NULL, &test_ip), "XX"));
+	assert(!peak_locate_get(db, &test_ip));
 
 	peak_locate_exit(NULL);
 	peak_locate_exit(db);
@@ -42,33 +57,33 @@ test_locate(void)
 	assert(db);
 
 	netaddr4(&test_ip, inet_addr("88.74.143.194"));
-	assert(!strcmp(peak_locate_me(db, &test_ip), "DE"));
+	assert(peak_locate_get(db, &test_ip) == LOCATE_DE);
 
 	netaddr4(&test_ip, inet_addr("0.116.0.0"));
-	assert(!strcmp(peak_locate_me(db, &test_ip), "AT"));
+	assert(peak_locate_get(db, &test_ip) == LOCATE_AT);
 
 	netaddr4(&test_ip, inet_addr("0.115.255.255"));
-	assert(!strcmp(peak_locate_me(db, &test_ip), "XX"));
+	assert(peak_locate_get(db, &test_ip) == LOCATE_XX);
 
 	netaddr4(&test_ip, inet_addr("0.119.255.255"));
-	assert(!strcmp(peak_locate_me(db, &test_ip), "AT"));
+	assert(peak_locate_get(db, &test_ip) == LOCATE_AT);
 
 	netaddr4(&test_ip, inet_addr("0.120.0.0"));
-	assert(!strcmp(peak_locate_me(db, &test_ip), "XX"));
+	assert(peak_locate_get(db, &test_ip) == LOCATE_XX);
 
 	inet_pton(AF_INET6, "2001:618::", &test_ip);
-	assert(!strcmp(peak_locate_me(db, &test_ip), "CH"));
+	assert(peak_locate_get(db, &test_ip) == LOCATE_CH);
 
 	inet_pton(AF_INET6, "2001:617:ffff:ffff:ffff:ffff:ffff:ffff",
 	    &test_ip);
-	assert(!strcmp(peak_locate_me(db, &test_ip), "XX"));
+	assert(peak_locate_get(db, &test_ip) == LOCATE_XX);
 
 	inet_pton(AF_INET6, "2001:618:ffff:ffff:ffff:ffff:ffff:ffff",
 	    &test_ip);
-	assert(!strcmp(peak_locate_me(db, &test_ip), "CH"));
+	assert(peak_locate_get(db, &test_ip) == LOCATE_CH);
 
 	inet_pton(AF_INET6, "2001:619::", &test_ip);
-	assert(!strcmp(peak_locate_me(db, &test_ip), "XX"));
+	assert(peak_locate_get(db, &test_ip) == LOCATE_XX);
 
 	peak_locate_exit(db);
 }
@@ -78,6 +93,7 @@ main(void)
 {
 	pout("peak locate test suite... ");
 
+	test_mapping();
 	test_locate();
 
 	pout("ok\n");

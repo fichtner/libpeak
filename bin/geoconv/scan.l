@@ -52,7 +52,10 @@ static void yyunput(int,char *) __unused;
 	return (IPV6_STR);
 }
 [A-Z][A-Z0-9] {
-	memcpy(yylval.loc, yytext, sizeof(yylval.loc));
+	yylval.loc = peak_locate_number(yytext);
+	if (!yylval.loc) {
+		perr("Unknown location `%s'\n", yytext);
+	}
 	return (LOC_SHORT);
 }
 [a-zA-Z .,/'()-]+ {
