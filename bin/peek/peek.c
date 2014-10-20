@@ -62,12 +62,28 @@ peek_report(const struct peak_packet *packet, const struct peak_track *flow,
 			pout("ip_type: %hhu", packet->net_type);
 			break;
 		case USE_SRC:
-			pout("src: %s%s", netprint(&packet->net_saddr),
-			    portprint(packet->flow_sport));
+			if (packet->net_family == AF_INET6 &&
+			    packet->flow_sport) {
+				pout("src: [%s]%s",
+				    netprint(&packet->net_saddr),
+				    portprint(packet->flow_sport));
+			} else {
+				pout("src: %s%s",
+				    netprint(&packet->net_saddr),
+				    portprint(packet->flow_sport));
+			}
 			break;
 		case USE_DST:
-			pout("dst: %s%s", netprint(&packet->net_daddr),
-			    portprint(packet->flow_dport));
+			if (packet->net_family == AF_INET6 &&
+			    packet->flow_dport) {
+				pout("dst: [%s]%s",
+				    netprint(&packet->net_daddr),
+				    portprint(packet->flow_dport));
+			} else {
+				pout("dst: %s%s",
+				    netprint(&packet->net_daddr),
+				    portprint(packet->flow_dport));
+			}
 			break;
 		case USE_TIME: {
 			char tsbuf[40];
