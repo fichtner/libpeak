@@ -89,6 +89,7 @@ unsigned int	 peak_li_get(const struct peak_packet *);
 const char	*peak_li_name(const unsigned int);
 const char	*peak_li_pretty(const unsigned int);
 const char	*peak_li_desc(const unsigned int);
+const char	*peak_li_cat(const unsigned int);
 unsigned int	 peak_li_number(const char *);
 
 static inline unsigned int
