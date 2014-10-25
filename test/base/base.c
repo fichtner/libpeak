@@ -152,10 +152,13 @@ test_token(void)
 	peak_token_init(&bucket, 100);
 
 	assert(peak_token_credit(&bucket, 50, 0));
+	assert(peak_token_credit(&bucket, 0, 0));
 	assert(peak_token_credit(&bucket, 50, 0));
 	assert(!peak_token_credit(&bucket, 50, 0));
 	assert(!peak_token_credit(&bucket, 1, 0));
 	assert(_peak_token_credit(&bucket, 50, 1000));
+	assert(_peak_token_credit(&bucket, 75, 1000));
+	assert(_peak_token_credit(&bucket, -75, 1000));
 	assert(_peak_token_credit(&bucket, 75, 1000));
 	assert(!_peak_token_credit(&bucket, 1, 1000));
 	assert(_peak_token_credit(&bucket, 25, 1500));
@@ -163,6 +166,13 @@ test_token(void)
 	assert(peak_token_credit(&bucket, 50, 1000));
 	assert(!peak_token_credit(&bucket, 1, 1000));
 
+	_peak_token_init(&bucket, 0);
+	assert(peak_token_credit(&bucket, 1000000, 0));
+	assert(peak_token_credit(&bucket, 1000000, 0));
+	assert(peak_token_credit(&bucket, 1000000, 0));
+	assert(peak_token_credit(&bucket, 1000000, 0));
+	assert(peak_token_credit(&bucket, 1000000, 0));
+	assert(peak_token_credit(&bucket, 1000000, 0));
 	peak_token_exit(&bucket);
 }
 

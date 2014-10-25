@@ -13,14 +13,15 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd October 12, 2014
+.Dd October 20, 2014
 .Dt PEAK_TOKEN 3
 .Os
 .Sh NAME
 .Nm peak_token_credit ,
 .Nm _peak_token_credit ,
 .Nm peak_token_exit ,
-.Nm peak_token_init
+.Nm peak_token_init ,
+.Nm _peak_token_init
 .Nd token slot machine
 .Sh SYNOPSIS
 .In peak.h
@@ -56,6 +57,10 @@ may be any unit-per-second value of the caller's choosing.
 The memory of
 .Vt struct peak_token
 must be provided externally.
+Similarly, the function
+.Fn _peak_token_init
+can be used to implement non-spinlock variants or to reset
+a token to a different value.
 .Pp
 The
 .Fn peak_token_credit
@@ -68,11 +73,16 @@ Afterwards,
 .Va want
 is substracted from the bucket's balance if sufficient credits are
 available and the function returns non-zero.
+If the bucket was initialised with zero bytes it will always
+return non-zero.
 Otherwise, zero is returned.
-.Pp
-The
+Negative amounts of
+.Va want
+will be reimbursed and must have been aqcuired at the same time
+in order to make sense to the implementation.
+Similarly, the function
 .Fn _peak_token_credit
-function operates like its sibling, but does not use the internal
+operates like its sibling, but does not use the internal
 mutex to serialise access.
 .Sh AUTHORS
 .An Franco Fichtner Aq Mt franco@packetwerk.com

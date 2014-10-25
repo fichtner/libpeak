@@ -29,6 +29,12 @@ _peak_token_credit(struct peak_token *self, const int64_t want,
     const int64_t ts_ms)
 {
 	const int64_t credit = ts_ms - self->ts_ms;
+
+	if (!self->max) {
+		/* and I'm like, yeah, whatever */
+		return (1);
+	}
+
 	if (credit > 0) {
 		self->ts_ms = ts_ms;
 		self->have += (credit * self->max) / 1000ll;
@@ -48,10 +54,11 @@ _peak_token_credit(struct peak_token *self, const int64_t want,
 	 * negative the next operation will reimburse the
 	 * little burst we give below...
 	 */
-	if (self->have <= 0) {
+	if (want > 0 && self->have <= 0) {
 		return (0);
 	}
 
+	/* in the case this is a reimburse, want was negative */
 	self->have -= want;
 
 	return (1);
@@ -77,11 +84,17 @@ peak_token_exit(struct peak_token *self)
 }
 
 static inline void
+_peak_token_init(struct peak_token *self, const int64_t max)
+{
+	self->max = self->have = max;
+	self->ts_ms = 0;
+}
+
+static inline void
 peak_token_init(struct peak_token *self, const int64_t max)
 {
 	spin_init(&self->lock);
-	self->max = self->have = max;
-	self->ts_ms = 0;
+	_peak_token_init(self, max);
 }
 
 #endif /* !PEAK_TOKEN_H */
