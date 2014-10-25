@@ -91,3 +91,4 @@
 #include "peak_string.h"
 #include "peak_number.h"
 #include "peak_track.h"
+#include "peak_audit.h"

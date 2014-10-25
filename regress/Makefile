@@ -1,4 +1,5 @@
 SUBDIR=	base \
+	audit \
 	load \
 	store \
 	locate \

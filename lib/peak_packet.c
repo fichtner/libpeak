@@ -139,8 +139,6 @@ peak_packet_ipv6(struct peak_packet *self)
 		case IPPROTO_AH:
 			/* variable extension header */
 			if (next_hdr->ip6e_len % 8) {
-				alert("invalid ipv6 extension header"
-				    "size %hhu\n", next_hdr->ip6e_len);
 				return (1);
 			}
 			self->net_hlen += next_hdr->ip6e_len;
@@ -288,7 +286,7 @@ peak_packet_parse(struct peak_packet *self, void *buf, unsigned int len,
 		self->net.raw = self->mac.raw + sizeof(*self->mac.sll);
 		break;
 	default:
-		alert("unknown link type %u\n", type);
+		peak_audit_inc(AUDIT_PACKET_DROP_LINK);
 		return (1);
 	}
 
@@ -299,16 +297,19 @@ peak_packet_parse(struct peak_packet *self, void *buf, unsigned int len,
 		const unsigned int ip_len = be16dec(&iph->ip_len);
 
 		if (unlikely(iph->ip_v != IPVERSION)) {
+			peak_audit_inc(AUDIT_PACKET_DROP_IPV4);
 			return (1);
 		}
 
 		if (unlikely(ip_hlen < sizeof(*iph))) {
+			peak_audit_inc(AUDIT_PACKET_DROP_IPV4);
 			return (1);
 		}
 
 		/* XXX check for fragmentation */
 
 		if (unlikely(ip_len < ip_hlen)) {
+			peak_audit_inc(AUDIT_PACKET_DROP_IPV4);
 			return (1);
 		}
 
@@ -332,6 +333,7 @@ peak_packet_parse(struct peak_packet *self, void *buf, unsigned int len,
 		self->net_family = AF_INET6;
 
 		if (unlikely(peak_packet_ipv6(self))) {
+			peak_audit_inc(AUDIT_PACKET_DROP_IPV6);
 			return (1);
 		}
 
@@ -348,16 +350,19 @@ peak_packet_parse(struct peak_packet *self, void *buf, unsigned int len,
 	switch (self->net_type) {
 	case IPPROTO_TCP:
 		if (peak_packet_tcp(self)) {
+			peak_audit_inc(AUDIT_PACKET_DROP_TCP);
 			return (1);
 		}
 		break;
 	case IPPROTO_UDP:
 		if (peak_packet_udp(self)) {
+			peak_audit_inc(AUDIT_PACKET_DROP_UDP);
 			return (1);
 		}
 		break;
 	case IPPROTO_ICMP:
 		if (unlikely(self->flow_len < ICMP_MINLEN)) {
+			peak_audit_inc(AUDIT_PACKET_DROP_ICMP);
 			return (1);
 		}
 		/*

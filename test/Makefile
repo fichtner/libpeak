@@ -1,4 +1,5 @@
 SUBDIR=	base \
+	audit \
 	track \
 	load \
 	store \
