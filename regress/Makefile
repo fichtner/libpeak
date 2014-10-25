@@ -4,6 +4,7 @@ SUBDIR=	base \
 	locate \
 	packet \
 	track \
+	number \
 	string \
 	regex \
 	magic \

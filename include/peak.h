@@ -89,4 +89,5 @@
 #include "peak_magic.h"
 #include "peak_regex.h"
 #include "peak_string.h"
+#include "peak_number.h"
 #include "peak_track.h"

@@ -4,6 +4,7 @@ SUBDIR=	base \
 	store \
 	packet \
 	locate \
+	number \
 	string \
 	regex \
 	jar \

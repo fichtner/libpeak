@@ -1,0 +1,132 @@
+.\"
+.\" Copyright (c) 2014 Masoud Chelongar <masoud@packetwerk.com>
+.\" Copyright (c) 2014 Franco Fichtner <franco@packetwerk.com>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd October 25, 2014
+.Dt PEAK_NUMBER 3
+.Os
+.Sh NAME
+.Nm peak_number_add ,
+.Nm peak_number_exit ,
+.Nm peak_number_find ,
+.Nm peak_number_init ,
+.Nm peak_number_parse
+.Nd number search
+.Sh SYNOPSIS
+.In peak.h
+.Ft unsigned int
+.Fo peak_number_add
+.Fa "struct peak_numbers *self"
+.Fa "const unsigned int result"
+.Fa "const char *buf"
+.Fa "const size_t len"
+.Fa "const unsigned int flags"
+.Fc
+.Ft void
+.Fn peak_number_exit "struct peak_numbers *self"
+.Ft void
+.Fo peak_number_find
+.Fa "struct peak_numbers *self"
+.Fa "const char *buf"
+.Fa "const size_t len"
+.Fa "stash_t stash"
+.Fc
+.Ft struct peak_numbers *
+.Fn peak_number_init void
+.Ft const char *
+.Fn peak_number_parse "const char *buf" "const size_t len"
+.Sh DESCREPTION
+The
+.Nm peak_number
+API functions provide a number search.
+An array of commonly used compare operations as well as additional
+matching options are implemented to fit individual needs.
+.Pp
+The functions
+.Fn peak_number_init
+and
+.Fn peak_number_exit
+create and destroy a search list, respectively.
+.Fn peak_number_init
+returns a pointer to the list, or
+.Dv NULL
+if the memory allocation failed.
+.Pp
+The function
+.Fn peak_number_add
+inserts the number (provided as a string in
+.Va buf
+and
+.Va len )
+and
+.Va flags
+into the list pointed to by
+.Va self .
+The value of
+.Va result
+is stored on the same node.
+On success, the function returns the selected value.
+If a memory allocation failed, zero is returned.
+Please note that a result of zero is reserved and must not be used.
+.Pp
+The
+.Va flags
+input consists of a merged operator and conversion type.
+The operators are as follows:
+.Pp
+.Bl -tag -compact -offset indent -width ".Dv NUMBER_EQ"
+.It Dv NUMBER_EQ
+equal (default)
+.It Dv NUMBER_NE
+not equal
+.It Dv NUMBER_LT
+less
+.It Dv NUMBER_GT
+greater
+.It Dv NUMBER_LE
+less or equal
+.It Dv NUMBER_GE
+greater or equal
+.El
+.Pp
+The conversion types are as follows:
+.Pp
+.Bl -tag -compact -offset indent -width ".Dv NUMBER_STRING"
+.It Dv NUMBER_STRING
+Convert the buffer into a number (default).
+.It Dv NUMBER_LENGTH
+Use the buffer's length for compare.
+.El
+.Pp
+The function
+.Fn peak_number_find
+takes a text as the base for a number conversion and finds all matching
+comparisons.
+To return the matches,
+.Va stash
+is used by calling
+.Fn STASH_PUSH
+for each matching result code.
+.Pp
+The function
+.Fn peak_number_parse
+can be used to test if a pattern is valid.
+If successful, the function returns
+.Dv NULL .
+Otherwise, a string containing the approriate error message is returned.
+.Sh SEE ALSO
+.Xr peak_stash 3
+.Sh AUTHORS
+.An Masoud Chelongar Aq Mt masoud@packetwerk.com
