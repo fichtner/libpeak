@@ -46,7 +46,8 @@ typedef struct {
 } while (0)
 
 #define TIMESLICE_ADVANCE(clock, timeval) do {				\
-	(clock)->tv = *(timeval);					\
+	(clock)->tv.tv_usec = (timeval)->tv_usec;			\
+	(clock)->tv.tv_sec = (timeval)->tv_sec;				\
 	if (unlikely((timeval)->tv_sec != (clock)->time)) {		\
 		(clock)->time = (timeval)->tv_sec;			\
 		localtime_r(&(clock)->time, &(clock)->local);		\

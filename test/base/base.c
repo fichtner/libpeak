@@ -574,7 +574,7 @@ test_hash(void)
 static void
 test_time(void)
 {
-	struct peak_timeval stackptr(now);
+	struct timeval stackptr(now);
 	timeslice_t stackptr(timer);
 
 	TIMESLICE_INIT(timer);
