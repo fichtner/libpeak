@@ -318,7 +318,7 @@ __peak_free(void *ptr, const unsigned int really_free)
 #define peak_mcheck(x)	ALLOC_ERROR(_peak_mcheck(x))
 #define peak_free(x)	ALLOC_ERROR(_peak_free(x))
 
-#ifndef WANT_UNGUARDED
+#ifndef WITHOUT_ALLOC
 
 /* pave over all standard functions */
 #define realloc		peak_realloc
@@ -331,7 +331,7 @@ __peak_free(void *ptr, const unsigned int really_free)
 #define mcheck		peak_mcheck
 #define free		peak_free
 
-#else /* WANT_UNGUARDED */
+#else /* WITHOUT_ALLOC */
 
 static inline void *
 malign(size_t count, size_t size)
@@ -380,6 +380,6 @@ reallocarray(void *ptr, size_t count, size_t size)
 
 #define mcheck(x)	do { (void)x; } while (0)
 
-#endif /* !WANT_UNGUARDED */
+#endif /* !WITHOUT_ALLOC */
 
 #endif /* !PEAK_ALLOC_H */
