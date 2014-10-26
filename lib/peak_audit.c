@@ -25,6 +25,9 @@ static const char *audit_names[AUDIT_MAX] = {
 	[AUDIT_PACKET_DROP_ICMP] = "packet.drop.icmp",
 	[AUDIT_PACKET_DROP_TCP] = "packet.drop.tcp",
 	[AUDIT_PACKET_DROP_UDP] = "packet.drop.udp",
+	[AUDIT_TRACK_ADDED] = "track.added",
+	[AUDIT_TRACK_RECYCLED] = "track.recycled",
+	[AUDIT_TRACK_FAILED] = "track.failed",
 };
 
 const char *

@@ -53,12 +53,14 @@ peak_track_acquire(struct peak_tracks *self, const struct peak_track *ref)
 
 	if (prealloc_empty(&self->mem)) {
 		if (self->no_timeout) {
+			peak_audit_inc(AUDIT_TRACK_FAILED);
 			return (NULL);
 		}
 		flow = TAILQ_FIRST(&self->tos);
 		TAILQ_REMOVE(&self->tos, flow, tq_to);
 		RB_REMOVE(peak_track_tree, &self->flows, flow);
 		prealloc_put(&self->mem, flow);
+		peak_audit_inc(AUDIT_TRACK_RECYCLED);
 	}
 
 	flow = prealloc_get(&self->mem);
@@ -75,6 +77,8 @@ peak_track_acquire(struct peak_tracks *self, const struct peak_track *ref)
 
 	flow->id = __sync_fetch_and_add(&next_flow_id, 1);
 	TAILQ_INSERT_TAIL(&self->tos, flow, tq_to);
+
+	peak_audit_inc(AUDIT_TRACK_ADDED);
 
 	return (flow);
 }
