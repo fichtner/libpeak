@@ -1,4 +1,5 @@
 REGRESS_FILE=	packet
-REGRESS_TARGET= run
+REGRESS_TYPE=	test
+REGRESS_TEST=	run
 
 .include <bsd.prog.mk>

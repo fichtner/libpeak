@@ -1,10 +1,9 @@
 # -*- makefile -*-
 
-all: $(REGRESS_TARGET)
+all: $(REGRESS_TEST)
 
 .SUFFIXES: .in
 
 .in:
-	@$(.CURDIR)/../../test/$(REGRESS_FILE)/$(REGRESS_FILE) $*.in | \
-	    diff -au $*.out - || \
-	    (echo "$* failed" && false)
+	@$(.CURDIR)/../../$(REGRESS_TYPE)/$(REGRESS_FILE)/$(REGRESS_FILE) \
+	    $*.in | diff -au $*.out - || (echo "$* failed" && false)
