@@ -125,13 +125,11 @@ prealloc_init(prealloc_t *self, size_t count, size_t size)
 
 #define _prealloc_exit(self) ({						\
 	unsigned int _ret = 0;						\
-	if (self) {							\
-		if (prealloc_used(self)) {				\
-			_ret = 1;					\
-		} else {						\
-			spin_exit(&(self)->lock);			\
-			free((self)->mem_start);			\
-		}							\
+	if (prealloc_used(self)) {					\
+		_ret = 1;						\
+	} else {							\
+		spin_exit(&(self)->lock);				\
+		free((self)->mem_start);				\
 	}								\
 	(_ret);								\
 })

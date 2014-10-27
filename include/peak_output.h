@@ -24,7 +24,7 @@
 
 extern int _peak_bug_priority;
 
-static void
+static void __unused
 _peak_print(FILE *stream, const char *message, ...)
 {
 	va_list ap;
