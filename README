@@ -11,13 +11,14 @@ peak_li:	lightweight inspection (DPI)
 peak_load:	PCAP/PCAPNG/ERF/NETMON file reader
 peak_locate:	geolocation database
 peak_magic:	libmagic MIME type detection wrapper
+peak_number:	string-based number comparison
 peak_netmap:	simplified netmap(4) bindings
 peak_packet:	packet preprocessor
 peak_store:	PCAP file writer
 peak_stream:	stream memory allocator
 peak_string:	full-text string search
 peak_regex:	full-text regex (pcre) search
-peak_track:	rudimentary flow tracker
+peak_track:	tree-based flow tracker
 
 The available binaries are:
 
@@ -50,12 +51,17 @@ your patches to us via email.  Contributions can also be made in the
 form of supplying trace files or hard to come by documentation to help
 maintain a reliable and free library.
 
+A big thanks goes out to the individual authors of this code, namely:
+Diego Assencio, Tobias Boertitz, Masoud Chelongar, Franco Fichtner,
+Ulrich Klein, Victor Pereira, Alexey Saushev and Thomas Siegmund.
+
 For further info check us out at http://packetwerk.com
 
 Basic directory layout
 ======================
 
 bin/		project binaries
+contrib/	third-party bits
 include/	base headers
 lib/		specific modules
 regress/	test framework
