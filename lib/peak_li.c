@@ -1838,7 +1838,7 @@ static const struct peak_lis apps[] = {
 	LI_LIST_APP(LI_RTCP, rtcp, IPPROTO_UDP, IPPROTO_MAX, "Real-Time Transport Control Protocol", "RTCP is a sister protocol of the Real-time Transport Protocol (RTP). RTCP provides out-of-band control information for an RTP flow.", "Streaming Media"),
 	LI_LIST_APP(LI_NETBIOS, netbios, IPPROTO_UDP, IPPROTO_TCP, "NetBIOS", "NetBIOS is an acronym for Network Basic Input/Output System. It provides services related to the session layer of the OSI model allowing applications on separate computers to communicate over a local area network.", "Networking"),
 	LI_LIST_APP(LI_TELNET, telnet, IPPROTO_TCP, IPPROTO_MAX, "Telnet", "Telnet (teletype network) is a network protocol used on the Internet or local area networks to provide a bidirectional interactive text-oriented communications facility using a virtual terminal connection.", "Remote Access"),
-	LI_LIST_APP(LI_RTP, rtp, IPPROTO_UDP, IPPROTO_MAX, "Real-Time Transport Protocol", "RTP is primarily used to deliver real-time audio and video.", ""),
+	LI_LIST_APP(LI_RTP, rtp, IPPROTO_UDP, IPPROTO_MAX, "Real-Time Transport Protocol", "RTP is primarily used to deliver real-time audio and video.", "Streaming Media"),
 };
 
 unsigned int
