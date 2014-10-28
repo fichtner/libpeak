@@ -1797,7 +1797,7 @@ LI_DESCRIBE_APP(iptype)
 
 static const struct peak_lis apps[] = {
 	/* shallow protocols first (match by IP type) */
-	LI_LIST_IPTYPE(LI_ICMP, icmp, IPPROTO_ICMP, IPPROTO_ICMPV6, "Internet Control Message Protocol", "ICMP is one of the core protocols of the Internet Protocol Suite. It is chiefly used by the operating systems of networked computers to send error messages indicating, for instance, that a requested service is not available or that a host or router could not be reached. ICMP can also be used to relay query messages.", "Network Monitoring"),
+	LI_LIST_IPTYPE(LI_ICMP, icmp, IPPROTO_ICMP, IPPROTO_ICMPV6, "Internet Control Message Protocol", "ICMP is one of the core protocols of the Internet Protocol Suite. It is chiefly used by the operating systems of networked computers to send error messages indicating, for instance, that a requested service is not available or that a host or router could not be reached. ICMP can also be used to relay query messages.", "Networking"),
 	LI_LIST_IPTYPE(LI_IGMP, igmp, IPPROTO_IGMP, IPPROTO_MAX, "Internet Group Management Protocol", "IGMP is a communications protocol used by hosts and adjacent routers on IP networks to establish multicast group memberships.", "Networking"),
 	LI_LIST_IPTYPE(LI_OSPF, ospf, IPPROTO_OSPFIGP, IPPROTO_MAX, "Open Shortest Path First", "OSPF is an interior gateway routing protocol developed for IP networks based on the shortest path first or link-state algorithm.", "Networking"),
 	LI_LIST_IPTYPE(LI_L2TP, l2tp, IPPROTO_L2TP, IPPROTO_MAX, "Layer 2 Tunneling Protocol", "L2TP is a tunneling protocol used to support virtual private networks (VPNs). It does not provide any encryption or confidentiality by itself; it relies on an encryption protocol that it passes within the tunnel to provide privacy.", "VPN and Tunneling"),
@@ -1809,7 +1809,7 @@ static const struct peak_lis apps[] = {
 	LI_LIST_APP(LI_IMAP, imap, IPPROTO_TCP, IPPROTO_MAX, "Internet Message Access Protocol", "IMAP is an Internet standard protocol for accessing email on a remote server.", "Mail"),
 	LI_LIST_APP(LI_SMTP, smtp, IPPROTO_TCP, IPPROTO_MAX, "Simple Mail Transfer Protocol", "SMTP is an Internet standard for electronic mail (e-mail) transmission across Internet Protocol (IP) networks.", "Mail"),
 	LI_LIST_APP(LI_FTP, ftp, IPPROTO_TCP, IPPROTO_MAX, "File Transfer Protocol", "FTP is used to transfer files from a file server to a local machine.", "File Transfer"),
-	LI_LIST_APP(LI_CVS, cvs, IPPROTO_TCP, IPPROTO_MAX, "Concurrent Versions System", "CVS is a client-server free software revision control system in the field of software development.", "Revision Control"),
+	LI_LIST_APP(LI_CVS, cvs, IPPROTO_TCP, IPPROTO_MAX, "Concurrent Versions System", "CVS is a client-server free software revision control system in the field of software development.", "Database"),
 	LI_LIST_APP(LI_SSH, ssh, IPPROTO_TCP, IPPROTO_MAX, "Secure Shell", "SSH is a network protocol that allows data to be exchanged using a secure channel between two networked devices.", "Remote Access"),
 	LI_LIST_APP(LI_IRC, irc, IPPROTO_TCP, IPPROTO_MAX, "Internet Relay Chat", "IRC is a popular form of real-time Internet text messaging.", "Messaging"),
 	LI_LIST_APP(LI_STUN, stun, IPPROTO_UDP, IPPROTO_TCP, "Session Traversal Utilities for NAT", "STUN is used in NAT traversal for applications with real-time voice, video, messaging, and other interactive communications.", "Networking"),
@@ -1821,15 +1821,15 @@ static const struct peak_lis apps[] = {
 	LI_LIST_APP(LI_NETFLOW, netflow, IPPROTO_UDP, IPPROTO_MAX, "NetFlow", "NetFlow is a network reporting protocol developed by Cisco.", "Networking"),
 	LI_LIST_APP(LI_TFTP, tftp, IPPROTO_UDP, IPPROTO_MAX, "Trivial File Transfer Protocol", "TFTP is a file transfer protocol, with the functionality of a very basic form of FTP (File Transfer Protocol).", "File Transfer"),
 	LI_LIST_APP(LI_DHCP, dhcp, IPPROTO_UDP, IPPROTO_MAX, "Dynamic Host Configuration Protocol", "DHCP is an auto configuration protocol used for assigning IP addresses.", "Networking"),
-	LI_LIST_APP(LI_DTLS, dtls, IPPROTO_UDP, IPPROTO_MAX, "Datagram Transport Layer Security", "DTLS is a protocol that provides communication privacy for datagram protocols.", "Encryption"),
-	LI_LIST_APP(LI_TLS, tls, IPPROTO_TCP, IPPROTO_MAX, "Transport Layer Security", "TLS is a cryptographic protocol designed to provide communication security over the Internet.", "Encryption"),
+	LI_LIST_APP(LI_DTLS, dtls, IPPROTO_UDP, IPPROTO_MAX, "Datagram Transport Layer Security", "DTLS is a protocol that provides communication privacy for datagram protocols.", "VPN and Tunneling"),
+	LI_LIST_APP(LI_TLS, tls, IPPROTO_TCP, IPPROTO_MAX, "Transport Layer Security", "TLS is a cryptographic protocol designed to provide communication security over the Internet.", "VPN and Tunneling"),
 	LI_LIST_APP(LI_LDAP, ldap, IPPROTO_TCP, IPPROTO_MAX, "Lightweight Directory Access Protocol", "LDAP is a protocol for reading and editing directories over an IP network.", "Database"),
-	LI_LIST_APP(LI_SNMP, snmp, IPPROTO_UDP, IPPROTO_MAX, "Simple Network Management Protocol", "SNMP is an Internet-standard protocol for managing devices on IP networks.", "Network Monitoring"),
+	LI_LIST_APP(LI_SNMP, snmp, IPPROTO_UDP, IPPROTO_MAX, "Simple Network Management Protocol", "SNMP is an Internet-standard protocol for managing devices on IP networks.", "Networking"),
 	LI_LIST_APP(LI_BITTORRENT, bittorrent, IPPROTO_TCP, IPPROTO_MAX, "BitTorrent", "A peer-to-peer file sharing protocol used for transferring large amounts of data.", "File Transfer"),
 	LI_LIST_APP(LI_GNUTELLA, gnutella, IPPROTO_TCP, IPPROTO_MAX, "Gnutella", "Gnutella is the protocol of the corresponding P2P network.", "File Transfer"),
 	LI_LIST_APP(LI_IMPP, impp, IPPROTO_TCP, IPPROTO_MAX, "Instant Messaging and Presence Protocol", "IMPP is a protocol clients use to interact with an Instant Messaging server.", "Messaging"),
 	LI_LIST_APP(LI_XMPP, xmpp, IPPROTO_TCP, IPPROTO_MAX, "Extensible Messaging and Presence Protocol", "XMPP is an open technology for real-time communication.", "Messaging"),
-	LI_LIST_APP(LI_SYSLOG, syslog, IPPROTO_UDP, IPPROTO_TCP, "Syslog", "Syslog is a standard for forwarding log messages in an Internet Protocol (IP) computer network.", "Network Monitoring"),
+	LI_LIST_APP(LI_SYSLOG, syslog, IPPROTO_UDP, IPPROTO_TCP, "Syslog", "Syslog is a standard for forwarding log messages in an Internet Protocol (IP) computer network.", "Networking"),
 	LI_LIST_APP(LI_L2TP, l2tp, IPPROTO_UDP, IPPROTO_MAX, "Layer 2 Tunneling Protocol", "L2TP is a tunneling protocol used to support virtual private networks (VPNs). It does not provide any encryption or confidentiality by itself; it relies on an encryption protocol that it passes within the tunnel to provide privacy.", "VPN and Tunneling"),
 	LI_LIST_APP(LI_NTP, ntp, IPPROTO_UDP, IPPROTO_MAX, "Network Time Protocol", "NTP is used for synchronizing the clocks of computer systems over the network. Sends small packets with current date and time.", "Networking"),
 	/* greedy protocols need to remain down here */
@@ -1839,6 +1839,8 @@ static const struct peak_lis apps[] = {
 	LI_LIST_APP(LI_NETBIOS, netbios, IPPROTO_UDP, IPPROTO_TCP, "NetBIOS", "NetBIOS is an acronym for Network Basic Input/Output System. It provides services related to the session layer of the OSI model allowing applications on separate computers to communicate over a local area network.", "Networking"),
 	LI_LIST_APP(LI_TELNET, telnet, IPPROTO_TCP, IPPROTO_MAX, "Telnet", "Telnet (teletype network) is a network protocol used on the Internet or local area networks to provide a bidirectional interactive text-oriented communications facility using a virtual terminal connection.", "Remote Access"),
 	LI_LIST_APP(LI_RTP, rtp, IPPROTO_UDP, IPPROTO_MAX, "Real-Time Transport Protocol", "RTP is primarily used to deliver real-time audio and video.", "Streaming Media"),
+	/* undefined is a special case and never matches */
+	LI_LIST_IPTYPE(LI_UNDEFINED, undefined, IPPROTO_MAX, IPPROTO_MAX, "Undefined protocol", "Protocols that cannot be identified by the engine are labled as 'undefined'.", "Networking"),
 };
 
 unsigned int
@@ -1914,14 +1916,6 @@ peak_li_number(const char *name)
 	}
 
 	/*
-	 * Don't forget to check against undefined protocols,
-	 * which means no match was found in the known list.
-	 */
-	if (!strcasecmp(name, "undefined")) {
-		return (LI_UNDEFINED);
-	}
-
-	/*
 	 * LI_UNKNOWN cannot be blocked and is implicitly
 	 * passed, so it's the perfect return value!
 	 */
@@ -1936,8 +1930,6 @@ peak_li_data(const unsigned int number, const unsigned int offset)
 	switch (number) {
 	case LI_UNKNOWN:
 		return ("unknown");
-	case LI_UNDEFINED:
-		return ("undefined");
 	default:
 		for (i = 0; i < lengthof(apps); ++i) {
 			if (number == apps[i].number) {
