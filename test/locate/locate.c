@@ -53,7 +53,7 @@ test_locate(void)
 	peak_locate_exit(NULL);
 	peak_locate_exit(db);
 
-	db = peak_locate_init("../../config/locate.csv.bin");
+	db = peak_locate_init("../../config/locate.conf.bin");
 	assert(db);
 
 	netaddr4(&test_ip, inet_addr("88.74.143.194"));
