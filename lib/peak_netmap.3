@@ -13,7 +13,7 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd July 24, 2014
+.Dd November 5, 2014
 .Dt PEAK_NETMAP 3
 .Os
 .Sh NAME
@@ -104,9 +104,7 @@ The function returns
 on errors or an expired timeout.
 Otherwise, a pointer to the claimed packet reference is returned.
 .Pp
-In theory, claiming multiple packets at once is possible
-as long as all the internal pools have the capacity.
-However, it is wise not to stress this part of the implementation.
+It is only possible to claim one packet at a time.
 Externally,
 .Vt struct peak_transfer
 is used to provide the caller with all the information regarding
@@ -149,7 +147,3 @@ The user must call the function again later or drop the packet.
 .Xr netmap 4
 .Sh AUTHORS
 .An Franco Fichtner Aq Mt franco@packetwerk.com
-.Sh CAVEATS
-The current version of
-.Nm peak_netmap
-is only capable of single-threaded claim and divert operations.

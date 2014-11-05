@@ -117,23 +117,23 @@ struct peak_netmap_dev {
 	struct netmap_ring *tx, *rx;    /* shortcuts */
 };
 
-static struct peak_netmaps {
-	unsigned int lastdev;
-	struct peak_netmap_dev dev[NETMAP_MAX];
-
-	prealloc_t pkt_pool;
-	unsigned int busy;
-	unsigned int reserved;
-	struct pollfd fd[NETMAP_MAX];
-} netmap_self = {.lastdev = 0};
-
-static struct peak_netmaps *const self = &netmap_self;	/* global ref */
-
 struct peak_netmap {
 	struct netmap_ring *ring;
-	unsigned int reserved;
+	unsigned int used;
 	unsigned int i;
 };
+
+static struct peak_netmaps {
+	unsigned int lastdev;
+	unsigned int reserved;
+	struct peak_netmap private_data;
+	struct peak_netmap_dev dev[NETMAP_MAX];
+	struct pollfd fd[NETMAP_MAX];
+} netmap_self = {
+	.lastdev = 0
+};
+
+static struct peak_netmaps *const self = &netmap_self;	/* global ref */
 
 #define NR_FOREACH(mode, ring, idx, dev, want_sw)			\
 	for ((idx) = (dev)->begin,					\
@@ -144,45 +144,13 @@ struct peak_netmap {
 #define NR_FOREACH_RX(r, i, d, s)	NR_FOREACH(RX, r, i, d, s)
 #define NR_FOREACH_TX(r, i, d, s)	NR_FOREACH(TX, r, i, d, s)
 
-static inline void
-netmap_lock()
-{
-	pthread_mutex_lock(&netmap_mutex);
-}
+#define NETMAP_LOCK() do {						\
+	pthread_mutex_lock(&netmap_mutex);				\
+} while (0)
 
-static inline void
-netmap_unlock()
-{
-	pthread_mutex_unlock(&netmap_mutex);
-}
-
-static inline void
-netpkt_put(struct peak_netmap *x)
-{
-	prealloc_put(&self->pkt_pool, x);
-}
-
-static inline struct peak_netmap *
-netpkt_get()
-{
-	return prealloc_get(&self->pkt_pool);
-}
-
-/* Manage underlying pool resources */
-static inline void
-allocate_pool()
-{
-	memset(self, 0, sizeof(*self));
-
-	prealloc_init(&self->pkt_pool, NETMAP_MAX,
-	    sizeof(struct peak_netmap));
-}
-
-static inline void
-free_pool()
-{
-	prealloc_exit(&self->pkt_pool);
-}
+#define NETMAP_UNLOCK() do {						\
+	pthread_mutex_unlock(&netmap_mutex);				\
+} while (0)
 
 static int
 __peak_netmap_init(struct peak_netmap_dev *dev)
@@ -300,9 +268,14 @@ static struct peak_transfer *
 __peak_netmap_claim(struct peak_transfer *packet,
     struct peak_netmap_dev *dev, const unsigned int want_sw)
 {
-	struct peak_netmap *priv;
+	struct peak_netmap *priv = &self->private_data;
 	struct netmap_ring *ring;
 	unsigned int rx;
+
+	if (unlikely(priv->used)) {
+		alert("must release claimed packet first\n");
+		return (NULL);
+	}
 
 	NR_FOREACH_RX(ring, rx, dev, want_sw) {
 		unsigned int i, idx;
@@ -311,14 +284,7 @@ __peak_netmap_claim(struct peak_transfer *packet,
 			continue;
 		}
 
-		priv = netpkt_get();
-		if (!priv) {
-			alert("netmap packet pool empty\n");
-			return (NULL);
-		}
-
 		memset(packet, 0, sizeof(*packet));
-		memset(priv, 0, sizeof(*priv));
 
 		i = ring->cur;
 		idx = ring->slot[i].buf_idx;
@@ -329,6 +295,7 @@ __peak_netmap_claim(struct peak_transfer *packet,
 
 		/* volatile internals */
 		priv->ring = ring;
+		priv->used = 1;
 		priv->i = i;
 
 		/* external stuff */
@@ -430,11 +397,9 @@ peak_netmap_forward(struct peak_transfer *packet)
 	/* drop kernel reference */
 	source->head = source->cur = nm_ring_next(source, source->cur);
 
-	/* drop userland reference */
-	netpkt_put(packet->private_data);
-
 	/* scrub content */
 	memset(packet, 0, sizeof(*packet));
+	memset(priv, 0, sizeof(*priv));
 
 	return (0);
 }
@@ -452,11 +417,9 @@ peak_netmap_drop(struct peak_transfer *packet)
 	/* drop kernel reference */
 	source->head = source->cur = nm_ring_next(source, source->cur);
 
-	/* drop userland reference */
-	netpkt_put(packet->private_data);
-
 	/* scrub content */
 	memset(packet, 0, sizeof(*packet));
+	memset(priv, 0, sizeof(*priv));
 
 	return (0);
 }
@@ -512,8 +475,9 @@ peak_netmap_divert(struct peak_transfer *packet, const char *ifname)
 		source->head = source->cur = nm_ring_next(source, source->cur);
 		drain->head = drain->cur = nm_ring_next(drain, drain->cur);
 
-		netpkt_put(packet->private_data);
+		/* scrub content */
 		memset(packet, 0, sizeof(*packet));
+		memset(priv, 0, sizeof(*priv));
 
 		return (0);
 	}
@@ -541,21 +505,13 @@ peak_netmap_attach(const char *ifname)
 {
 	unsigned int devno;
 
-	netmap_lock();
-
-	/* lazy init */
-	if (self->lastdev == 0)
-		allocate_pool();
-
 	devno = peak_netmap_find(ifname);
 	if (devno < self->lastdev) {
-		netmap_unlock();
 		alert("netmap interface %s already attached\n", ifname);
 		return (1);
 	}
 
 	if (self->lastdev >= sizeof(self->dev)/sizeof(self->dev[0])) {
-		netmap_unlock();
 		alert("netmap interface capacity reached\n");
 		return (1);
 	}
@@ -566,15 +522,12 @@ peak_netmap_attach(const char *ifname)
 	strlcpy(self->dev[devno].ifname, ifname, sizeof(self->dev[devno].ifname));
 	if (_peak_netmap_init(&self->dev[devno])) {
 		self->lastdev--; /* deallocate it */
-		netmap_unlock();
 		alert("could not open netmap device %s\n", ifname);
 		return (1);
 	}
 
 	peak_netmap_configure(&self->dev[devno]);
 	self->fd[devno].fd = self->dev[devno].fd;
-
-	netmap_unlock();
 
 	return (0);
 }
@@ -584,11 +537,8 @@ peak_netmap_detach(const char *ifname)
 {
 	unsigned int devno;
 
-	netmap_lock();
-
 	devno = peak_netmap_find(ifname);
 	if (devno >= self->lastdev) {
-		netmap_unlock();
 		alert("netmap interface %s not attached\n", ifname);
 		return (1);
 	}
@@ -608,25 +558,19 @@ peak_netmap_detach(const char *ifname)
 
 	self->lastdev--;
 
-	/* lazy exit */
-	if (self->lastdev == 0)
-		free_pool();
-
-	netmap_unlock();
-
 	return (0);
 }
 
 void
 peak_netmap_lock(void)
 {
-	netmap_lock();
+	NETMAP_LOCK();
 }
 
 void
 peak_netmap_unlock(void)
 {
-	netmap_unlock();
+	NETMAP_UNLOCK();
 }
 
 #endif
