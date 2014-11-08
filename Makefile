@@ -7,4 +7,8 @@ SUBDIR=	include \
 	bin \
 	config
 
+sweep:
+	@git ls-files | egrep -v "^(contrib|regress|sample)" | \
+	    xargs -n1 scripts/cleanfile
+
 .include <bsd.subdir.mk>

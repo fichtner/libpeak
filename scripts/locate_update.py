@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2.7
 
 # Copyright (c) 2014 Franco Fichtner <franco@packetwerk.com>
 # Copyright (c) 2014 Tobias Boertitz <tobias@packetwerk.com>
