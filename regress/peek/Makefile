@@ -2,14 +2,14 @@ REGRESS_FILE=	peek
 REGRESS_TYPE=	bin
 
 #	output			sample
-REGRESS_TEST= \
+REGRESS_DATA= \
 	test_erf		test.erf \
 	test_pcap		test.pcap \
 	test_pcap_swap		test_be.pcap \
 	test_pcapng		test.pcapng \
 
 all:
-	@set `echo $(REGRESS_TEST)`; \
+	@set `echo $(REGRESS_DATA)`; \
 	while : ; do \
 		case $$# in \
 		0) break;; \
@@ -22,3 +22,5 @@ all:
 		    $$TRACE | diff -au $$1 - || (echo "$$1 failed" && exit 1); \
 		shift; shift; \
 	done
+
+.include <bsd.prog.mk>
