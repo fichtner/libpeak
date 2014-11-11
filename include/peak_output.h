@@ -22,6 +22,8 @@
 #include <stdlib.h>
 #include <syslog.h>
 
+#define OUTPUT_TIME	"%a %F %T"
+
 extern int _peak_bug_priority;
 
 static void __unused

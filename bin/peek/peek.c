@@ -47,7 +47,8 @@ peek_report(const struct peak_packet *packet, const struct peak_track *flow,
 
 		switch (use_print[i]) {
 		case USE_APP:
-			pout("app: %s", peak_li_name(peak_li_merge(flow->li)));
+			pout("app: %s",
+			    peak_li_name(peak_li_merge(flow->li)));
 			break;
 		case USE_APP_LEN:
 			pout("app_len: %hu", packet->app_len);
@@ -88,7 +89,7 @@ peek_report(const struct peak_packet *packet, const struct peak_track *flow,
 		case USE_TIME: {
 			char tsbuf[40];
 			pout("time: %s.%06ld", strftime(tsbuf, sizeof(tsbuf),
-			    "%a %F %T", &timer->gmt) ? tsbuf : "???",
+			    OUTPUT_TIME, &timer->gmt) ? tsbuf : "????",
 			    timer->tv.tv_usec);
 			break;
 		}
