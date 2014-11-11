@@ -44,7 +44,7 @@ peak_transfer_divert(struct peak_transfer *x, const char *y)
 	(void)x;
 	(void)y;
 
-	return (0);
+	return (1);
 }
 
 static inline struct peak_transfer *
@@ -54,7 +54,7 @@ peak_transfer_claim(struct peak_transfer *x, int y, const unsigned int z)
 	(void)y;
 	(void)z;
 
-	return (x);
+	return (NULL);
 }
 
 static inline unsigned int
@@ -62,7 +62,7 @@ peak_transfer_forward(struct peak_transfer *x)
 {
 	(void)x;
 
-	return (0);
+	return (1);
 }
 
 static inline unsigned int
@@ -70,7 +70,7 @@ peak_transfer_drop(struct peak_transfer *x)
 {
 	(void)x;
 
-	return (0);
+	return (1);
 }
 
 static inline unsigned int
@@ -78,7 +78,7 @@ peak_transfer_attach(const char *x)
 {
 	(void)x;
 
-	return (0);
+	return (1);
 }
 
 static inline unsigned int
@@ -86,7 +86,7 @@ peak_transfer_detach(const char *x)
 {
 	(void)x;
 
-	return (0);
+	return (1);
 }
 
 static inline void
