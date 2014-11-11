@@ -39,7 +39,8 @@ usage(void)
 int
 main(int argc, char **argv)
 {
-	(void)argv;
+	struct peak_transfer stackptr(pkt);
+	const char *dev0, *dev1;
 
 	if (argc < 3) {
 		usage();
@@ -50,44 +51,37 @@ main(int argc, char **argv)
 
 	output_bug();
 
-#if defined(__FreeBSD__) && defined(NETMAP_API) && NETMAP_API >= 11
-	struct peak_transfer *pkt;
-	struct peak_transfer _pkt;
-	const char *dev0, *dev1;
-
 	dev0 = argv[1];
 	dev1 = argv[2];
 
-	if (peak_netmap_attach(dev0)) {
+	if (transfer_netmap.attach(dev0)) {
 		perr("could not attach to %s\n", dev0);
 		return (1);
 	}
 
-	if (peak_netmap_attach(dev1)) {
+	if (transfer_netmap.attach(dev1)) {
 		perr("could not attach to %s\n", dev1);
-		peak_netmap_detach(dev0);
+		transfer_netmap.detach(dev0);
 		return (1);
 	}
 
-	peak_netmap_lock();
+	transfer_netmap.lock();
 
 	while (loop) {
-		pkt = peak_netmap_claim(&_pkt, 200, 0);
-		if (pkt) {
-			if (peak_netmap_divert(pkt,
+		if (transfer_netmap.claim(pkt, 200, 0)) {
+			if (transfer_netmap.divert(pkt,
 			    !strcmp(dev0, pkt->ifname) ? dev1 : dev0)) {
 				perr("%lld: dropping packet of size %u\n",
 				    pkt->ts.tv_sec, pkt->len);
-				peak_netmap_drop(pkt);
+				transfer_netmap.drop(pkt);
 			}
 		}
 	}
 
-	peak_netmap_unlock();
+	transfer_netmap.unlock();
 
-	peak_netmap_detach(dev0);
-	peak_netmap_detach(dev1);
-#endif /* _FreeBSD__ */
+	transfer_netmap.detach(dev0);
+	transfer_netmap.detach(dev1);
 
 	return (0);
 }

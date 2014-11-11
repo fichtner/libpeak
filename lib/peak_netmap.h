@@ -18,12 +18,12 @@
 #ifndef PEAK_NETMAP_H
 #define PEAK_NETMAP_H
 
+extern const struct peak_transfers transfer_netmap;
+
 #ifdef __FreeBSD__
 
 #include <net/if.h>
 #include <net/netmap.h>
-
-extern const struct peak_transfers transfer_netmap;
 
 #if defined(NETMAP_API) && NETMAP_API >= 11
 

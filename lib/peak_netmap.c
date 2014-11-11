@@ -42,6 +42,21 @@
 
 #include <peak.h>
 
+#if !defined(NETMAP_API) || NETMAP_API < 11
+
+const struct peak_transfers transfer_netmap = {
+	.attach = peak_transfer_attach,
+	.lock = peak_transfer_lock,
+	.claim = peak_transfer_claim,
+	.divert = peak_transfer_divert,
+	.forward = peak_transfer_forward,
+	.drop = peak_transfer_drop,
+	.unlock = peak_transfer_unlock,
+	.detach = peak_transfer_detach,
+};
+
+#else
+
 #include <errno.h>
 #include <signal.h>	/* signal */
 #include <stdlib.h>
@@ -75,21 +90,6 @@
 #include <pthread_np.h> /* pthread w/ affinity */
 #include <sys/cpuset.h> /* cpu_set */
 #include <net/if_dl.h>  /* LLADDR */
-
-#if !defined(NETMAP_API) || NETMAP_API < 11
-
-const struct peak_transfers transfer_netmap = {
-	.attach = peak_transfer_attach,
-	.lock = peak_transfer_lock,
-	.claim = peak_transfer_claim,
-	.divert = peak_transfer_divert,
-	.forward = peak_transfer_forward,
-	.drop = peak_transfer_drop,
-	.unlock = peak_transfer_unlock,
-	.detach = peak_transfer_detach,
-};
-
-#else
 
 const struct peak_transfers transfer_netmap = {
 	.attach = peak_netmap_attach,
@@ -195,12 +195,12 @@ __peak_netmap_init(struct peak_netmap_dev *dev)
 static int
 _peak_netmap_init(struct peak_netmap_dev *dev)
 {
-	uint16_t ringid = 0;
+	const uint16_t ringid = 0;
 	struct nmreq req;
 
 	dev->fd = open("/dev/netmap", O_RDWR);
 	if (dev->fd < 0) {
-		error("unable to open /dev/netmap");
+		error("unable to open /dev/netmap\n");
 		return (1);
 	}
 
@@ -216,7 +216,7 @@ _peak_netmap_init(struct peak_netmap_dev *dev)
 	strlcpy(req.nr_name, dev->ifname, sizeof(req.nr_name));
 
 	if (ioctl(dev->fd, NIOCREGIF, &req)) {
-		error("NIOCREGIF failed on %s", dev->ifname);
+		error("NIOCREGIF failed on %s\n", dev->ifname);
 		goto error;
 	}
 
