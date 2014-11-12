@@ -13,11 +13,12 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd October 25, 2014
+.Dd October 26, 2014
 .Dt PEAK_AUDIT 3
 .Os
 .Sh NAME
 .Nm peak_audit_add ,
+.Nm peak_audit_get ,
 .Nm peak_audit_inc ,
 .Nm peak_audit_name ,
 .Nm peak_audit_set ,
@@ -27,6 +28,8 @@
 .In peak.h
 .Ft void
 .Fn peak_audit_add "const unsigned int field" "const uint64_t value"
+.Ft uint64_t
+.Fn peak_audit_get "const unsigned int field"
 .Ft void
 .Fn peak_audit_inc "const unsigned int field"
 .Ft const char *
@@ -40,8 +43,13 @@ The
 .Nm peak_audit
 API functions provide a thread-safe way to keep counters and
 similar sorts of statistics for individual subsystems.
-The API can be used without prior initialisation.
-It can be completely disabled by defining
+The API is ready for use without explicit initialisation.
+The private memory location per thread is never leaked to the
+outside, so that there is no need for locking access.
+Care should be taken when threads are destroyed as their
+.Nm peak_audit
+state will be destroyed as well.
+It may be disabled by defining
 .Dv WITHOUT_AUDIT
 prior to including
 .In peak.h .
@@ -53,6 +61,12 @@ and
 .Fn peak_audit_set
 may be used to manipulate a given
 .Va field .
+.Pp
+The function
+.Fn peak_audit_get
+returns the current value of
+.Va field ,
+in case a surgical need to operate on the value arises.
 .Pp
 The function
 .Fn peak_audit_sync

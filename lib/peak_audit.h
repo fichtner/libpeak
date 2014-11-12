@@ -40,6 +40,7 @@ void		 peak_audit_set(const unsigned int, const uint64_t);
 void		 peak_audit_add(const unsigned int, const uint64_t);
 void		 peak_audit_sync(struct peak_audit *);
 const char	*peak_audit_name(const unsigned int);
+uint64_t	 peak_audit_get(const unsigned int);
 void		 peak_audit_inc(const unsigned int);
 
 #else /* WITHOUT_AUDIT */
@@ -47,7 +48,8 @@ void		 peak_audit_inc(const unsigned int);
 #define peak_audit_set(x, y)
 #define peak_audit_add(x, y)
 #define peak_audit_sync(x) do { (void)(x); } while (0);
-#define peak_audit_name(x) NULL
+#define peak_audit_name(x)	NULL
+#define peak_audit_get(x)	0
 #define peak_audit_inc(x)
 
 #endif /* !WITHOUT_AUDIT */

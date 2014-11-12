@@ -50,6 +50,18 @@ peak_audit_set(const unsigned int field, const uint64_t value)
 	}
 }
 
+uint64_t
+peak_audit_get(const unsigned int field)
+{
+	uint64_t ret = 0;
+
+	if (likely(field < AUDIT_MAX)) {
+		ret = audit_thread.field[field];
+	}
+
+	return (ret);
+}
+
 void
 peak_audit_add(const unsigned int field, const uint64_t value)
 {
@@ -76,6 +88,6 @@ peak_audit_sync(struct peak_audit *export)
 		__sync_fetch_and_add(&export->field[i],
 		    audit_thread.field[i]);
 		/* wipe local fields for next round */
-		peak_audit_set(i, 0);
+		audit_thread.field[i] = 0;
 	}
 }
