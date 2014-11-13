@@ -108,13 +108,13 @@ static pthread_mutex_t netmap_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 struct peak_netmap_dev {
 	char ifname[IFNAMSIZ];
-	int fd;
-	char *mem;                      /* userspace mmap address */
-	u_int memsize;
-	u_int queueid;
-	u_int begin, end;               /* first..last+1 rings to check */
 	struct netmap_if *nifp;
-	struct netmap_ring *tx, *rx;    /* shortcuts */
+	void *mem;			/* userspace mmap address */
+	int fd;
+	unsigned int type;
+	unsigned int memsize;
+	unsigned int begin;		/* first ring to check */
+	unsigned int end;		/* last+1 ring to check */
 };
 
 struct peak_netmap {
@@ -124,25 +124,32 @@ struct peak_netmap {
 };
 
 static struct peak_netmaps {
-	unsigned int lastdev;
-	unsigned int reserved;
+	unsigned int count;
+	unsigned int last;
 	struct peak_netmap private_data;
 	struct peak_netmap_dev dev[NETMAP_MAX];
 	struct pollfd fd[NETMAP_MAX];
-} netmap_self = {
-	.lastdev = 0
-};
+} netmap_self;
 
 static struct peak_netmaps *const self = &netmap_self;	/* global ref */
 
-#define NR_FOREACH(mode, ring, idx, dev, want_sw)			\
+#define NR_FOREACH_RX(ring, idx, dev, want_sw)				\
 	for ((idx) = (dev)->begin,					\
-	    (ring) = NETMAP_##mode##RING((dev)->nifp, idx);		\
+	    (ring) = NETMAP_RXRING((dev)->nifp, idx);			\
 	    (idx) < (dev)->end + !!(want_sw); ++(idx),			\
-	    (ring) = NETMAP_##mode##RING((dev)->nifp, idx))
+	    (ring) = NETMAP_RXRING((dev)->nifp, idx))
 
-#define NR_FOREACH_RX(r, i, d, s)	NR_FOREACH(RX, r, i, d, s)
-#define NR_FOREACH_TX(r, i, d, s)	NR_FOREACH(TX, r, i, d, s)
+#define NR_FOREACH_TX_WIRE(ring, idx, dev)				\
+	for ((idx) = (dev)->begin,					\
+	    (ring) = NETMAP_TXRING((dev)->nifp, idx);			\
+	    (idx) < (dev)->end; ++(idx),				\
+	    (ring) = NETMAP_TXRING((dev)->nifp, idx))
+
+#define NR_FOREACH_TX_HOST(ring, idx, dev)				\
+	for ((idx) = (dev)->end,					\
+	    (ring) = NETMAP_TXRING((dev)->nifp, idx);			\
+	    (idx) < (dev)->end + 1; ++(idx),				\
+	    (ring) = NETMAP_TXRING((dev)->nifp, idx))
 
 #define NETMAP_LOCK() do {						\
 	pthread_mutex_lock(&netmap_mutex);				\
@@ -198,6 +205,8 @@ _peak_netmap_init(struct peak_netmap_dev *dev)
 	const uint16_t ringid = 0;
 	struct nmreq req;
 
+	memset(&req, 0, sizeof(req));
+
 	dev->fd = open("/dev/netmap", O_RDWR);
 	if (dev->fd < 0) {
 		error("unable to open /dev/netmap\n");
@@ -205,11 +214,10 @@ _peak_netmap_init(struct peak_netmap_dev *dev)
 	}
 
 	if (__peak_netmap_init(dev)) {
-		goto error;
+		goto _peak_netmap_init_error;
 	}
 
 	/* Put the interface into netmap mode: */
-	memset(&req, 0, sizeof(req));
 	req.nr_version = NETMAP_API;
 	req.nr_ringid = ringid;
 	req.nr_flags = NR_REG_ALL_NIC;
@@ -217,7 +225,7 @@ _peak_netmap_init(struct peak_netmap_dev *dev)
 
 	if (ioctl(dev->fd, NIOCREGIF, &req)) {
 		error("NIOCREGIF failed on %s\n", dev->ifname);
-		goto error;
+		goto _peak_netmap_init_error;
 	}
 
 	dev->memsize = req.nr_memsize;
@@ -226,21 +234,18 @@ _peak_netmap_init(struct peak_netmap_dev *dev)
 	    MAP_SHARED, dev->fd, 0);
 	if (dev->mem == MAP_FAILED) {
 		error("mmap() failed on %s\n", dev->ifname);
-		goto error;
+		goto _peak_netmap_init_error;
 	}
 
 	dev->nifp = NETMAP_IF(dev->mem, req.nr_offset);
-	dev->queueid = ringid;
 
 	/* setup for NR_REG_ALL_NIC */
 	dev->begin = 0;
 	dev->end = req.nr_rx_rings; // XXX max of the two
-	dev->tx = NETMAP_TXRING(dev->nifp, 0);
-	dev->rx = NETMAP_RXRING(dev->nifp, 0);
 
 	return (0);
 
-error:
+_peak_netmap_init_error:
 
 	close(dev->fd);
 	return (1);
@@ -252,10 +257,10 @@ peak_netmap_find(const char *ifname)
 	unsigned int i;
 
 	if (!ifname) {
-		return self->lastdev;
+		return self->count;
 	}
 
-	for (i = 0; i < self->lastdev; ++i) {
+	for (i = 0; i < self->count; ++i) {
 		if (!strcmp(ifname, self->dev[i].ifname)) {
 			break;
 		}
@@ -289,7 +294,7 @@ __peak_netmap_claim(struct peak_transfer *packet,
 		i = ring->cur;
 		idx = ring->slot[i].buf_idx;
 		if (idx < 2) {
-			panic("%s bugus RX index %d at offset %d\n",
+			panic("%s bogus RX index %d at offset %d\n",
 			      dev->nifp->ni_name, idx, i);
 		}
 
@@ -299,11 +304,11 @@ __peak_netmap_claim(struct peak_transfer *packet,
 		priv->i = i;
 
 		/* external stuff */
+		packet->ts.tv_usec = ring->ts.tv_usec;
+		packet->ts.tv_sec = ring->ts.tv_sec;
 		packet->buf = NETMAP_BUF(ring, idx);
 		packet->len = ring->slot[i].len;
 		packet->ll = LINKTYPE_ETHERNET;
-		packet->ts.tv_usec = ring->ts.tv_usec;
-		packet->ts.tv_sec = ring->ts.tv_sec;
 		packet->ifname = dev->ifname;
 		packet->private_data = priv;
 
@@ -317,12 +322,16 @@ static struct peak_transfer *
 _peak_netmap_claim(struct peak_transfer *packet,
     const unsigned int want_sw)
 {
+	unsigned int i, j = self->last + 1;
 	struct peak_transfer *ret = NULL;
-	unsigned int j;
 
-	for (j = 0; j < self->lastdev; ++j) {
+	for (i = 0; i < self->count; ++i) {
+		/* reshuffle the index */
+		j = (j + i) % self->count;
 		ret = __peak_netmap_claim(packet, &self->dev[j], want_sw);
 		if (ret) {
+			/* set the last device */
+			self->last = j;
 			break;
 		}
 	}
@@ -354,26 +363,25 @@ peak_netmap_claim(struct peak_transfer *packet, int timeout,
 	 * timeout value (see poll(3)'s timeout parameter).
 	 */
 
-	for (i = 0; i < self->lastdev; ++i) {
+	for (i = 0; i < self->count; ++i) {
 		fd = &self->fd[i];
 
 		fd->events = POLLIN | POLLOUT;
 		fd->revents = 0;
 	}
 
-	ret = poll(self->fd, self->lastdev, timeout);
+	ret = poll(self->fd, self->count, timeout);
 	if (ret <= 0) {
 		/* error or timeout */
 		return (NULL);
 	}
 
-	for (i = 0; i < self->lastdev; ++i) {
+	for (i = 0; i < self->count; ++i) {
 		dev = &self->dev[i];
 		fd = &self->fd[i];
 
 		if (fd->revents & POLLERR) {
-			alert("error on %s, rxcur %d/%d", dev->ifname,
-			    dev->rx->head, dev->rx->cur);
+			alert("poll() error on %s\n", dev->ifname);
 		}
 
 		if (fd->revents & POLLIN) {
@@ -439,14 +447,14 @@ peak_netmap_divert(struct peak_transfer *packet, const char *ifname)
 	}
 
 	i = peak_netmap_find(ifname);
-	if (i >= self->lastdev) {
+	if (i >= self->count) {
 		/* not found means error */
 		return (1);
 	}
 
 	dev = &self->dev[i];
 
-	NR_FOREACH_TX(drain, tx, dev, 0) {
+	NR_FOREACH_TX_WIRE(drain, tx, dev) {
 		struct netmap_slot *rs, *ts;
 		uint32_t pkt;
 
@@ -503,31 +511,32 @@ peak_netmap_configure(struct peak_netmap_dev *dev)
 unsigned int
 peak_netmap_attach(const char *ifname)
 {
-	unsigned int devno;
+	unsigned int i;
 
-	devno = peak_netmap_find(ifname);
-	if (devno < self->lastdev) {
+	i = peak_netmap_find(ifname);
+	if (i < self->count) {
 		alert("netmap interface %s already attached\n", ifname);
 		return (1);
 	}
 
-	if (self->lastdev >= sizeof(self->dev)/sizeof(self->dev[0])) {
+	if (self->count >= lengthof(self->dev)) {
 		alert("netmap interface capacity reached\n");
 		return (1);
 	}
 
-	devno = self->lastdev++; /* allocate it */
+	i = self->count;
 
-	memset(&self->dev[devno], 0, sizeof(self->dev[devno]));
-	strlcpy(self->dev[devno].ifname, ifname, sizeof(self->dev[devno].ifname));
-	if (_peak_netmap_init(&self->dev[devno])) {
-		self->lastdev--; /* deallocate it */
+	memset(&self->dev[i], 0, sizeof(self->dev[i]));
+	strlcpy(self->dev[i].ifname, ifname, sizeof(self->dev[i].ifname));
+	if (_peak_netmap_init(&self->dev[i])) {
 		alert("could not open netmap device %s\n", ifname);
 		return (1);
 	}
 
-	peak_netmap_configure(&self->dev[devno]);
-	self->fd[devno].fd = self->dev[devno].fd;
+	peak_netmap_configure(&self->dev[i]);
+	self->fd[i].fd = self->dev[i].fd;
+
+	++self->count;
 
 	return (0);
 }
@@ -535,28 +544,30 @@ peak_netmap_attach(const char *ifname)
 unsigned int
 peak_netmap_detach(const char *ifname)
 {
-	unsigned int devno;
+	unsigned int i;
 
-	devno = peak_netmap_find(ifname);
-	if (devno >= self->lastdev) {
+	i = peak_netmap_find(ifname);
+	if (i >= self->count) {
 		alert("netmap interface %s not attached\n", ifname);
 		return (1);
 	}
 
-	if (self->dev[devno].mem) {
-		munmap(self->dev[devno].mem, self->dev[devno].memsize);
+	if (self->dev[i].mem) {
+		munmap(self->dev[i].mem, self->dev[i].memsize);
 	}
 
-	close(self->dev[devno].fd);
+	close(self->dev[i].fd);
 
-	if (devno < self->lastdev - 1) {
-		/* Replace the dead element with the last
-		   element in the list to fill the hole in */
-		self->dev[devno] = self->dev[self->lastdev - 1];
-		self->fd[devno] = self->fd[self->lastdev - 1];
+	if (i < self->count - 1) {
+		/*
+		 * Replace the dead element with the last
+		 * element in the list to fill the hole.
+		 */
+		self->dev[i] = self->dev[self->count - 1];
+		self->fd[i] = self->fd[self->count - 1];
 	};
 
-	self->lastdev--;
+	self->count--;
 
 	return (0);
 }
