@@ -112,13 +112,15 @@ peak_jar_repair(struct peak_jars *self, struct peak_jar *context)
 	if (wrap32(context->first_serial - self->first_serial)) {
 		struct peak_jar_data *zap = data;
 
+		TAILQ_INIT(&context->datas);
+
 		while (TAILQ_PREV(zap, peak_jar_user, entry) &&
 		    !wrap32(zap->prev_serial - self->first_serial)) {
 			zap = TAILQ_PREV(zap, peak_jar_user, entry);
+			TAILQ_INSERT_HEAD(&context->datas, zap, entry);
 		}
 
 		context->first_serial = zap->serial;
-		TAILQ_FIRST(&context->datas) = zap;
 	}
 }
 
