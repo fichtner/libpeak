@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2012-2014 Franco Fichtner <franco@packetwerk.com>
  * Copyright (c) 2014 Thomas Siegmund <thomas@packetwerk.com>
+ * Copyright (c) 2014 Tobias Boertitz <tobias@packetwerk.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -84,20 +85,22 @@ static inline int
 netprefix(const struct netaddr *x, const struct netaddr *y, unsigned int yp)
 {
 	const unsigned char prefix[] = {
-		0xFF, 0x80, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC, 0xFE,
+		0x80, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC, 0xFE, 0xFF,
 	};
 	unsigned int i;
 	int ret;
 
 	if (!yp) {
-		return (1);
+		/* different, but same same */
+		return (0);
+	}
+
+	if (yp > NET_PREFIX_MAX) {
+		/* truncate the prefix if needed */
+		yp = NET_PREFIX_MAX;
 	}
 
 	--yp;
-
-	if (yp >= NET_PREFIX_MAX) {
-		return (1);
-	}
 
 	for (i = 0; yp >= lengthof(prefix); ++i, yp -= lengthof(prefix)) {
 		ret = x->u.byte[i] - y->u.byte[i];

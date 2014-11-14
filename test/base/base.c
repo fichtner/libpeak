@@ -103,8 +103,9 @@ test_net(void)
 		assert(!netprefix(&ip, &ip4_ref, NET_PREFIX4(i)));
 	}
 
-	assert(netprefix(&ip, &ip4_ref, NET_PREFIX4(33)));
-	assert(netprefix(&ip, &ip4_ref, NET_PREFIX4(0)));
+	/* these are weird, but ok */
+	assert(!netprefix(&ip, &ip4_ref, NET_PREFIX4(33)));
+	assert(!netprefix(&ip, &ip4_ref, NET_PREFIX4(0)));
 
 	netaddr6(&ip, &ip6_ref);
 	assert(!memcmp(&ip6_ref, netto6(&ip), sizeof(ip6_ref)));
@@ -116,14 +117,16 @@ test_net(void)
 		assert(!netprefix(&ip, &ip6_ref, NET_PREFIX6(i)));
 	}
 
-	assert(netprefix(&ip, &ip6_ref, NET_PREFIX6(129)));
-	assert(netprefix(&ip, &ip6_ref, NET_PREFIX6(0)));
+	/* these are weird, but ok */
+	assert(!netprefix(&ip, &ip6_ref, NET_PREFIX6(129)));
+	assert(!netprefix(&ip, &ip6_ref, NET_PREFIX6(0)));
 
 	assert(netprefix(&ip4_ref, &ip6_ref, NET_PREFIX6(1)));
 	peak_be32enc(&ipv4_addr, 0x11224433);
 	netaddr4(&ip, ipv4_addr);
 	assert(!netprefix(&ip, &ip4_ref, NET_PREFIX4(16)));
-	assert(netprefix(&ip, &ip4_ref, NET_PREFIX4(17)));
+	assert(!netprefix(&ip, &ip4_ref, NET_PREFIX4(17)));
+	assert(netprefix(&ip, &ip4_ref, NET_PREFIX4(18)));
 
 	assert(!strcmp(netprint(&ip4_ref), IP4_REF_STR));
 	assert(!strcmp(netprint(&ip6_ref), IP6_REF_STR));
