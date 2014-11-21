@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2012-2014 Franco Fichtner <franco@packetwerk.com>
+ * Copyright (c) 2014 Thomas Siegmund <thomas@packetwerk.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -91,7 +92,7 @@ peak_jar_repair(struct peak_jars *self, struct peak_jar *context)
 	struct peak_jar_data *data;
 
 	/* is there any data in the context? */
-	data = TAILQ_LAST(&context->datas, peak_jar_user);
+	data = TAILQ_FIRST(&context->datas);
 	if (!data) {
 		return;
 	}
@@ -114,10 +115,10 @@ peak_jar_repair(struct peak_jars *self, struct peak_jar *context)
 
 		TAILQ_INIT(&context->datas);
 
-		while (TAILQ_PREV(zap, peak_jar_user, entry) &&
+		while (TAILQ_NEXT(zap, entry) &&
 		    !wrap32(zap->prev_serial - self->first_serial)) {
-			zap = TAILQ_PREV(zap, peak_jar_user, entry);
-			TAILQ_INSERT_HEAD(&context->datas, zap, entry);
+			zap = TAILQ_NEXT(zap, entry);
+			TAILQ_INSERT_TAIL(&context->datas, zap, entry);
 		}
 
 		context->first_serial = zap->serial;
@@ -170,13 +171,13 @@ peak_jar_pack_again:
 	if (TAILQ_EMPTY(&context->datas)) {
 		context->first_serial = data->serial;
 	}
-	TAILQ_INSERT_TAIL(&context->datas, data, entry);
+	TAILQ_INSERT_HEAD(&context->datas, data, entry);
 	context->last_serial = data->serial;
 
 	/* almost done: sync prev_serial for peek */
-	if (TAILQ_PREV(data, peak_jar_user, entry)) {
+	if (TAILQ_NEXT(data, entry)) {
 		data->prev_serial =
-		    TAILQ_PREV(data, peak_jar_user, entry)->serial;
+		    TAILQ_NEXT(data, entry)->serial;
 	}
 
 	/* sync serial header */
@@ -194,7 +195,8 @@ peak_jar_fifo(struct peak_jars *self, struct peak_jar *context,
 	peak_jar_repair(self, context);
 
 	/* invoke callback for all data in the context */
-	TAILQ_FOREACH_SAFE(data, &context->datas, entry, temp) {
+	TAILQ_FOREACH_REVERSE_SAFE(data, &context->datas,
+	    peak_jar_user, entry, temp) {
 		switch (callback(userdata, data->buf, data->len)) {
 		case JAR_RETURN:
 			goto peak_jar_fifo_out;
@@ -222,8 +224,7 @@ peak_jar_lifo(struct peak_jars *self, struct peak_jar *context,
 	peak_jar_repair(self, context);
 
 	/* invoke callback for all data in the context */
-	TAILQ_FOREACH_REVERSE_SAFE(data, &context->datas,
-	    peak_jar_user, entry, temp) {
+	TAILQ_FOREACH_SAFE(data, &context->datas, entry, temp) {
 		switch (callback(userdata, data->buf, data->len)) {
 		case JAR_RETURN:
 			goto peak_jar_lifo_out;
