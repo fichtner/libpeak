@@ -21,38 +21,46 @@ struct peak_transfer {
 	struct peak_timeval ts;
 	const char *ifname;
 	void *private_data;
+	unsigned int type;
 	unsigned int len;
 	unsigned int ll;
+	unsigned int id;
 	void *buf;
 };
 
 struct peak_transfers {
-	unsigned int (*divert)(struct peak_transfer *, const char *);
-	struct peak_transfer *(*claim)(struct peak_transfer *, int,
+	unsigned int (*send)(struct peak_transfer *, const char *,
 	    const unsigned int);
+	struct peak_transfer *(*recv)(struct peak_transfer *, int,
+	    const char *, const unsigned int);
 	unsigned int (*forward)(struct peak_transfer *);
-	unsigned int (*drop)(struct peak_transfer *);
 	unsigned int (*attach)(const char *);
 	unsigned int (*detach)(const char *);
+	unsigned int (*master)(const char *);
+	unsigned int (*slave)(const char *);
 	void (*unlock)(void);
 	void (*lock)(void);
 };
 
 static inline unsigned int
-peak_transfer_divert(struct peak_transfer *x, const char *y)
+peak_transfer_send(struct peak_transfer *x, const char *y,
+    const unsigned int z)
 {
 	(void)x;
 	(void)y;
+	(void)z;
 
 	return (1);
 }
 
 static inline struct peak_transfer *
-peak_transfer_claim(struct peak_transfer *x, int y, const unsigned int z)
+peak_transfer_recv(struct peak_transfer *x, int y, const char *z,
+    const unsigned int a)
 {
 	(void)x;
 	(void)y;
 	(void)z;
+	(void)a;
 
 	return (NULL);
 }
@@ -66,7 +74,15 @@ peak_transfer_forward(struct peak_transfer *x)
 }
 
 static inline unsigned int
-peak_transfer_drop(struct peak_transfer *x)
+peak_transfer_master(const char *x)
+{
+	(void)x;
+
+	return (1);
+}
+
+static inline unsigned int
+peak_transfer_slave(const char *x)
 {
 	(void)x;
 

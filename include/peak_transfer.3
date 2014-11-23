@@ -13,35 +13,47 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd July 24, 2014
+.Dd November 14, 2014
 .Dt PEAK_TRANSFER 3
 .Os
 .Sh NAME
 .Nm peak_transfer_attach ,
-.Nm peak_transfer_claim ,
 .Nm peak_transfer_detach ,
-.Nm peak_transfer_divert ,
-.Nm peak_transfer_drop ,
 .Nm peak_transfer_forward ,
 .Nm peak_transfer_lock ,
+.Nm peak_transfer_master ,
+.Nm peak_transfer_recv ,
+.Nm peak_transfer_send ,
+.Nm peak_transfer_slave ,
 .Nm peak_transfer_unlock
 .Nd packet transport interface
 .Sh SYNOPSIS
 .In peak.h
 .Ft unsigned int
 .Fn peak_transfer_attach "const char *ifname"
-.Ft struct peak_transfer *
-.Fn peak_transfer_claim "int timeout" "const unsigned int want_sw"
 .Ft unsigned int
 .Fn peak_transfer_detach "const char *ifname"
 .Ft unsigned int
-.Fn peak_transfer_drop "struct peak_transfer *packet"
-.Ft unsigned int
 .Fn peak_transfer_forward "struct peak_transfer *packet"
-.Ft unsigned int
-.Fn peak_transfer_divert "struct peak_transfer *packet" "const char *ifname"
 .Ft void
 .Fn peak_transfer_lock void
+.Ft unsigned int
+.Fn peak_transfer_master "const char *ifname"
+.Ft struct peak_transfer *
+.Fo peak_transfer_recv
+.Fa "struct peak_transfer *packet"
+.Fa "int timeout"
+.Fa "const char *ifname"
+.Fa ""const unsigned int mode"
+.Fc
+.Ft unsigned int
+.Fo peak_transfer_send
+.Fa "struct peak_transfer *packet"
+.Fa "const char *ifname"
+.Fa "const unsigned int mode"
+.Fc
+.Ft unsigned int
+.Fn peak_transfer_slave "const char *ifname"
 .Ft void
 .Fn peak_transfer_unlock void
 .Sh DESCRIPTION
@@ -64,6 +76,12 @@ The
 parameter must be a string holding the interface name.
 Both functions return zero, if the operation was successful.
 Otherwise, a non-zero value is returned.
+.Fn peak_transfer_master
+and
+.Fn peak_transfer_slave
+are for compatibility with
+.Xr netmap 4
+pipes.
 .Pp
 The
 .Fn peak_transfer_lock
@@ -71,12 +89,12 @@ and
 .Fn peak_transfer_unlock
 functions pairs can be used to guard the API against premature
 interface attach and detach.
-It's recommended to provide glitch-free operation of claim and
+It's recommended to provide glitch-free operation of receive and
 friends \(em especially when separate threads handle interface
 configuration and receive/transmit.
 .Pp
 The
-.Fn peak_transfer_claim
+.Fn peak_transfer_recv
 function claims ownership of a packet internally bound to
 a specific hidden implementation.
 If
@@ -86,7 +104,7 @@ is greater than zero, it specifies a maximum interval
 If
 .Va timeout
 is zero, then
-.Fn peak_transfer_claim
+.Fn peak_transfer_recv
 will return without blocking.
 If the value of
 .Va timeout
@@ -109,6 +127,7 @@ struct peak_transfer {
 	void *private_data;
 	unsigned int len;
 	unsigned int ll;
+	unsigned int id;
 	void *buf;
 };
 .Ed
@@ -121,23 +140,18 @@ and moves it over to the host stack or the interface,
 whichever was the original destination of the packet.
 .Pp
 The
-.Fn peak_transfer_drop
-function releases the previously claimed
-.Va packet
-and issues it to be dropped.
-This operation cannot fail.
-.Pp
-The
-.Fn peak_transfer_divert
+.Fn peak_transfer_send
 function releases the previously claimed
 .Va packet
 and moves it to the specified interface
-.Va ifname
-using a zero-copy technique.
+.Va ifname .
 Upon success, the function returns zero.
 Otherwise, non-zero is returned indicating that the packet could not
 be transmitted via the specified interface.
-The user must call the function again later or drop the packet.
+The user must call the function again later or drop the packet using
+.Va ifname
+set to
+.Dv NULL .
 .Sh SEE ALSO
 .Xr bpf 4 ,
 .Xr netmap 4

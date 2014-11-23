@@ -68,12 +68,13 @@ main(int argc, char **argv)
 	transfer_netmap.lock();
 
 	while (loop) {
-		if (transfer_netmap.claim(pkt, 200, 0)) {
-			if (transfer_netmap.divert(pkt,
-			    !strcmp(dev0, pkt->ifname) ? dev1 : dev0)) {
+		if (transfer_netmap.recv(pkt, 200, NULL, NETMAP_WIRE)) {
+			if (transfer_netmap.send(pkt,
+			    !strcmp(dev0, pkt->ifname) ? dev1 : dev0,
+			    NETMAP_WIRE)) {
 				perr("%lld: dropping packet of size %u\n",
 				    pkt->ts.tv_sec, pkt->len);
-				transfer_netmap.drop(pkt);
+				transfer_netmap.send(pkt, NULL, NETMAP_DFLT);
 			}
 		}
 	}

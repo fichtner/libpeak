@@ -18,6 +18,11 @@
 #ifndef PEAK_NETMAP_H
 #define PEAK_NETMAP_H
 
+#define NETMAP_DFLT	0
+#define NETMAP_WIRE	1
+#define NETMAP_HOST	2
+#define NETMAP_PIPE	3
+
 extern const struct peak_transfers transfer_netmap;
 
 #ifdef __FreeBSD__
@@ -27,19 +32,18 @@ extern const struct peak_transfers transfer_netmap;
 
 #if defined(NETMAP_API) && NETMAP_API >= 11
 
-unsigned int		 peak_netmap_divert(struct peak_transfer *,
-			     const char *);
-struct peak_transfer	*peak_netmap_claim(struct peak_transfer *,
-			     int, const unsigned int);
+struct peak_transfer	*peak_netmap_recv(struct peak_transfer *,
+			     int, const char *, const unsigned int);
+unsigned int		 peak_netmap_send(struct peak_transfer *,
+			     const char *, const unsigned int);
 unsigned int		 peak_netmap_forward(struct peak_transfer *);
-unsigned int		 peak_netmap_drop(struct peak_transfer *);
+unsigned int		 peak_netmap_master(const char *);
+unsigned int		 peak_netmap_slave(const char *);
 unsigned int		 peak_netmap_attach(const char *);
 unsigned int		 peak_netmap_detach(const char *);
 void			 peak_netmap_unlock(void);
 void			 peak_netmap_lock(void);
 
-#endif
-
+#endif /* NETMAP_API */
 #endif /* __FreeBSD__ */
-
 #endif /* !PEAK_NETMAP_H */

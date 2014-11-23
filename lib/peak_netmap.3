@@ -13,38 +13,45 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd November 5, 2014
+.Dd November 14, 2014
 .Dt PEAK_NETMAP 3
 .Os
 .Sh NAME
 .Nm peak_netmap_attach ,
-.Nm peak_netmap_claim ,
 .Nm peak_netmap_detach ,
-.Nm peak_netmap_divert ,
-.Nm peak_netmap_drop ,
 .Nm peak_netmap_forward ,
 .Nm peak_netmap_lock ,
+.Nm peak_netmap_master ,
+.Nm peak_netmap_recv ,
+.Nm peak_netmap_send ,
+.Nm peak_netmap_slave ,
 .Nm peak_netmap_unlock
 .Nd the convenient netmap wrapper
 .Sh SYNOPSIS
 .In peak.h
 .Ft unsigned int
 .Fn peak_netmap_attach "const char *ifname"
-.Ft struct peak_transfer *
-.Fo peak_netmap_claim
-.Fa "struct peak_transfer *packet" "int timeout"
-.Fa "const unsigned int want_sw"
-.Fc
 .Ft unsigned int
 .Fn peak_netmap_detach "const char *ifname"
 .Ft unsigned int
-.Fn peak_netmap_drop "struct peak_transfer *packet"
-.Ft unsigned int
 .Fn peak_netmap_forward "struct peak_transfer *packet"
-.Ft unsigned int
-.Fn peak_netmap_divert "struct peak_transfer *packet" "const char *ifname"
 .Ft void
 .Fn peak_netmap_lock void
+.Ft unsigned int
+.Fn peak_netmap_master "const char *pipeid"
+.Ft struct peak_transfer *
+.Fo peak_netmap_recv
+.Fa "struct peak_transfer *packet" "int timeout"
+.Fa "const char *ifname" "const unsigned int mode"
+.Fc
+.Ft unsigned int
+.Fo peak_netmap_send
+.Fa "struct peak_transfer *packet"
+.Fa "const char *ifname"
+.Fa "const unsigned int mode"
+.Fc
+.Ft unsigned int
+.Fn peak_netmap_slave "const char *pipeid"
 .Ft void
 .Fn peak_netmap_unlock void
 .Sh DESCRIPTION
@@ -69,17 +76,34 @@ Both functions return zero, if the operation was successful.
 Otherwise, a non-zero value is returned.
 .Pp
 The
+.Fn peak_netmap_master
+and
+.Fn peak_netmap_slave
+create a named
+.Xr netmap 4
+pipe with
+.Va pipeid
+.Pq a string with a numeric ID for API compatiblity
+capable of sending or receiving packets using zero-copy,
+respectively.
+Pipes are also removed via
+.Fn peak_netmap_detach .
+NOTE: Creating a master/slave pair withinin the same process
+requires calling the detach function twice.
+It is undefined which pipe end is deleted first.
+.Pp
+The
 .Fn peak_netmap_lock
 and
 .Fn peak_netmap_unlock
 functions pairs can be used to guard the API against premature
 interface attach and detach.
-It's recommended to provide glitch-free operation of claim and
+It's recommended to provide glitch-free operation of recieve and
 friends \(em especially when separate threads handle interface
 configuration and receive/transmit.
 .Pp
 The
-.Fn peak_netmap_claim
+.Fn peak_netmap_recv
 function claims ownership of a packet internally bound to
 .Xr netmap 4 .
 If
@@ -89,7 +113,7 @@ is greater than zero, it specifies a maximum interval
 If
 .Va timeout
 is zero, then
-.Fn peak_netmap_claim
+.Fn peak_netmap_recv
 will return without blocking.
 If the value of
 .Va timeout
@@ -125,14 +149,7 @@ as the packet needs to be converted either from or to an
 .Xr mbuf 9 .
 .Pp
 The
-.Fn peak_netmap_drop
-function releases the previously claimed
-.Va packet
-and issues it to be dropped.
-This operation cannot fail.
-.Pp
-The
-.Fn peak_netmap_divert
+.Fn peak_netmap_send
 function releases the previously claimed
 .Va packet
 and moves it to the specified interface
@@ -141,7 +158,10 @@ using a zero-copy technique.
 Upon success, the function returns zero.
 Otherwise, non-zero is returned indicating that the packet could not
 be transmitted via the specified interface.
-The user must call the function again later or drop the packet.
+The user must call the function again later or drop the packet using
+.Va ifname
+set to
+.Dv NULL .
 .Sh SEE ALSO
 .Xr peak_transfer 3 ,
 .Xr netmap 4
