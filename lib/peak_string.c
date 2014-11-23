@@ -140,10 +140,12 @@ _peak_string_find(struct peak_strings *node, const char *buf,
 	if (ref->character) {
 		found = PAGE_FIND(node->next, ref, STRING_CMP);
 		if (found) {
-			if (peak_string_match(found, len - 1, start, stash)) {
+			if (peak_string_match(found, len - 1,
+			    start, stash)) {
 				return;
 			}
-			_peak_string_find(found, buf + 1, len - 1, start, stash);
+			_peak_string_find(found, buf + 1, len - 1,
+			    start, stash);
 		}
 	}
 }

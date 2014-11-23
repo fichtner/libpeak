@@ -1130,6 +1130,7 @@ LI_DESCRIBE_APP(tftp)
 
 	return (1);
 }
+
 LI_DESCRIBE_APP(netbios_session_service)
 {
 	struct netbios {
@@ -1840,7 +1841,7 @@ static const struct peak_lis apps[] = {
 	LI_LIST_APP(LI_TELNET, telnet, IPPROTO_TCP, IPPROTO_MAX, "Telnet", "Telnet (teletype network) is a network protocol used on the Internet or local area networks to provide a bidirectional interactive text-oriented communications facility using a virtual terminal connection.", "Remote Access"),
 	LI_LIST_APP(LI_RTP, rtp, IPPROTO_UDP, IPPROTO_MAX, "Real-Time Transport Protocol", "RTP is primarily used to deliver real-time audio and video.", "Streaming Media"),
 	/* undefined is a special case and never matches */
-	LI_LIST_IPTYPE(LI_UNDEFINED, undefined, IPPROTO_MAX, IPPROTO_MAX, "Undefined protocol", "Protocols that cannot be identified by the engine are labled as 'undefined'.", "Networking"),
+	LI_LIST_IPTYPE(LI_UNDEFINED, undefined, IPPROTO_MAX, IPPROTO_MAX, "Undefined Protocols", "Traffic that does not match any known patterns.", "Networking"),
 };
 
 unsigned int
