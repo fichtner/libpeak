@@ -42,7 +42,7 @@
 
 #include <peak.h>
 
-#if !defined(NETMAP_API) || NETMAP_API < 11
+#if !defined(NETMAP_API) || NETMAP_API != 11
 
 const struct peak_transfers transfer_netmap = {
 	.attach = peak_transfer_attach,
@@ -147,14 +147,6 @@ static struct peak_netmaps *const self = &netmap_self;	/* global ref */
 	    (idx) <= (dev)->end; ++(idx),				\
 	    (ring) = NETMAP_##mode##RING((dev)->nifp, idx))
 
-#define NETMAP_LOCK() do {						\
-	pthread_mutex_lock(&netmap_mutex);				\
-} while (0)
-
-#define NETMAP_UNLOCK() do {						\
-	pthread_mutex_unlock(&netmap_mutex);				\
-} while (0)
-
 static int
 __peak_netmap_init(struct peak_netmap_dev *dev)
 {
@@ -165,7 +157,7 @@ __peak_netmap_init(struct peak_netmap_dev *dev)
 	strlcpy(ifr.ifr_name, dev->ifname, sizeof(ifr.ifr_name));
 
 	if (ioctl(dev->fd, SIOCGIFFLAGS, &ifr)) {
-		error("ioctl error on SIOCGIFFLAGS");
+		error("ioctl error on SIOCGIFFLAGS\n");
 		return (1);
 	}
 
@@ -173,7 +165,7 @@ __peak_netmap_init(struct peak_netmap_dev *dev)
 	ifr.ifr_flags |= if_flags & 0xffff;
 
 	if (ioctl(dev->fd, SIOCSIFFLAGS, &ifr)) {
-		error("ioctl error on SIOCSIFFLAGS");
+		error("ioctl error on SIOCSIFFLAGS\n");
 		return (1);
 	}
 
@@ -181,7 +173,7 @@ __peak_netmap_init(struct peak_netmap_dev *dev)
 	strlcpy(ifr.ifr_name, dev->ifname, sizeof(ifr.ifr_name));
 
 	if (ioctl(dev->fd, SIOCGIFCAP, &ifr)) {
-		error("ioctl error on SIOCGIFCAP");
+		error("ioctl error on SIOCGIFCAP\n");
 		return (1);
 	}
 
@@ -189,7 +181,7 @@ __peak_netmap_init(struct peak_netmap_dev *dev)
 	ifr.ifr_reqcap &= ~(IFCAP_HWCSUM | IFCAP_TSO | IFCAP_TOE);
 
 	if (ioctl(dev->fd, SIOCSIFCAP, &ifr)) {
-		error("ioctl error on SIOCSIFCAP");
+		error("ioctl error on SIOCSIFCAP\n");
 		return (1);
 	}
 
@@ -613,6 +605,11 @@ _peak_netmap_attach(const char *ifname, const unsigned int type)
 	unsigned int ignore = type;
 	unsigned int i;
 
+	if (pthread_mutex_trylock(&netmap_mutex)) {
+		/* mutex is busy or locked externally */
+		return (1);
+	}
+
 	switch (type) {
 	case NR_REG_PIPE_MASTER:
 		ignore = NR_REG_PIPE_SLAVE;
@@ -626,11 +623,13 @@ _peak_netmap_attach(const char *ifname, const unsigned int type)
 
 	i = peak_netmap_find(ifname, ignore);
 	if (i < self->count) {
+		pthread_mutex_unlock(&netmap_mutex);
 		alert("netmap interface %s already attached\n", ifname);
 		return (1);
 	}
 
 	if (self->count >= lengthof(self->dev)) {
+		pthread_mutex_unlock(&netmap_mutex);
 		alert("netmap interface capacity reached\n");
 		return (1);
 	}
@@ -641,6 +640,7 @@ _peak_netmap_attach(const char *ifname, const unsigned int type)
 	strlcpy(self->dev[i].ifname, ifname, sizeof(self->dev[i].ifname));
 	self->dev[i].type = type;
 	if (_peak_netmap_init(&self->dev[i])) {
+		pthread_mutex_unlock(&netmap_mutex);
 		alert("could not open netmap device %s\n", ifname);
 		return (1);
 	}
@@ -649,6 +649,8 @@ _peak_netmap_attach(const char *ifname, const unsigned int type)
 	self->fd[i].fd = self->dev[i].fd;
 
 	++self->count;
+
+	pthread_mutex_unlock(&netmap_mutex);
 
 	return (0);
 }
@@ -676,8 +678,14 @@ peak_netmap_detach(const char *ifname)
 {
 	unsigned int i;
 
+	if (pthread_mutex_trylock(&netmap_mutex)) {
+		/* mutex is busy or locked externally */
+		return (1);
+	}
+
 	i = peak_netmap_find(ifname, NR_REG_ALL_NIC);
 	if (i >= self->count) {
+		pthread_mutex_unlock(&netmap_mutex);
 		alert("netmap interface %s not attached\n", ifname);
 		return (1);
 	}
@@ -699,19 +707,21 @@ peak_netmap_detach(const char *ifname)
 
 	self->count--;
 
+	pthread_mutex_unlock(&netmap_mutex);
+
 	return (0);
 }
 
 void
 peak_netmap_lock(void)
 {
-	NETMAP_LOCK();
+	pthread_mutex_lock(&netmap_mutex);
 }
 
 void
 peak_netmap_unlock(void)
 {
-	NETMAP_UNLOCK();
+	pthread_mutex_unlock(&netmap_mutex);
 }
 
 #endif

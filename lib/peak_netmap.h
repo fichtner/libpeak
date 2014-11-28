@@ -30,7 +30,7 @@ extern const struct peak_transfers transfer_netmap;
 #include <net/if.h>
 #include <net/netmap.h>
 
-#if defined(NETMAP_API) && NETMAP_API >= 11
+#if defined(NETMAP_API) && NETMAP_API == 11
 
 struct peak_transfer	*peak_netmap_recv(struct peak_transfer *,
 			     int, const char *, const unsigned int);
