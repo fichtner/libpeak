@@ -39,6 +39,7 @@ usage(void)
 int
 main(int argc, char **argv)
 {
+	const unsigned int mode = NETMAP_WIRE;
 	struct peak_transfer stackptr(pkt);
 	const char *dev0, *dev1;
 
@@ -68,14 +69,14 @@ main(int argc, char **argv)
 	transfer_netmap.lock();
 
 	while (loop) {
-		if (transfer_netmap.recv(pkt, 200, NULL, NETMAP_WIRE)) {
-			if (transfer_netmap.send(pkt,
-			    !strcmp(dev0, pkt->ifname) ? dev1 : dev0,
-			    NETMAP_WIRE)) {
-				perr("%lld: dropping packet of size %u\n",
-				    pkt->ts.tv_sec, pkt->len);
-				transfer_netmap.send(pkt, NULL, NETMAP_DFLT);
-			}
+		if (!transfer_netmap.recv(pkt, 200, NULL, mode)) {
+			continue;
+		}
+		if (transfer_netmap.send(pkt, !strcmp(dev0, pkt->ifname) ?
+		    dev1 : dev0, mode)) {
+			perr("%lld: dropping packet of size %u\n",
+			    pkt->ts.tv_sec, pkt->len);
+			transfer_netmap.send(pkt, NULL, mode);
 		}
 	}
 
