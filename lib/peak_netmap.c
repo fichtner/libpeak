@@ -545,13 +545,15 @@ peak_netmap_send(struct peak_transfer *packet, const char *ifname,
 	struct netmap_ring *ring;
 	unsigned int i, tx;
 
-	if (!priv->used) {
+	if (!priv || !priv->used) {
 		/* packet is empty */
-		return (0);
+		return (1);
 	}
 
 	if (!ifname) {
+		/* quick path for drop */
 		peak_netmap_drop(packet);
+		return (0);
 	}
 
 	i = peak_netmap_find(ifname, NR_REG_PIPE_SLAVE);
