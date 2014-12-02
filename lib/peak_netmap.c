@@ -218,6 +218,8 @@ _peak_netmap_init(struct peak_netmap_dev *dev)
 		if (req.nr_ringid >= NETMAP_RING_MASK) {
 			goto _peak_netmap_init_error;
 		}
+		/* bump the pipe count to reasonable levels */
+		req.nr_arg1 = 16;
 		break;
 	default:
 		strlcpy(req.nr_name, dev->ifname, sizeof(req.nr_name));
