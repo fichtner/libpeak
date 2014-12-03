@@ -129,12 +129,14 @@ struct peak_netmap {
 static struct peak_netmaps {
 	unsigned int count;
 	unsigned int last;
-	struct peak_netmap private_data;
 	struct peak_netmap_dev dev[NETMAP_MAX];
 	struct pollfd fd[NETMAP_MAX];
 } netmap_self;
 
 static struct peak_netmaps *const self = &netmap_self;	/* global ref */
+
+static struct peak_netmap __thread netmap_priv;	/* XXX not sure */
+static struct peak_timeval __thread netmap_ts;	/* XXX not sure */
 
 #define NR_FOREACH_WIRE(mode, ring, idx, dev)				\
 	for ((idx) = (dev)->begin,					\
@@ -284,7 +286,7 @@ ___peak_netmap_recv(struct peak_transfer *packet,
     struct peak_netmap_dev *dev, struct netmap_ring *ring,
     const unsigned int rx)
 {
-	struct peak_netmap *priv = &self->private_data;
+	struct peak_netmap *priv = &netmap_priv;
 	unsigned int i, idx;
 
 	if (nm_ring_empty(ring)) {
@@ -306,9 +308,24 @@ ___peak_netmap_recv(struct peak_transfer *packet,
 	priv->used = 1;
 	priv->i = i;
 
+	/*
+	 * netmap(4) seems to have trouble syncing the timestamp
+	 * under yet unknown conditions, causing the timestamp to
+	 * jump back and forth, causing `extra' time to appear
+	 * inside peak_timeslice(3) as it tries to adapt to `real'
+	 * time changes inside the system.  To temporarily address
+	 * this, any backwards leap smaller than 3 seconds must be
+	 * ignored.
+	 */
+	if (ring->ts.tv_sec > netmap_ts.tv_sec ||
+	    netmap_ts.tv_sec - ring->ts.tv_sec >= 3) {
+		netmap_ts.tv_usec = ring->ts.tv_usec;
+		netmap_ts.tv_sec = ring->ts.tv_sec;
+	}
+
 	/* external stuff */
-	packet->ts.tv_usec = ring->ts.tv_usec;
-	packet->ts.tv_sec = ring->ts.tv_sec;
+	packet->ts.tv_usec = netmap_ts.tv_usec;
+	packet->ts.tv_sec = netmap_ts.tv_sec;
 	packet->buf = NETMAP_BUF(ring, idx);
 	packet->len = ring->slot[i].len;
 	packet->ll = LINKTYPE_ETHERNET;
@@ -400,7 +417,7 @@ struct peak_transfer *
 peak_netmap_recv(struct peak_transfer *packet, int timeout,
     const char *ifname, const unsigned int mode)
 {
-	struct peak_netmap *priv = &self->private_data;
+	struct peak_netmap *priv = &netmap_priv;
 	struct peak_netmap_dev *dev;
 	struct pollfd *fd;
 	unsigned int i;
