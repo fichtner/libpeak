@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2013-2014 Franco Fichtner <franco@packetwerk.com>
  * Copyright (c) 2014 Alexey Saushev <alexey@packetwerk.com>
+ * Copyright (c) 2014 Tobias Boertitz <tobias@packetwerk.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -378,12 +379,12 @@ static struct peak_transfer *
 _peak_netmap_recv(struct peak_transfer *packet,
     const unsigned int mode)
 {
-	unsigned int i, j = self->last + 1;
+	unsigned int i, j = self->last;
 	struct peak_transfer *ret = NULL;
 
 	for (i = 0; i < self->count; ++i) {
 		/* reshuffle the index */
-		j = (j + i) % self->count;
+		j = (j + 1) % self->count;
 		ret = __peak_netmap_recv(packet, &self->dev[j], mode);
 		if (ret) {
 			/* set the last device */
