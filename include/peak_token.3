@@ -13,13 +13,15 @@
 .\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd October 20, 2014
+.Dd December 6, 2014
 .Dt PEAK_TOKEN 3
 .Os
 .Sh NAME
 .Nm peak_token_credit ,
 .Nm _peak_token_credit ,
+.Nm peak_token_dec ,
 .Nm peak_token_exit ,
+.Nm peak_token_inc ,
 .Nm peak_token_init ,
 .Nm _peak_token_init
 .Nd token slot machine
@@ -37,8 +39,12 @@
 .Fa "const int64_t want"
 .Fa "const int64_t ts_ms"
 .Fc
+.Ft unsigned int
+.Fn peak_token_dec "struct peak_token *self"
 .Ft void
 .Fn peak_token_exit "struct peak_token *self"
+.Ft unsigned int
+.Fn peak_token_inc "struct peak_token *self"
 .Ft void
 .Fn peak_token_init "struct peak_token *self" "const int64_t max"
 .Sh DESCRIPTION
@@ -61,6 +67,15 @@ Similarly, the function
 .Fn _peak_token_init
 can be used to implement non-spinlock variants or to reset
 a token to a different value.
+.Pp
+Aditionally,
+.Fn peak_token_inc
+and
+.Fn peak_token_dec
+may used to implement reference counting for dynamic management
+by the caller, as they increment or decrement the reference counter,
+respectively.
+Both return the updated reference count.
 .Pp
 The
 .Fn peak_token_credit

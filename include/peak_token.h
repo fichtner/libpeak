@@ -22,6 +22,7 @@ struct peak_token {
 	int64_t max;		/* maximum number of tokens per second */
 	int64_t ts_ms;		/* last updated millisecond timestamp */
 	spinlock_t lock;	/* lock for concurrent access */
+	unsigned int ref;	/* reference counter */
 };
 
 static inline unsigned int
@@ -75,6 +76,18 @@ peak_token_credit(struct peak_token *self, const int64_t want,
 	spin_unlock(&self->lock);
 
 	return (ret);
+}
+
+static inline unsigned int
+peak_token_inc(struct peak_token *self)
+{
+	return (__sync_add_and_fetch(&self->ref, 1));
+}
+
+static inline unsigned int
+peak_token_dec(struct peak_token *self)
+{
+	return (__sync_sub_and_fetch(&self->ref, 1));
 }
 
 static inline void

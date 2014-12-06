@@ -154,20 +154,54 @@ test_token(void)
 
 	peak_token_init(&bucket, 100);
 
+	assert(peak_token_inc(&bucket) == 1);
+	assert(peak_token_inc(&bucket) == 2);
+	assert(peak_token_dec(&bucket) == 1);
+	assert(peak_token_inc(&bucket) == 2);
+	assert(peak_token_dec(&bucket) == 1);
+	assert(peak_token_dec(&bucket) == 0);
+
 	assert(peak_token_credit(&bucket, 50, 0));
+	assert(bucket.have == 50 && bucket.ts_ms == 0);
+
 	assert(peak_token_credit(&bucket, 0, 0));
+	assert(bucket.have == 50 && bucket.ts_ms == 0);
+
 	assert(peak_token_credit(&bucket, 50, 0));
+	assert(bucket.have == 0 && bucket.ts_ms == 0);
+
 	assert(!peak_token_credit(&bucket, 50, 0));
+	assert(bucket.have == 0 && bucket.ts_ms == 0);
+
 	assert(!peak_token_credit(&bucket, 1, 0));
+	assert(bucket.have == 0 && bucket.ts_ms == 0);
+
 	assert(_peak_token_credit(&bucket, 50, 1000));
+	assert(bucket.have == 50 && bucket.ts_ms == 1000);
+
 	assert(_peak_token_credit(&bucket, 75, 1000));
+	assert(bucket.have == -25 && bucket.ts_ms == 1000);
+
 	assert(_peak_token_credit(&bucket, -75, 1000));
+	assert(bucket.have == 50 && bucket.ts_ms == 1000);
+
 	assert(_peak_token_credit(&bucket, 75, 1000));
+	assert(bucket.have == -25 && bucket.ts_ms == 1000);
+
 	assert(!_peak_token_credit(&bucket, 1, 1000));
+	assert(bucket.have == -25 && bucket.ts_ms == 1000);
+
 	assert(_peak_token_credit(&bucket, 25, 1500));
+	assert(bucket.have == 0 && bucket.ts_ms == 1500);
+
 	assert(_peak_token_credit(&bucket, 0, 2000));
+	assert(bucket.have == 50 && bucket.ts_ms == 2000);
+
 	assert(peak_token_credit(&bucket, 50, 1000));
+	assert(bucket.have == 0 && bucket.ts_ms == 2000);
+
 	assert(!peak_token_credit(&bucket, 1, 1000));
+	assert(bucket.have == 0 && bucket.ts_ms == 2000);
 
 	_peak_token_init(&bucket, 0);
 	assert(peak_token_credit(&bucket, 1000000, 0));
