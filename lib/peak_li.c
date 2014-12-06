@@ -113,9 +113,9 @@ LI_DESCRIBE_APP(dns)
 	}
 
 	switch (decoded & 0x7800) {
-	case (0 << 12):	/* a standard query (QUERY) */
-	case (1 << 12):	/* an inverse query (IQUERY) */
-	case (2 << 12):	/* a server status request (STATUS) */
+	case (0 << 11):	/* a standard query (QUERY) */
+	case (1 << 11):	/* an inverse query (IQUERY) */
+	case (2 << 11):	/* a server status request (STATUS) */
 		break;
 	default:
 		return (0);
@@ -1814,7 +1814,7 @@ static const struct peak_lis apps[] = {
 	LI_LIST_APP(LI_SSH, ssh, IPPROTO_TCP, IPPROTO_MAX, "Secure Shell", "SSH is a network protocol that allows data to be exchanged using a secure channel between two networked devices.", "Remote Access"),
 	LI_LIST_APP(LI_IRC, irc, IPPROTO_TCP, IPPROTO_MAX, "Internet Relay Chat", "IRC is a popular form of real-time Internet text messaging.", "Messaging"),
 	LI_LIST_APP(LI_STUN, stun, IPPROTO_UDP, IPPROTO_TCP, "Session Traversal Utilities for NAT", "STUN is used in NAT traversal for applications with real-time voice, video, messaging, and other interactive communications.", "Networking"),
-	LI_LIST_APP(LI_SIP, sip, IPPROTO_UDP, IPPROTO_TCP, "Session Initiation Protocol", "SIP is a common control protocol for setting up and controlling voice and video calls.", "Streaming Media"),
+	LI_LIST_APP(LI_SIP, sip, IPPROTO_UDP, IPPROTO_TCP, "Session Initiation Protocol", "SIP is a common control protocol for setting up and controlling voice and video calls.", "Messaging"),
 	LI_LIST_APP(LI_RIP, rip, IPPROTO_UDP, IPPROTO_MAX, "Routing Information Protocol", "RIP is a dynamic routing protocol.", "Networking"),
 	LI_LIST_APP(LI_RADIUS, radius, IPPROTO_UDP, IPPROTO_MAX, "Remote Authentication Dial In User Service", "RADIUS is a networking protocol that provides centralized Authentication, Authorization, and Accounting (AAA) management for computers to connect and use a network service.", "Networking"),
 	LI_LIST_APP(LI_BGP, bgp, IPPROTO_TCP, IPPROTO_MAX, "Border Gateway Protocol", "BGP is the protocol backing the core routing decisions on the Internet.", "Networking"),
@@ -1824,7 +1824,7 @@ static const struct peak_lis apps[] = {
 	LI_LIST_APP(LI_DHCP, dhcp, IPPROTO_UDP, IPPROTO_MAX, "Dynamic Host Configuration Protocol", "DHCP is an auto configuration protocol used for assigning IP addresses.", "Networking"),
 	LI_LIST_APP(LI_DTLS, dtls, IPPROTO_UDP, IPPROTO_MAX, "Datagram Transport Layer Security", "DTLS is a protocol that provides communication privacy for datagram protocols.", "VPN and Tunneling"),
 	LI_LIST_APP(LI_TLS, tls, IPPROTO_TCP, IPPROTO_MAX, "Transport Layer Security", "TLS is a cryptographic protocol designed to provide communication security over the Internet.", "VPN and Tunneling"),
-	LI_LIST_APP(LI_LDAP, ldap, IPPROTO_TCP, IPPROTO_MAX, "Lightweight Directory Access Protocol", "LDAP is a protocol for reading and editing directories over an IP network.", "Database"),
+	LI_LIST_APP(LI_LDAP, ldap, IPPROTO_TCP, IPPROTO_MAX, "Lightweight Directory Access Protocol", "LDAP is a protocol for reading and editing directories over an IP network.", "Networking"),
 	LI_LIST_APP(LI_SNMP, snmp, IPPROTO_UDP, IPPROTO_MAX, "Simple Network Management Protocol", "SNMP is an Internet-standard protocol for managing devices on IP networks.", "Networking"),
 	LI_LIST_APP(LI_BITTORRENT, bittorrent, IPPROTO_TCP, IPPROTO_MAX, "BitTorrent", "A peer-to-peer file sharing protocol used for transferring large amounts of data.", "File Transfer"),
 	LI_LIST_APP(LI_GNUTELLA, gnutella, IPPROTO_TCP, IPPROTO_MAX, "Gnutella", "Gnutella is the protocol of the corresponding P2P network.", "File Transfer"),
