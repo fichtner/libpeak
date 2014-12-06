@@ -423,8 +423,6 @@ peak_netmap_recv(struct peak_transfer *packet, int timeout,
 	unsigned int i;
 	int ret;
 
-	(void)ifname;
-
 	if (unlikely(priv->used)) {
 		alert("must release claimed packet first\n");
 		return (NULL);
@@ -435,8 +433,22 @@ peak_netmap_recv(struct peak_transfer *packet, int timeout,
 	 * the system call overhead when not needed.
 	 */
 
-	if (_peak_netmap_recv(packet, mode)) {
-		return (packet);
+	if (ifname) {
+		i = peak_netmap_find(ifname, NR_REG_PIPE_MASTER);
+		if (i >= self->count) {
+			/* not found means error */
+			return (NULL);
+		}
+
+		dev = &self->dev[i];
+
+		if (__peak_netmap_recv(packet, dev, mode)) {
+			return (packet);
+		}
+	} else {
+		if (_peak_netmap_recv(packet, mode)) {
+			return (packet);
+		}
 	}
 
 	/*
@@ -445,22 +457,16 @@ peak_netmap_recv(struct peak_transfer *packet, int timeout,
 	 * timeout value (see poll(3)'s timeout parameter).
 	 */
 
-	for (i = 0; i < self->count; ++i) {
+	if (ifname) {
 		fd = &self->fd[i];
-
 		fd->events = POLLIN | POLLOUT;
 		fd->revents = 0;
-	}
 
-	ret = poll(self->fd, self->count, timeout);
-	if (ret <= 0) {
-		/* error or timeout */
-		return (NULL);
-	}
-
-	for (i = 0; i < self->count; ++i) {
-		dev = &self->dev[i];
-		fd = &self->fd[i];
+		ret = poll(fd, 1, timeout);
+		if (ret <= 0) {
+			/* error or timeout */
+			return (NULL);
+		}
 
 		if (fd->revents & POLLERR) {
 			alert("poll() error on %s\n", dev->ifname);
@@ -468,6 +474,33 @@ peak_netmap_recv(struct peak_transfer *packet, int timeout,
 
 		if (fd->revents & POLLIN) {
 			return (__peak_netmap_recv(packet, dev, mode));
+		}
+	} else {
+		for (i = 0; i < self->count; ++i) {
+			fd = &self->fd[i];
+			fd->events = POLLIN | POLLOUT;
+			fd->revents = 0;
+		}
+
+		ret = poll(self->fd, self->count, timeout);
+		if (ret <= 0) {
+			/* error or timeout */
+			return (NULL);
+		}
+
+		for (i = 0; i < self->count; ++i) {
+			dev = &self->dev[i];
+			fd = &self->fd[i];
+
+			if (fd->revents & POLLERR) {
+				alert("poll() error on %s\n", dev->ifname);
+			}
+
+			if (fd->revents & POLLIN) {
+				self->last = i;
+				return (__peak_netmap_recv(packet,
+				    dev, mode));
+			}
 		}
 	}
 
