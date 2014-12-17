@@ -1934,10 +1934,11 @@ peak_li_data(const unsigned int number, const unsigned int offset)
 	default:
 		for (i = 0; i < lengthof(apps); ++i) {
 			if (number == apps[i].number) {
-				register unsigned long *base = (unsigned long *)
-				    (((char*) &apps[i]) + offset);
+				const register unsigned long *base =
+				    (const unsigned long *)
+				    (((const char *)&apps[i]) + offset);
 
-				return ((char *) *base);
+				return ((const char *)*base);
 			}
 		}
 		panic("application %u caused a failure\n", number);
