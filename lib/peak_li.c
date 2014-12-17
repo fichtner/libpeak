@@ -1949,23 +1949,27 @@ peak_li_data(const unsigned int number, const unsigned int offset)
 const char *
 peak_li_name(const unsigned int number)
 {
-	return peak_li_data(number, __offsetof(struct peak_lis, name));
+	return peak_li_data(number,
+	    __builtin_offsetof(struct peak_lis, name));
 }
 
 const char *
 peak_li_pretty(const unsigned int number)
 {
-	return peak_li_data(number, __offsetof(struct peak_lis, pretty));
+	return peak_li_data(number,
+	    __builtin_offsetof(struct peak_lis, pretty));
 }
 
 const char *
 peak_li_desc(const unsigned int number)
 {
-	return peak_li_data(number, __offsetof(struct peak_lis, desc));
+	return peak_li_data(number,
+	    __builtin_offsetof(struct peak_lis, desc));
 }
 
 const char *
 peak_li_cat(const unsigned int number)
 {
-	return peak_li_data(number, __offsetof(struct peak_lis, cat));
+	return peak_li_data(number,
+	    __builtin_offsetof(struct peak_lis, cat));
 }
