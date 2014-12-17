@@ -76,8 +76,9 @@ The code builds fine on MacOS, NetBSD, OpenBSD, FreeBSD, DragonFly BSD
 and Linux.  The following packes must be installed:
 
 * libmagic (development variety)
+* pcre (development variety)
 * bmake or pmake (non-BSD)
-* pcre
+* flex/bison (non-BSD)
 
 Building the code:
 
