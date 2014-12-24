@@ -459,7 +459,7 @@ peak_netmap_recv(struct peak_transfer *packet, int timeout,
 
 	if (ifname) {
 		fd = &self->fd[i];
-		fd->events = POLLIN | POLLOUT;
+		fd->events = POLLIN;
 		fd->revents = 0;
 
 		ret = poll(fd, 1, timeout);
@@ -478,7 +478,7 @@ peak_netmap_recv(struct peak_transfer *packet, int timeout,
 	} else {
 		for (i = 0; i < self->count; ++i) {
 			fd = &self->fd[i];
-			fd->events = POLLIN | POLLOUT;
+			fd->events = POLLIN;
 			fd->revents = 0;
 		}
 
@@ -619,6 +619,8 @@ peak_netmap_send(struct peak_transfer *packet, const char *ifname,
 	case NETMAP_HOST:
 		NR_FOREACH_HOST(TX, ring, tx, dev) {
 			if (!_peak_netmap_send(packet, ring)) {
+				/* XXX workaround is slow */
+				ioctl(dev->fd, NIOCTXSYNC, NULL);
 				return (0);
 			}
 		}
@@ -626,6 +628,8 @@ peak_netmap_send(struct peak_transfer *packet, const char *ifname,
 	default:
 		NR_FOREACH_WIRE(TX, ring, tx, dev) {
 			if (!_peak_netmap_send(packet, ring)) {
+				/* XXX workaround is slow */
+				ioctl(dev->fd, NIOCTXSYNC, NULL);
 				return (0);
 			}
 		}
