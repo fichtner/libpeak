@@ -1,7 +1,7 @@
 libpeak -- network-related library glue
 =======================================
 
-This library consists of several modules and generic base headers
+This amazing library consists of several modules,methods,binaries and generic base headers
 designed around the daily needs of network packet-related userland
 tools written in C.  The available modules are:
 
